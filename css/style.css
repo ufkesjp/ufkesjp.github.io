@@ -1,10 +1,10 @@
 /* General Body and Layout */
 body {
-    font-family: Futura;
+    font-family: Arial, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #fff;
     color: #333;
 }
 
@@ -93,7 +93,7 @@ footer a:hover {
 
 /* Title Banner */
 .card-title-banner {
-    background-color: #007bff; /* Bright blue for the banner */
+    background-color: #f4f4f4; /* Bright blue for the banner */
     color: #446A8F;
     padding: 15px;
     text-align: center;
