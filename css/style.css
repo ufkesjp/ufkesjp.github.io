@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1: Supply Chain Optimization</title>
+    <link rel="stylesheet" href="../css/style.css"> </head>
+<body>
+    <header>
+        <h1>Supply Chain Optimization Project</h1>
+        <p><a href="../">← Back to Portfolio</a></p>
+    </header>
+
+    <main class="project-detail">
+        <section>
+            <h2>Problem Statement</h2>
+            <p>Details about the supply chain problem, e.g., optimizing delivery routes and warehouse allocation to minimize transportation costs and meet demand efficiently.</p>
+        </section>
+
+        <section>
+            <h2>Data Used</h2>
+            <p>Description of the datasets (e.g., historical sales, warehouse locations, transportation costs).</p>
+        </section>
+
+        <section>
+            <h2>Methodology & Tools</h2>
+            <p>Explanation of how PuLP was used for linear programming, alongside Python, Pandas for data handling, and Matplotlib for visualizations.</p>
+            <p>Link to code: <a href="YOUR_GITHUB_REPO_FOR_PROJECT1" target="_blank">GitHub Repository</a></p>
+        </section>
+
+        <section>
+            <h2>Key Findings & Visualizations</h2>
+            <p>Present your optimal solution, insights, and relevant charts/graphs. (Use static images here!)</p>
+            <img src="../images/project1_chart1.png" alt="Optimal routes chart">
+            <p>Caption for chart 1.</p>
+            <img src="../images/project1_chart2.png" alt="Cost breakdown chart">
+            <p>Caption for chart 2.</p>
+        </section>
+
+        <section>
+            <h2>Impact & Recommendations</h2>
+            <p>Discuss the business value of your solution and actionable recommendations.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Your Name. All rights reserved.</p>
+    </footer>
+</body>
+</html>
