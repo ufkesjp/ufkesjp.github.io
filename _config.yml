@@ -4,4 +4,4 @@ description: >- # A brief description of your site
 # baseurl: "" # The subpath of your site, e.g. /blog (usually empty for user/org pages)
 url: "https://ufkesjp.github.io" # The base hostname & protocol for your site
 
-theme: jekyll-theme-architect
+theme: jekyll-theme-modernist
