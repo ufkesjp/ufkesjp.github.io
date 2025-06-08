@@ -9,7 +9,7 @@ body {
 }
 
 header {
-    background-color: #0056b3; /* Darker blue */
+    background-color: #26292C;
     color: #fff;
     padding: 2em 0;
     text-align: center;
@@ -29,13 +29,13 @@ footer {
     text-align: center;
     padding: 1.5em 0;
     margin-top: 3em;
-    background-color: #333;
+    background-color: #26292C;
     color: #fff;
     font-size: 0.9em;
 }
 
 footer a {
-    color: #007bff; /* Bright blue for links */
+    color: #446A8F; /* Bright blue for links */
     text-decoration: none;
 }
 
