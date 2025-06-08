@@ -59,7 +59,7 @@ footer a:hover {
 
 /* Individual Project Card Styling */
 .project-card {
-    background-color: #fff;
+    background-color: #f4f4f4;
     border-radius: 8px;
     overflow: hidden; /* Ensures image and banner stay within rounded corners */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* Stronger drop shadow */
