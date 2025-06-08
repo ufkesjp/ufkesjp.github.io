@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Data Analyst Portfolio</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Your Name's Data Analyst Portfolio</h1>
+        <p>Showcasing data-driven insights and problem-solving skills.</p>
+    </header>
+
+    <main class="project-grid">
+        <div class="project-card" data-project-url="project1/">
+            <div class="card-image-container">
+                <img src="images/project1_thumb.jpg" alt="Thumbnail for Project 1">
+            </div>
+            <div class="card-title-banner">
+                <h3>Supply Chain Optimization</h3>
+            </div>
+        </div>
+
+        <div class="project-card" data-project-url="project2/">
+            <div class="card-image-container">
+                <img src="images/project2_thumb.jpg" alt="Thumbnail for Project 2">
+            </div>
+            <div class="card-title-banner">
+                <h3>Customer Churn Prediction</h3>
+            </div>
+        </div>
+
+        <div class="project-card" data-project-url="project3/">
+            <div class="card-image-container">
+                <img src="images/project3_thumb.jpg" alt="Thumbnail for Project 3">
+            </div>
+            <div class="card-title-banner">
+                <h3>Sales Performance Dashboard</h3>
+            </div>
+        </div>
+
+        </main>
+
+    <footer>
+        <p>&copy; 2025 Your Name. All rights reserved.</p>
+        <p>Connect with me on <a href="YOUR_LINKEDIN_PROFILE_URL" target="_blank">LinkedIn</a> | <a href="YOUR_GITHUB_PROFILE_URL" target="_blank">GitHub</a></p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const projectCards = document.querySelectorAll('.project-card');
+
+            projectCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const projectUrl = card.dataset.projectUrl;
+                    if (projectUrl) {
+                        window.location.href = projectUrl;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
