@@ -55,7 +55,7 @@ footer a:hover {
 
 /* Individual Project Card Styling */
 .project-card {
-    background-color: #fff;
+    background-color: #446A8F;
     border-radius: 8px;
     overflow: hidden; /* Ensures image and banner stay within rounded corners */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* Stronger drop shadow */
@@ -94,7 +94,7 @@ footer a:hover {
 /* Title Banner */
 .card-title-banner {
     background-color: #007bff; /* Bright blue for the banner */
-    color: #fff;
+    color: #446A8F;
     padding: 15px;
     text-align: center;
     font-size: 1.1em;
