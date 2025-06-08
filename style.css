@@ -1,10 +1,10 @@
 /* General Body and Layout */
 body {
-    font-family: Futura;
+    font-family: Arial, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #fff;
     color: #333;
 }
 
@@ -18,7 +18,7 @@ header {
 }
 
 header h1 {
-    font-family: Futura;
+    font-family: Arial, sans-serif;
     margin: 0;
     font-size: 2.5em;
 }
@@ -29,7 +29,7 @@ header p {
 }
 
 footer {
-    font-family: Futura;
+    font-family: Arial, sans-serif;
     text-align: center;
     padding: 1.5em 0;
     margin-top: 3em;
