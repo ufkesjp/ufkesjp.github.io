@@ -1,6 +1,6 @@
 /* General Body and Layout */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Impact, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -35,7 +35,7 @@ footer {
 }
 
 footer a {
-    color: #007bff; /* Bright blue for links */
+    color: #9e6616; /* green for banner blue for links */
     text-decoration: none;
 }
 
