@@ -44,6 +44,30 @@ footer a:hover {
     text-decoration: underline;
 }
 
+/* customizing the home button to match theme */
+.home-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #aea062; /* Your specified background color */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    transition: background-color 0.3s ease; /* Optional: smooth transition for hover */
+}
+
+.home-button:hover {
+    background-color: #9b8c54; /* Slightly darker for hover */
+}
+
+.home-button:active {
+    background-color: #8a7b48; /* Darker when clicked */
+}
+
 /* Project Grid Layout */
 .project-grid {
     display: grid;
