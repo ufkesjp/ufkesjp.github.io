@@ -157,5 +157,7 @@ footer a:hover {
     }
 }
 p {
-    margin-bottom: 20px; /* Adds 20 pixels of space below each paragraph */
+    margin-bottom: 20px;
+    margin-left: 5%;
+    margin-right: 5%; 
 }
