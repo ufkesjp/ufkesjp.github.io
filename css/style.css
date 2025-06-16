@@ -156,3 +156,6 @@ footer a:hover {
         font-size: 1em;
     }
 }
+p {
+    margin-bottom: 20px; /* Adds 20 pixels of space below each paragraph */
+}
