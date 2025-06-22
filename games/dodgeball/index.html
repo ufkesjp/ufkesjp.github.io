@@ -28,7 +28,7 @@
             padding: 0.5rem; /* Reduced padding to maximize canvas space */
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
             width: 98vw; /* Almost full viewport width */
-            height: 98vh; /* Almost full viewport height */
+            height: 95vh; /* Adjusted height to be slightly smaller and fit screen better */
             position: relative;
             box-sizing: border-box; /* Include padding in dimensions */
         }
@@ -187,7 +187,7 @@
         const ball = {
             x: 0,
             y: 0,
-            radius: 15,
+            radius: 15 * 1.5, // Increased ball radius by 1.5 times
             dx: 0, // Initialized to 0, starts moving when game starts
             dy: 0,
             speedMultiplier: 1, // Will increase as players lose
@@ -335,7 +335,7 @@
                 player.isFingerDown = false; // No longer tracking active touch for this player
                 player.touchIdentifier = null; // Clear associated touch ID
                 player.finalTime = ((Date.now() - gameOverallStartTime) / 1000).toFixed(2); // Record time
-                player.x = -100; // Move off-screen once they are out
+                player.x = -100; // Move off-screen once they are out (their circle disappears)
                 player.y = -100;
 
                 // Optionally increase ball speed slightly for remaining players
@@ -558,7 +558,7 @@
 
                 if (player) {
                     player.isFingerDown = false; // Finger is no longer down for this player
-                    // Crucially, player.touchIdentifier remains, and x, y are not reset.
+                    // Player.touchIdentifier remains, and x, y are not reset.
                     // The circle stays in place and the player can still lose.
                 }
             }
