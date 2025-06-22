@@ -25,11 +25,12 @@
             justify-content: center;
             background-color: #2d3748; /* Slightly lighter dark background for container */
             border-radius: 1.5rem; /* Rounded corners */
-            padding: 1.5rem;
+            padding: 0.5rem; /* Reduced padding to maximize canvas space */
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-            width: 95%; /* Responsive width */
-            max-width: 500px; /* Max width for desktop */
+            width: 98vw; /* Almost full viewport width */
+            height: 98vh; /* Almost full viewport height */
             position: relative;
+            box-sizing: border-box; /* Include padding in dimensions */
         }
         canvas {
             background-color: #4a5568; /* Canvas background */
@@ -37,17 +38,25 @@
             border-radius: 1rem; /* Rounded corners for canvas */
             touch-action: none; /* Prevent default touch actions like scrolling/zooming */
             border: 2px solid #a0aec0;
-            width: 100%; /* Make canvas responsive */
-            height: auto; /* Maintain aspect ratio, will be set in JS */
-            max-height: 70vh; /* Limit canvas height on taller screens */
+            width: 100%; /* Make canvas fill its container */
+            height: 100%; /* Make canvas fill its container */
         }
         #timerDisplay {
+            position: absolute; /* Position over the canvas */
+            top: 1rem; /* From the top of the container */
             color: #e2e8f0; /* Light text color */
             font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 1rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             text-align: center;
+            z-index: 10; /* Ensure it's above the canvas */
+            background-color: rgba(45, 55, 72, 0.7); /* Semi-transparent background for readability */
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            width: fit-content;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none; /* Allows clicks/touches to pass through to canvas */
         }
         #initialScreen, #gameOverScreen {
             position: absolute;
@@ -64,6 +73,7 @@
             text-align: center;
             padding: 1rem;
             box-sizing: border-box; /* Include padding in element's total width and height */
+            z-index: 20; /* Ensure it's above timer and canvas */
         }
         #initialScreen h2, #gameOverScreen p {
             color: #edf2f7;
@@ -197,9 +207,10 @@
          * This ensures responsiveness.
          */
         function resizeCanvas() {
-            const container = document.getElementById('gameContainer');
-            canvas.width = container.offsetWidth - (2 * 1.5 * 16); // Container width minus padding (1.5rem = 24px)
-            canvas.height = canvas.width * 0.75; // Maintain a 4:3 aspect ratio (or desired ratio)
+            // Set canvas dimensions to match its computed CSS dimensions
+            // We use clientWidth/Height of the canvas itself, which should fill the gameContainer
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
 
             // Re-center ball if game is not running or at the start
             if (!gameRunning && !gameStartedByTouches) {
@@ -212,7 +223,7 @@
 
             // Adjust player positions if they were out of bounds after resize
             players.forEach(player => {
-                if (player.active && player.alive) {
+                if (player.alive) { // Only adjust if player is still in the game
                     player.x = Math.max(playerTouchRadius, Math.min(canvas.width - playerTouchRadius, player.x));
                     player.y = Math.max(playerTouchRadius, Math.min(canvas.height - playerTouchRadius, player.y));
                 }
@@ -227,11 +238,11 @@
         function createPlayer(id) {
             return {
                 id: id,
-                touchIdentifier: null, // Used to link a specific touch to this player
+                touchIdentifier: null, // Used to link a specific touch to this player (null if not currently touching)
                 x: -100, // Initialize off-screen
                 y: -100,
-                active: false, // True if finger is currently down
-                alive: true, // True if player is still in the game
+                isFingerDown: false, // True if finger is currently down (for movement tracking)
+                alive: true, // True if player has not been hit by the ball
                 startTime: null, // When this player's timer started
                 elapsedTime: 0, // Current elapsed time for this player
                 finalTime: null, // Time recorded when player lost
@@ -256,12 +267,22 @@
          * @param {object} player - The player object to draw.
          */
         function drawPlayerTouch(player) {
-            if (player.active && player.alive) { // Only draw if active and alive
+            // Draw player circle only if they are still alive
+            if (player.alive) {
                 ctx.beginPath();
                 ctx.arc(player.x, player.y, playerTouchRadius, 0, Math.PI * 2);
                 ctx.fillStyle = player.color;
                 ctx.fill();
                 ctx.closePath();
+
+                // Optionally draw a small inner circle if finger is currently down
+                if (player.isFingerDown) {
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, playerTouchRadius / 3, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; // White transparent inner circle
+                    ctx.fill();
+                    ctx.closePath();
+                }
             }
         }
 
@@ -292,7 +313,8 @@
          * @param {object} player - The player object to check collision for.
          */
         function checkCollisionForPlayer(player) {
-            if (player.active && player.alive) {
+            // Check collision only if the player is still alive
+            if (player.alive) {
                 const distance = Math.sqrt(
                     Math.pow(ball.x - player.x, 2) + Math.pow(ball.y - player.y, 2)
                 );
@@ -309,10 +331,13 @@
         function endPlayer(playerId) {
             const player = players.find(p => p.id === playerId);
             if (player && player.alive) {
-                player.alive = false;
-                player.active = false; // No longer tracking this touch
+                player.alive = false; // Player is no longer in the game
+                player.isFingerDown = false; // No longer tracking active touch for this player
                 player.touchIdentifier = null; // Clear associated touch ID
                 player.finalTime = ((Date.now() - gameOverallStartTime) / 1000).toFixed(2); // Record time
+                player.x = -100; // Move off-screen once they are out
+                player.y = -100;
+
                 // Optionally increase ball speed slightly for remaining players
                 ball.speedMultiplier += 0.05;
 
@@ -333,14 +358,14 @@
                 const playersLeft = players.filter(p => p.alive).length;
                 timerDisplay.textContent = `Players Left: ${playersLeft} | Time: ${currentOverallTime.toFixed(2)}s`;
 
-                // Update individual player elapsed times (only for display, finalTime recorded on loss)
+                // Update individual player elapsed times (finalTime recorded on loss)
                 players.forEach(player => {
                     if (player.alive && player.startTime) {
                         player.elapsedTime = (currentOverallTime).toFixed(2);
                     }
                 });
             } else {
-                 const activePlayersCount = players.filter(p => p.active).length;
+                 const activePlayersCount = players.filter(p => p.touchIdentifier !== null && p.alive).length;
                  timerDisplay.innerHTML = `Players Left: ${numPlayers} | Time: 0.00s <br><span id="waitingMessage">Waiting for ${numPlayers - activePlayersCount} players to touch the screen...</span>`;
             }
         }
@@ -353,7 +378,7 @@
                 // Clear the canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Update game elements if game has officially started (all touches registered)
+                // Update game elements if game has officially started (all initial touches registered)
                 if (gameStartedByTouches) {
                     updateBall();
                     players.forEach(player => checkCollisionForPlayer(player)); // Check collision for each player
@@ -363,7 +388,7 @@
 
                 // Draw game elements
                 drawBall();
-                players.forEach(player => drawPlayerTouch(player)); // Draw all active players
+                players.forEach(player => drawPlayerTouch(player)); // Draw all players (alive ones will show)
 
                 // Request the next frame
                 animationFrameId = requestAnimationFrame(gameLoop);
@@ -417,7 +442,7 @@
 
                 // Set individual player start times (though we use overall time for now)
                 players.forEach(player => {
-                    if (player.active && player.alive) {
+                    if (player.alive) { // Set start time for all players who are in the game
                         player.startTime = gameOverallStartTime;
                     }
                 });
@@ -434,9 +459,12 @@
 
             // Populate results list
             resultsList.innerHTML = '';
-            players.forEach(player => {
+            // Sort players by final time, longest first
+            const sortedPlayers = [...players].sort((a, b) => (b.finalTime || 0) - (a.finalTime || 0));
+
+            sortedPlayers.forEach(player => {
                 const li = document.createElement('li');
-                li.textContent = `${player.name}: ${player.finalTime !== null ? player.finalTime + 's' : 'Did not participate'}`;
+                li.textContent = `${player.name}: ${player.finalTime !== null ? player.finalTime + 's' : '0.00s (Did not participate)'}`;
                 resultsList.appendChild(li);
             });
 
@@ -455,7 +483,7 @@
         }
 
         /**
-         * Assigns a touch to a free player slot.
+         * Assigns a touch to a free and alive player slot.
          * @param {number} identifier - The touch identifier.
          * @returns {object|null} The assigned player object or null if no free slot.
          */
@@ -489,13 +517,13 @@
 
                     player.x = clientX_clamped - rect.left;
                     player.y = clientY_clamped - rect.top;
-                    player.active = true;
+                    player.isFingerDown = true; // Finger is down
                 }
             }
 
-            // Check if all players are active to start the game
-            const activePlayers = players.filter(p => p.active && p.alive).length;
-            if (activePlayers === numPlayers && !gameStartedByTouches) {
+            // Check if all players have a touch identifier assigned to them to start the game
+            const activePlayersCount = players.filter(p => p.touchIdentifier !== null && p.alive).length;
+            if (activePlayersCount === numPlayers && !gameStartedByTouches) {
                 activateGame();
             }
         });
@@ -509,7 +537,8 @@
                 const touch = e.changedTouches[i];
                 const player = findPlayerByIdentifier(touch.identifier);
 
-                if (player && player.alive && player.active) {
+                // Only update position if finger is currently down and player is alive
+                if (player && player.isFingerDown && player.alive) {
                     // Clamp player x, y coordinates within canvas bounds
                     const clientX_clamped = Math.max(rect.left + playerTouchRadius, Math.min(rect.right - playerTouchRadius, touch.clientX));
                     const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, touch.clientY));
@@ -528,27 +557,25 @@
                 const player = findPlayerByIdentifier(touch.identifier);
 
                 if (player) {
-                    player.active = false;
-                    player.touchIdentifier = null; // Free up this player slot's touch ID
-                    player.x = -100; // Move off-screen
-                    player.y = -100;
+                    player.isFingerDown = false; // Finger is no longer down for this player
+                    // Crucially, player.touchIdentifier remains, and x, y are not reset.
+                    // The circle stays in place and the player can still lose.
                 }
             }
         });
 
 
         // --- Mouse Events for Desktop Testing (simulates single touch) ---
-        // Note: For actual multi-touch, a mouse cannot fully replicate.
-        // It's still useful for single-player testing on desktop.
+        let mouseTouchIdentifier = null; // To track if mouse is down
+
         canvas.addEventListener('mousedown', (e) => {
-            // If the game is not running and we are in single player mode,
-            // then initialize the game for a single player when mouse down occurs.
+            // Only handle if in single player mode (as multi-touch cannot be simulated with mouse)
+            // And if game is not yet running (to prevent re-initializing mouse for new touches)
             if (!gameRunning && numPlayersInput.value == 1) {
                  setupGame(); // Set up game for 1 player (from input)
             }
 
-            // If game is running and it's a single player game AND the first player is alive
-            if (gameRunning && numPlayers === 1 && players[0] && players[0].alive) {
+            if (gameRunning && numPlayers === 1 && players[0] && players[0].alive && mouseTouchIdentifier === null) {
                 const rect = canvas.getBoundingClientRect();
 
                 // Clamp mouse x, y coordinates within canvas bounds
@@ -557,8 +584,9 @@
 
                 players[0].x = clientX_clamped - rect.left;
                 players[0].y = clientY_clamped - rect.top;
-                players[0].active = true;
+                players[0].isFingerDown = true; // Finger is down (mouse down)
                 players[0].touchIdentifier = 'mouse'; // Unique identifier for mouse
+                mouseTouchIdentifier = 'mouse';
 
                 // Activate game if this is the first touch for a 1-player game
                 if (!gameStartedByTouches) {
@@ -568,7 +596,7 @@
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (gameRunning && numPlayers === 1 && players[0] && players[0].active && players[0].alive) {
+            if (gameRunning && numPlayers === 1 && players[0] && players[0].isFingerDown && players[0].alive) {
                 const rect = canvas.getBoundingClientRect();
 
                 // Clamp mouse x, y coordinates within canvas bounds
@@ -582,10 +610,9 @@
 
         canvas.addEventListener('mouseup', () => {
             if (gameRunning && numPlayers === 1 && players[0]) {
-                players[0].active = false;
-                players[0].touchIdentifier = null;
-                players[0].x = -100;
-                players[0].y = -100;
+                players[0].isFingerDown = false; // Mouse is no longer down
+                mouseTouchIdentifier = null; // Reset mouse identifier
+                // Player.touchIdentifier and x,y are not reset, circle stays.
             }
         });
 
