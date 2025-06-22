@@ -28,7 +28,7 @@
             padding: 0.5rem; /* Reduced padding to maximize canvas space */
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
             width: 98vw; /* Almost full viewport width */
-            height: 90vh; /* Adjusted height to be slightly smaller and fit screen better */
+            height: 76.5vh; /* Adjusted height: 90vh - 15% = 76.5vh */
             position: relative;
             box-sizing: border-box; /* Include padding in dimensions */
         }
@@ -544,7 +544,7 @@
                     const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, touch.clientY));
 
                     player.x = clientX_clamped - rect.left;
-                    player.y = clientY_clamped - rect.top; /* Fixed typo: clientY_claged to clientY_clamped */
+                    player.y = clientY_clamped - rect.top;
                 }
             }
         });
