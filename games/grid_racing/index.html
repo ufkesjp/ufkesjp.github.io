@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Racing Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .game-container {
+            background-color: #2d3748; /* Slightly lighter dark background */
+            border-radius: 1rem; /* Rounded corners */
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .game-grid {
+            display: grid;
+            border: 2px solid #4a5568; /* Grid border */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            width: 100%; /* Make grid fluid */
+            aspect-ratio: 1 / 1; /* Keep grid square */
+        }
+
+        .grid-cell {
+            width: 100%;
+            height: 100%;
+            background-color: #4a5568; /* Default cell color */
+            border: 1px solid #2d3748; /* Cell borders */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #a0aec0;
+            transition: background-color 0.2s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .grid-cell.player {
+            border-radius: 50%; /* Make player circles */
+            color: white;
+            animation: pulse 1s infinite alternate; /* Simple pulse animation for players */
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        /* Styles for Player-created blocked cells (Red with X) */
+        .grid-cell.player-blocked {
+            background-color: #c53030; /* Red for player-blocked cells */
+            position: relative;
+        }
+        .grid-cell.player-blocked::before {
+            content: 'X';
+            position: absolute;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* Styles for Environment blocked cells (Green with X) */
+        .grid-cell.env-blocked {
+            background-color: #059669; /* Green for environment blocks (Emerald 600) */
+            position: relative;
+        }
+        .grid-cell.env-blocked::before {
+            content: 'X'; /* X symbol for environment blocks */
+            position: absolute;
+            font-size: 1.5rem;
+            color: white; /* White color for the X */
+        }
+
+
+        .grid-cell.target {
+            background-color: #38a169; /* Green for target */
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .player-info-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            background-color: #2c5282; /* Blueish background */
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-info-dot {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .game-container {
+                flex-direction: row;
+            }
+            .game-controls {
+                flex: 1;
+                min-width: 250px;
+            }
+            .game-board-area {
+                flex: 2;
+            }
+            .game-grid {
+                max-width: 500px; /* Limit grid size on larger screens */
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-300 selection:text-blue-900">
+    <div class="game-container">
+        <!-- Game Controls and Info -->
+        <div class="game-controls flex flex-col gap-4 p-4 bg-gray-700 rounded-lg shadow-inner">
+            <h1 class="text-2xl font-bold text-center text-white mb-4">Grid Racing</h1>
+
+            <!-- Player Selection (Pre-Game) -->
+            <div id="player-setup" class="flex flex-col gap-3">
+                <label for="num-players" class="text-lg text-gray-300">Number of Players (1-4):</label>
+                <input type="number" id="num-players" min="1" max="4" value="2" class="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="start-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95">
+                    Start Game
+                </button>
+            </div>
+
+            <!-- Game Info (In-Game) -->
+            <div id="game-info" class="hidden flex flex-col gap-2">
+                <div class="player-info-box">
+                    <div id="current-player-color" class="player-info-dot"></div>
+                    <span id="current-player-text" class="text-lg font-semibold">Current Player: P1</span>
+                </div>
+                <p class="text-xl font-bold text-gray-200">Dice Roll: <span id="dice-roll">0</span></p>
+                <p class="text-xl font-bold text-gray-200">Actions Left: <span id="actions-left">0</span></p>
+
+                <button id="roll-dice-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95 mt-4">
+                    Roll Dice
+                </button>
+                <button id="end-turn-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95" disabled>
+                    End Turn
+                </button>
+                <!-- New: Action Mode Toggle -->
+                <button id="action-mode-toggle-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95 mt-4">
+                    Mode: Move
+                </button>
+                <p id="game-message" class="text-sm text-center text-gray-400 mt-2"></p>
+            </div>
+        </div>
+
+        <!-- Game Board Area -->
+        <div class="game-board-area flex-grow flex items-center justify-center">
+            <div id="game-grid" class="game-grid">
+                <!-- Grid cells will be dynamically generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold text-white mb-4">Game Over!</h2>
+            <p id="winner-message" class="text-2xl text-gray-200 mb-6"></p>
+            <button id="play-again-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global game state variables
+        const GRID_SIZE = 10; // 10x10 grid
+        const ENV_COVERAGE_PERCENTAGE = 0.15; // Target 15% of grid cells to be environment blocks
+        const SEGMENT_LENGTH = 3; // Each environment block will try to be a segment of this length
+
+        let numPlayers = 2; // Default number of players
+        let playerPositions = []; // [{x: 0, y: 0, color: 'red'}, ...]
+        let environmentBlocks = []; // Cells permanently blocked by the environment
+        let playerBlockedCells = []; // Cells blocked by players during gameplay
+        let targetPosition = { x: -1, y: -1 }; // Will be randomized
+
+        let currentPlayerIndex = 0;
+        let diceRoll = 0;
+        let actionsLeft = 0;
+        let gameStarted = false;
+        let gameOver = false;
+        let currentActionMode = 'move'; // 'move' or 'block'
+
+        const playerColors = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981']; // Red, Blue, Amber, Emerald
+
+        // DOM Elements
+        // These are declared here and will be assigned in DOMContentLoaded
+        let numPlayersInput;
+        let startGameBtn;
+        let playerSetupDiv;
+        let gameInfoDiv;
+        let gameGridDiv;
+        let currentPlayerColorDiv;
+        let currentPlayerTextSpan;
+        let diceRollSpan;
+        let actionsLeftSpan;
+        let rollDiceBtn;
+        let endTurnBtn;
+        let gameMessageP;
+        let gameOverModal;
+        let winnerMessageP;
+        let playAgainBtn;
+        let actionModeToggleBtn;
+
+
+        /**
+         * Calculates Manhattan distance between two cells.
+         * @param {Object} p1 - {x, y} of first point.
+         * @param {Object} p2 - {x, y} of second point.
+         * @returns {number} Manhattan distance.
+         */
+        function manhattanDistance(p1, p2) {
+            return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+        }
+
+        /**
+         * Checks if a cell is an environment block.
+         * @param {number} x - X coordinate of the cell.
+         * @param {number} y - Y coordinate of the cell.
+         * @param {Array<Object>} [envBlocksToCheck=environmentBlocks] - Optional, specific env blocks to check against.
+         * @returns {boolean} True if the cell is an environment block, false otherwise.
+         */
+        function isEnvironmentBlock(x, y, envBlocksToCheck = environmentBlocks) {
+            return envBlocksToCheck.some(b => b.x === x && b.y === y);
+        }
+
+        /**
+         * Checks if a cell is occupied by any player.
+         * @param {number} x - X coordinate of the cell.
+         * @param {number} y - Y coordinate of the cell.
+         * @param {Array<Object>} [playersToCheck=playerPositions] - Optional, specific player positions to check against.
+         * @returns {boolean} True if the cell is occupied by a player, false otherwise.
+         */
+        function isPlayerOccupied(x, y, playersToCheck = playerPositions) {
+            return playersToCheck.some(p => p.x === x && p.y === y);
+        }
+
+        /**
+         * Checks if a cell is the target cell.
+         * @param {number} x - X coordinate of the cell.
+         * @param {number} y - Y coordinate of the cell.
+         * @param {Object} [targetToCheck=targetPosition] - Optional, specific target position to check against.
+         * @returns {boolean} True if the cell is the target cell, false otherwise.
+         */
+        function isTargetCell(x, y, targetToCheck = targetPosition) {
+            return x === targetToCheck.x && y === targetToCheck.y;
+        }
+
+        /**
+         * Checks if the grid is fully connected (all non-environment-blocked cells are reachable from player start points and target).
+         * Uses Breadth-First Search (BFS).
+         * @param {Array<Object>} currentEnvBlocks - The list of environment blocks to check against.
+         * @param {Array<Object>} currentPlayers - The list of player start positions.
+         * @param {Object} currentTarget - The target position.
+         * @returns {boolean} True if the grid is connected and all critical points are reachable, false otherwise.
+         */
+        function checkGridConnectivity(currentEnvBlocks, currentPlayers, currentTarget) {
+            const allCriticalPoints = [...currentPlayers, currentTarget];
+
+            // Filter out any critical points that are blocked by the *proposed* environment blocks.
+            // If a critical point is itself blocked, the layout is invalid.
+            const validCriticalPoints = allCriticalPoints.filter(p => !isEnvironmentBlock(p.x, p.y, currentEnvBlocks));
+
+            if (validCriticalPoints.length !== allCriticalPoints.length) {
+                // Some critical point is directly blocked by the environment
+                return false;
+            }
+            if (validCriticalPoints.length === 0) {
+                 // Should not happen unless GRID_SIZE is tiny and everything is blocked
+                return false;
+            }
+
+            const visited = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(false));
+            const queue = [];
+
+            // Start BFS from the first valid critical point
+            queue.push(validCriticalPoints[0]);
+            visited[validCriticalPoints[0].y][validCriticalPoints[0].x] = true;
+
+            const dx = [0, 0, 1, -1]; // Directions: Up, Down, Right, Left
+            const dy = [1, -1, 0, 0];
+
+            while (queue.length > 0) {
+                const { x, y } = queue.shift();
+
+                for (let i = 0; i < 4; i++) {
+                    const nx = x + dx[i];
+                    const ny = y + dy[i];
+
+                    // Check bounds, visited, and if it's an environment block
+                    if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE &&
+                        !visited[ny][nx] &&
+                        !isEnvironmentBlock(nx, ny, currentEnvBlocks)) {
+                        visited[ny][nx] = true;
+                        queue.push({ x: nx, y: ny });
+                    }
+                }
+            }
+
+            // After BFS, verify all other valid critical points were visited
+            for (const cp of validCriticalPoints) {
+                if (!visited[cp.y][cp.x]) {
+                    return false; // A critical point is unreachable
+                }
+            }
+
+            return true; // All critical points are reachable
+        }
+
+        /**
+         * Randomly places player starting positions, ensuring they are unique and not the target.
+         * @returns {Array<Object>} An array of randomized player start positions.
+         */
+        function assignRandomPlayerStarts() {
+            const newPlayerStarts = [];
+            const allPossibleCells = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    allPossibleCells.push({ x, y });
+                }
+            }
+
+            let attempts = 0;
+            const MAX_PICK_ATTEMPTS = GRID_SIZE * GRID_SIZE * 5; // Avoid infinite loop
+
+            while (newPlayerStarts.length < numPlayers && attempts < MAX_PICK_ATTEMPTS) {
+                const randomIndex = Math.floor(Math.random() * allPossibleCells.length);
+                const potentialCell = allPossibleCells[randomIndex];
+
+                // Ensure it's not already picked, and not the target position
+                const isAlreadyPicked = newPlayerStarts.some(p => p.x === potentialCell.x && p.y === potentialCell.y);
+                const isTargetCandidate = (targetPosition.x !== -1 && potentialCell.x === targetPosition.x && potentialCell.y === targetPosition.y); // If target is already set
+
+                if (!isAlreadyPicked && !isTargetCandidate) {
+                    newPlayerStarts.push({ ...potentialCell, color: playerColors[newPlayerStarts.length] });
+                }
+                attempts++;
+            }
+
+            if (newPlayerStarts.length < numPlayers) {
+                console.warn("Could not find enough unique starting positions for all players. Falling back to default positions for missing players.");
+                // Fallback to default positions if not enough unique spots are found
+                for (let i = newPlayerStarts.length; i < numPlayers; i++) {
+                    newPlayerStarts.push({ x: 0, y: i, color: playerColors[i] });
+                }
+            }
+            return newPlayerStarts;
+        }
+
+        /**
+         * Randomly assigns the target position, attempting to make it equidistant from all players.
+         * It tries to find a spot that minimizes the difference between the max and min distance to any player.
+         */
+        function assignRandomTargetPosition() {
+            let bestTargetCandidate = null;
+            let minDistanceVariance = Infinity;
+            
+            // Generate a list of all potential target cells
+            const allPossibleTargetCells = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const potentialTarget = { x, y };
+                    // Exclude cells already occupied by players
+                    if (!isPlayerOccupied(x, y, playerPositions)) {
+                        allPossibleTargetCells.push(potentialTarget);
+                    }
+                }
+            }
+
+            if (allPossibleTargetCells.length === 0) {
+                console.warn("No valid cells for target position found. Defaulting to (GRID_SIZE-1, GRID_SIZE-1).");
+                targetPosition = { x: GRID_SIZE - 1, y: GRID_SIZE - 1 };
+                return;
+            }
+
+            // Iterate through possible target cells to find the "most equidistant" one
+            for (const potentialTarget of allPossibleTargetCells) {
+                const distances = playerPositions.map(p => manhattanDistance(p, potentialTarget));
+                if (distances.length === 0) continue; // Should not happen if players exist
+
+                const maxDist = Math.max(...distances);
+                const minDist = Math.min(...distances);
+                const currentVariance = maxDist - minDist; // We want to minimize this variance
+
+                if (currentVariance < minDistanceVariance) {
+                    minDistanceVariance = currentVariance;
+                    bestTargetCandidate = potentialTarget;
+                }
+            }
+            
+            // Fallback to a random valid spot if for some edge case no best candidate was found
+            targetPosition = bestTargetCandidate || allPossibleTargetCells[Math.floor(Math.random() * allPossibleTargetCells.length)];
+        }
+
+
+        /**
+         * Generates permanent environment blocks for the grid, ensuring connectivity.
+         */
+        function generateEnvironment() {
+            environmentBlocks = [];
+            playerBlockedCells = []; // Clear player-created blocks for the new round
+
+            const TARGET_TOTAL_ENV_CELLS = Math.floor(GRID_SIZE * GRID_SIZE * ENV_COVERAGE_PERCENTAGE);
+            const NUM_SEGMENTS_TO_GENERATE = Math.floor(TARGET_TOTAL_ENV_CELLS / SEGMENT_LENGTH);
+
+            let currentSegmentsPlaced = 0;
+            let attempts = 0;
+            const MAX_SEGMENT_PLACEMENT_ATTEMPTS = NUM_SEGMENTS_TO_GENERATE * 200; // Increased attempts for robust generation
+
+            // Combine all critical points (player initial positions + target) to avoid blocking them
+            const criticalPoints = [...playerPositions, targetPosition];
+
+            while (currentSegmentsPlaced < NUM_SEGMENTS_TO_GENERATE && attempts < MAX_SEGMENT_PLACEMENT_ATTEMPTS) {
+                const start_x = Math.floor(Math.random() * GRID_SIZE);
+                const start_y = Math.floor(Math.random() * GRID_SIZE);
+                
+                // Randomly choose orientation: 0 for horizontal, 1 for vertical
+                const orientation = Math.floor(Math.random() * 2);
+
+                const potentialSegmentCells = [];
+                let isSegmentValid = true;
+
+                for (let i = 0; i < SEGMENT_LENGTH; i++) {
+                    let cell_x = start_x;
+                    let cell_y = start_y;
+                    if (orientation === 0) { // Horizontal
+                        cell_x += i;
+                    } else { // Vertical
+                        cell_y += i;
+                    }
+
+                    // Check bounds for each cell in segment
+                    if (!(cell_x >= 0 && cell_x < GRID_SIZE && cell_y >= 0 && cell_y < GRID_SIZE)) {
+                        isSegmentValid = false;
+                        break;
+                    }
+                    
+                    // Check if cell is a critical position or already an environment block
+                    if (criticalPoints.some(p => p.x === cell_x && p.y === cell_y) || 
+                        environmentBlocks.some(b => b.x === cell_x && b.y === cell_y)) {
+                        isSegmentValid = false;
+                        break;
+                    }
+                    
+                    potentialSegmentCells.push({ x: cell_x, y: cell_y });
+                }
+
+                if (!isSegmentValid) {
+                    attempts++;
+                    continue;
+                }
+
+                // Temporarily add segment cells and check connectivity
+                const tempEnvBlocks = [...environmentBlocks, ...potentialSegmentCells];
+                
+                if (!checkGridConnectivity(tempEnvBlocks, playerPositions, targetPosition)) {
+                    attempts++;
+                    continue;
+                }
+
+                // If all checks pass, commit the segment
+                environmentBlocks.push(...potentialSegmentCells);
+                currentSegmentsPlaced++;
+                // Do not increment attempts here, only for failed placements to try more
+            }
+
+            if (currentSegmentsPlaced < NUM_SEGMENTS_TO_GENERATE) {
+                console.warn(`Could not generate desired number of environment segments (${NUM_SEGMENTS_TO_GENERATE}) while maintaining connectivity. Generated: ${currentSegmentsPlaced}`);
+            }
+        }
+
+        /**
+         * Initializes the game by setting up player positions, environment blocks,
+         * and resetting game state variables.
+         */
+        function initializeGame() {
+            // First, get the number of players from input
+            numPlayers = parseInt(numPlayersInput.value);
+
+            // 1. Assign random player starting positions FIRST
+            playerPositions = assignRandomPlayerStarts();
+            
+            // 2. Then assign random target position, considering player starts
+            assignRandomTargetPosition(); 
+
+            // 3. Finally, generate environment blocks, ensuring they don't block critical points
+            generateEnvironment();
+
+            currentPlayerIndex = 0;
+            diceRoll = 0;
+            actionsLeft = 0;
+            gameOver = false;
+            currentActionMode = 'move'; // Reset mode to move for new game
+            updateActionModeButton(); // Update button text
+            gameMessageP.textContent = ''; // Clear game messages
+
+            // Ensure grid size property is set for CSS grid
+            gameGridDiv.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+            gameGridDiv.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
+
+            renderGrid();
+            updateInfoDisplay();
+
+            // Enable roll dice button, disable end turn
+            rollDiceBtn.disabled = false;
+            endTurnBtn.disabled = true;
+        }
+
+        /**
+         * Renders the game grid based on the current game state.
+         * Clears existing grid cells and recreates them.
+         */
+        function renderGrid() {
+            gameGridDiv.innerHTML = ''; // Clear existing grid
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('grid-cell');
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+
+                    // Check if cell is the target
+                    if (isTargetCell(x, y)) {
+                        cell.classList.add('target');
+                        cell.textContent = '🏁'; // Flag emoji for target
+                    }
+
+                    // Check if cell is an environment block (priority for visual styling)
+                    if (isEnvironmentBlock(x, y)) {
+                        cell.classList.add('env-blocked'); // New class for environment blocks
+                    }
+                    // Check if cell is player-blocked
+                    else if (playerBlockedCells.some(b => b.x === x && b.y === y)) {
+                        cell.classList.add('player-blocked'); // New class for player-created blocks
+                    }
+
+                    // Check if cell has a player (player takes visual precedence)
+                    const playerAtCell = playerPositions.find(p => p.x === x && p.y === y);
+                    if (playerAtCell) {
+                        cell.classList.remove('player-blocked'); // Remove block styling if player is there
+                        cell.classList.remove('env-blocked'); // Remove env-blocked styling if player is there (safety)
+                        cell.classList.add('player');
+                        cell.style.backgroundColor = playerAtCell.color; // Set player color
+                    }
+
+                    // Add click listener for actions
+                    cell.addEventListener('click', handleGridClick);
+                    gameGridDiv.appendChild(cell);
+                }
+            }
+        }
+
+        /**
+         * Updates the display for current player, dice roll, and actions left.
+         */
+        function updateInfoDisplay() {
+            const currentPlayer = playerPositions[currentPlayerIndex];
+            currentPlayerColorDiv.style.backgroundColor = currentPlayer.color;
+            currentPlayerTextSpan.textContent = `Current Player: P${currentPlayerIndex + 1}`;
+            diceRollSpan.textContent = diceRoll;
+            actionsLeftSpan.textContent = actionsLeft;
+
+            if (gameOver) {
+                rollDiceBtn.disabled = true;
+                endTurnBtn.disabled = true;
+                actionModeToggleBtn.disabled = true; // Disable toggle button on game over
+                gameMessageP.textContent = 'Game over!';
+            } else if (actionsLeft > 0) {
+                rollDiceBtn.disabled = true; // Can't roll again if actions are pending
+                endTurnBtn.disabled = false; // Player can end turn early
+                actionModeToggleBtn.disabled = false; // Enable toggle button during actions
+                gameMessageP.textContent = `P${currentPlayerIndex + 1}: ${actionsLeft} actions left. Current mode: ${currentActionMode.toUpperCase()}. Click on the grid to perform action.`;
+            } else { // actionsLeft is 0
+                if (diceRoll === 0) { // Before rolling dice, or after a new turn starts
+                    rollDiceBtn.disabled = false;
+                    endTurnBtn.disabled = true;
+                    actionModeToggleBtn.disabled = true; // Disable toggle before actions start
+                    gameMessageP.textContent = `P${currentPlayerIndex + 1}: Roll the dice to start your turn.`;
+                } else { // After actions are exhausted
+                    rollDiceBtn.disabled = true; // Cannot roll again
+                    endTurnBtn.disabled = false; // MUST end turn
+                    actionModeToggleBtn.disabled = true; // Disable toggle after actions exhausted
+                    gameMessageP.textContent = `P${currentPlayerIndex + 1}: No actions left. Please End Turn.`;
+                }
+            }
+        }
+
+        /**
+         * Rolls the dice and updates actions available for the current player.
+         */
+        function rollDice() {
+            if (gameOver || actionsLeft > 0) return; // Can't roll if game is over or actions are pending
+
+            diceRoll = Math.floor(Math.random() * 6) + 1; // Roll 1-6
+            actionsLeft = diceRoll;
+            updateInfoDisplay();
+        }
+
+        /**
+         * Handles clicks on the grid cells to perform actions (move, block, unblock).
+         * @param {Event} event - The click event object.
+         */
+        function handleGridClick(event) {
+            if (gameOver || actionsLeft === 0) {
+                gameMessageP.textContent = 'No actions left. Roll the dice or end turn.';
+                return;
+            }
+
+            const clickedX = parseInt(event.target.dataset.x);
+            const clickedY = parseInt(event.target.dataset.y);
+
+            const currentPlayer = playerPositions[currentPlayerIndex];
+            const currentPx = currentPlayer.x;
+            const currentPy = currentPlayer.y;
+
+            const isEnvBlocked = isEnvironmentBlock(clickedX, clickedY);
+            const isPlayerBlocked = playerBlockedCells.some(b => b.x === clickedX && b.y === clickedY);
+            const isPlayerOccupiedCell = isPlayerOccupied(clickedX, clickedY);
+            const isTarget = isTargetCell(clickedX, clickedY);
+
+            let actionTaken = false;
+
+            // --- Attempt to Unblock (only player-created blocks) ---
+            if (isPlayerBlocked && !isEnvBlocked) { // Can only unblock player-created blocks, not environment blocks
+                unblockCell(clickedX, clickedY);
+                gameMessageP.textContent = `Unblocked cell (${clickedX}, ${clickedY}).`;
+                actionTaken = true;
+            }
+            // --- Handle Move action ---
+            else if (currentActionMode === 'move') {
+                if (isAdjacent(currentPx, currentPy, clickedX, clickedY)) {
+                    // Allow moving to target if it's adjacent and no other player is there
+                    if (isTarget && !isPlayerOccupiedCell) {
+                        movePlayer(currentPlayerIndex, clickedX, clickedY);
+                        gameMessageP.textContent = `Moved to Finish Line!`;
+                        actionTaken = true;
+                        checkWinCondition(); // Check win immediately on target move
+                    }
+                    // Allow moving to a regular, non-blocked, unoccupied cell
+                    else if (!isEnvBlocked && !isPlayerBlocked && !isPlayerOccupiedCell && !isTarget) {
+                        movePlayer(currentPlayerIndex, clickedX, clickedY);
+                        gameMessageP.textContent = `Moved to (${clickedX}, ${clickedY}).`;
+                        actionTaken = true;
+                    } else {
+                        gameMessageP.textContent = 'Cannot move to this space (blocked, occupied, or target in an invalid way).';
+                    }
+                } else {
+                    gameMessageP.textContent = 'Cannot move to non-adjacent space.';
+                }
+            }
+            // --- Handle Block action ---
+            else if (currentActionMode === 'block') {
+                // Cannot block environment blocks, occupied cells, or target
+                if (isEnvBlocked || isPlayerOccupiedCell || isTarget) {
+                    gameMessageP.textContent = 'Invalid action. Cannot block this space (environment, occupied, or target).';
+                }
+                // Cannot block your own current position
+                else if (clickedX === currentPx && clickedY === currentPy) {
+                    gameMessageP.textContent = 'Cannot block your own current position.';
+                }
+                // Cannot block an already player-blocked cell (unblocking handles this separately)
+                else if (isPlayerBlocked) {
+                    gameMessageP.textContent = 'Space is already player-blocked. Switch to unblock if needed.';
+                }
+                else { // Valid block
+                    blockCell(clickedX, clickedY);
+                    gameMessageP.textContent = `Blocked cell (${clickedX}, ${clickedY}).`;
+                    actionTaken = true;
+                }
+            } else {
+                // General invalid action for any other unhandled cases (should be rare)
+                gameMessageP.textContent = 'Invalid action.';
+            }
+
+            if (actionTaken && !gameOver) { // Only decrement actions if action was taken and game is not over from win
+                actionsLeft--;
+                gameMessageP.textContent += ` Actions left: ${actionsLeft}.`;
+                renderGrid();
+                updateInfoDisplay();
+                // checkWinCondition is called for move to target, not needed generally here
+            }
+        }
+
+        /**
+         * Toggles the current action mode between 'move' and 'block'.
+         */
+        function toggleActionMode() {
+            if (currentActionMode === 'move') {
+                currentActionMode = 'block';
+            } else {
+                currentActionMode = 'move';
+            }
+            updateActionModeButton();
+            gameMessageP.textContent = `Action mode changed to: ${currentActionMode.toUpperCase()}.`;
+            updateInfoDisplay(); // Update message and buttons
+        }
+
+        /**
+         * Updates the text of the action mode toggle button.
+         */
+        function updateActionModeButton() {
+            actionModeToggleBtn.textContent = `Mode: ${currentActionMode.toUpperCase()}`;
+        }
+
+        /**
+         * Moves a player to a new position.
+         * @param {number} playerIdx - Index of the player to move.
+         * @param {number} newX - New X coordinate.
+         * @param {number} newY - New Y coordinate.
+         */
+        function movePlayer(playerIdx, newX, newY) {
+            playerPositions[playerIdx].x = newX;
+            playerPositions[playerIdx].y = newY;
+        }
+
+        /**
+         * Blocks a specified cell (player-created block).
+         * @param {number} x - X coordinate of the cell.
+         * @param {number} y - Y coordinate of the cell.
+         */
+        function blockCell(x, y) {
+            playerBlockedCells.push({ x, y });
+        }
+
+        /**
+         * Unblocks a specified cell (player-created block).
+         * @param {number} x - X coordinate of the cell.
+         * @param {number} y - Y coordinate of the cell.
+         */
+        function unblockCell(x, y) {
+            playerBlockedCells = playerBlockedCells.filter(b => !(b.x === x && b.y === y));
+        }
+
+        /**
+         * Checks if two positions are adjacent (horizontally or vertically).
+         * @param {number} x1 - X coordinate of first position.
+         * @param {number} y1 - Y coordinate of first position.
+         * @param {number} x2 - X coordinate of second position.
+         * @param {number} y2 - Y coordinate of second position.
+         * @returns {boolean} True if adjacent, false otherwise.
+         */
+        function isAdjacent(x1, y1, x2, y2) {
+            const dx = Math.abs(x1 - x2);
+            const dy = Math.abs(y1 - y2);
+            return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+        }
+
+        /**
+         * Ends the current player's turn and switches to the next player.
+         */
+        function endTurn() {
+            if (gameOver) return;
+            actionsLeft = 0; // Ensure actions are reset
+            currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+            diceRoll = 0; // Reset dice roll for next turn
+            currentActionMode = 'move'; // Reset mode to move for next player
+            updateInfoDisplay();
+            updateActionModeButton(); // Update button text for new player
+        }
+
+        /**
+         * Checks if any player has reached the target position.
+         * If a player wins, triggers the game over state.
+         */
+        function checkWinCondition() {
+            const winningPlayer = playerPositions.find(p => p.x === targetPosition.x && p.y === targetPosition.y);
+            if (winningPlayer) {
+                gameOver = true;
+                const winnerIdx = playerPositions.indexOf(winningPlayer);
+                winnerMessageP.innerHTML = `Player <span style="color: ${winningPlayer.color}; font-weight: bold;">P${winnerIdx + 1}</span> wins!`;
+                gameOverModal.classList.remove('hidden'); // Show modal
+                rollDiceBtn.disabled = true;
+                endTurnBtn.disabled = true;
+                actionModeToggleBtn.disabled = true;
+                gameMessageP.textContent = 'Game over!';
+            }
+        }
+
+        /**
+         * Resets the game and hides the game over modal.
+         */
+        function playAgain() {
+            gameOverModal.classList.add('hidden'); // Hide modal
+            startGame(); // This function will be called, which means initializeGame, and new environment
+        }
+
+        /**
+         * Starts the game, showing game info and hiding player setup.
+         */
+        function startGame() {
+            numPlayers = parseInt(numPlayersInput.value);
+            if (isNaN(numPlayers) || numPlayers < 1 || numPlayers > 4) {
+                alert('Please select between 1 and 4 players.');
+                return;
+            }
+
+            playerSetupDiv.classList.add('hidden');
+            gameInfoDiv.classList.remove('hidden');
+            gameStarted = true;
+            initializeGame();
+        }
+
+        // --- Event Listeners and Initialization ---
+        // Wrap all DOM element access and event listener assignments in DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize DOM Elements
+            numPlayersInput = document.getElementById('num-players');
+            startGameBtn = document.getElementById('start-game-btn');
+            playerSetupDiv = document.getElementById('player-setup');
+            gameInfoDiv = document.getElementById('game-info');
+            gameGridDiv = document.getElementById('game-grid');
+            currentPlayerColorDiv = document.getElementById('current-player-color');
+            currentPlayerTextSpan = document.getElementById('current-player-text');
+            diceRollSpan = document.getElementById('dice-roll');
+            actionsLeftSpan = document.getElementById('actions-left');
+            rollDiceBtn = document.getElementById('roll-dice-btn');
+            endTurnBtn = document.getElementById('end-turn-btn');
+            gameMessageP = document.getElementById('game-message');
+            gameOverModal = document.getElementById('game-over-modal');
+            winnerMessageP = document.getElementById('winner-message');
+            playAgainBtn = document.getElementById('play-again-btn');
+            actionModeToggleBtn = document.getElementById('action-mode-toggle-btn');
+            // restartGameBtn is not present in this version (as per revert)
+
+            // Add Event Listeners
+            // Reference the functions directly. They are all defined in the global scope
+            // and available when DOMContentLoaded fires.
+            startGameBtn.addEventListener('click', startGame);
+            rollDiceBtn.addEventListener('click', rollDice);
+            endTurnBtn.addEventListener('click', endTurn);
+            playAgainBtn.addEventListener('click', playAgain);
+            actionModeToggleBtn.addEventListener('click', toggleActionMode);
+        });
+    </script>
+</body>
+</html>
