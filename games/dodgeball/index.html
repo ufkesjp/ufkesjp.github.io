@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Avoid the Ball</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the game */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as per instructions */
+            background-color: #1a202c; /* Dark background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #2d3748; /* Slightly lighter dark background for container */
+            border-radius: 1.5rem; /* Rounded corners */
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            width: 95%; /* Responsive width */
+            max-width: 500px; /* Max width for desktop */
+            position: relative;
+        }
+        canvas {
+            background-color: #4a5568; /* Canvas background */
+            display: block;
+            border-radius: 1rem; /* Rounded corners for canvas */
+            touch-action: none; /* Prevent default touch actions like scrolling/zooming */
+            border: 2px solid #a0aec0;
+            width: 100%; /* Make canvas responsive */
+            height: auto; /* Maintain aspect ratio, will be set in JS */
+            max-height: 70vh; /* Limit canvas height on taller screens */
+        }
+        #timerDisplay {
+            color: #e2e8f0; /* Light text color */
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        #initialScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+            display: flex; /* Hidden by default, shown when needed */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 1.5rem;
+            text-align: center;
+            padding: 1rem;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        #initialScreen h2, #gameOverScreen p {
+            color: #edf2f7;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        #initialScreen label {
+            color: #cbd5e0;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        #numPlayersInput {
+            background-color: #4a5568;
+            color: #edf2f7;
+            border: 2px solid #a0aec0;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1.5rem;
+            width: 80px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .game-button {
+            background-color: #48bb78; /* Green button */
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 9999px; /* Pill-shaped button */
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            background-image: linear-gradient(to right, #48bb78, #38a169); /* Gradient */
+            margin-top: 1rem;
+        }
+        .game-button:hover {
+            background-color: #38a169;
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        .game-button:active {
+            transform: translateY(0); /* Press effect */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #gameOverScreen ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 2rem;
+            color: #cbd5e0;
+            font-size: 1.2rem;
+        }
+        #gameOverScreen li {
+            margin-bottom: 0.5rem;
+        }
+        #waitingMessage {
+            color: #a0aec0;
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="timerDisplay">Players Left: 0 | Time: 0.00s</div>
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Initial Screen for Player Count -->
+        <div id="initialScreen">
+            <h2>How many players?</h2>
+            <label for="numPlayersInput">Enter number of players (1-4):</label>
+            <input type="number" id="numPlayersInput" min="1" max="4" value="1" class="mb-4">
+            <button id="startGameButton" class="game-button">Start Game</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" style="display: none;">
+            <p>Game Over!</p>
+            <ul id="resultsList"></ul>
+            <button id="playAgainButton" class="game-button">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Get canvas and its context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Get display elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const initialScreen = document.getElementById('initialScreen');
+        const numPlayersInput = document.getElementById('numPlayersInput');
+        const startGameButton = document.getElementById('startGameButton');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const resultsList = document.getElementById('resultsList');
+        const playAgainButton = document.getElementById('playAgainButton');
+
+        // Game state variables
+        let animationFrameId; // To store the requestAnimationFrame ID
+        let gameRunning = false; // True when game loop is active
+        let gameStartedByTouches = false; // True when all initial touches are registered
+        let gameOverallStartTime; // Timestamp for the entire game session
+        let numPlayers = 1; // Default number of players
+        let players = []; // Array to hold player data
+        const playerTouchRadius = 25;
+
+        // Ball properties
+        const ball = {
+            x: 0,
+            y: 0,
+            radius: 15,
+            dx: 0, // Initialized to 0, starts moving when game starts
+            dy: 0,
+            speedMultiplier: 1, // Will increase as players lose
+            color: '#feb2b2' // Light red for the ball
+        };
+
+        // Predefined colors for players
+        const playerColors = [
+            '#63b3ed', // Blue
+            '#f6ad55', // Orange
+            '#fc8181', // Red
+            '#9f7aea'  // Purple
+        ];
+
+        /**
+         * Adjusts canvas size based on its parent container.
+         * This ensures responsiveness.
+         */
+        function resizeCanvas() {
+            const container = document.getElementById('gameContainer');
+            canvas.width = container.offsetWidth - (2 * 1.5 * 16); // Container width minus padding (1.5rem = 24px)
+            canvas.height = canvas.width * 0.75; // Maintain a 4:3 aspect ratio (or desired ratio)
+
+            // Re-center ball if game is not running or at the start
+            if (!gameRunning && !gameStartedByTouches) {
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+            }
+            // Ensure ball stays within new bounds if already running
+            ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
+            ball.y = Math.max(ball.radius, Math.min(canvas.height - ball.radius, ball.y));
+
+            // Adjust player positions if they were out of bounds after resize
+            players.forEach(player => {
+                if (player.active && player.alive) {
+                    player.x = Math.max(playerTouchRadius, Math.min(canvas.width - playerTouchRadius, player.x));
+                    player.y = Math.max(playerTouchRadius, Math.min(canvas.height - playerTouchRadius, player.y));
+                }
+            });
+        }
+
+        /**
+         * Creates a new player object.
+         * @param {number} id - Unique identifier for the player (index).
+         * @returns {object} Player object.
+         */
+        function createPlayer(id) {
+            return {
+                id: id,
+                touchIdentifier: null, // Used to link a specific touch to this player
+                x: -100, // Initialize off-screen
+                y: -100,
+                active: false, // True if finger is currently down
+                alive: true, // True if player is still in the game
+                startTime: null, // When this player's timer started
+                elapsedTime: 0, // Current elapsed time for this player
+                finalTime: null, // Time recorded when player lost
+                color: playerColors[id % playerColors.length], // Assign a color
+                name: `Player ${id + 1}` // Simple naming
+            };
+        }
+
+        /**
+         * Draws the ball on the canvas.
+         */
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        /**
+         * Draws the player's touch indicator on the canvas.
+         * @param {object} player - The player object to draw.
+         */
+        function drawPlayerTouch(player) {
+            if (player.active && player.alive) { // Only draw if active and alive
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, playerTouchRadius, 0, Math.PI * 2);
+                ctx.fillStyle = player.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        /**
+         * Updates the ball's position and handles wall collisions.
+         */
+        function updateBall() {
+            ball.x += ball.dx * ball.speedMultiplier;
+            ball.y += ball.dy * ball.speedMultiplier;
+
+            // Wall collision detection (left/right)
+            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                ball.dx *= -1; // Reverse horizontal direction
+                // Adjust position to prevent sticking to wall
+                ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
+            }
+
+            // Wall collision detection (top/bottom)
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy *= -1; // Reverse vertical direction
+                // Adjust position to prevent sticking to wall
+                ball.y = Math.max(ball.radius, Math.min(canvas.height - ball.radius, ball.y));
+            }
+        }
+
+        /**
+         * Checks for collision between the ball and a specific player's touch.
+         * @param {object} player - The player object to check collision for.
+         */
+        function checkCollisionForPlayer(player) {
+            if (player.active && player.alive) {
+                const distance = Math.sqrt(
+                    Math.pow(ball.x - player.x, 2) + Math.pow(ball.y - player.y, 2)
+                );
+                if (distance < ball.radius + playerTouchRadius) {
+                    endPlayer(player.id); // Collision detected, end this player's game
+                }
+            }
+        }
+
+        /**
+         * Ends the game for a specific player.
+         * @param {number} playerId - The ID of the player who lost.
+         */
+        function endPlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (player && player.alive) {
+                player.alive = false;
+                player.active = false; // No longer tracking this touch
+                player.touchIdentifier = null; // Clear associated touch ID
+                player.finalTime = ((Date.now() - gameOverallStartTime) / 1000).toFixed(2); // Record time
+                // Optionally increase ball speed slightly for remaining players
+                ball.speedMultiplier += 0.05;
+
+                // Check if all players have lost
+                const playersLeft = players.filter(p => p.alive).length;
+                if (playersLeft === 0) {
+                    endGame();
+                }
+            }
+        }
+
+        /**
+         * Updates the main timer display and individual player elapsed times.
+         */
+        function updateTimer() {
+            if (gameStartedByTouches) {
+                const currentOverallTime = (Date.now() - gameOverallStartTime) / 1000;
+                const playersLeft = players.filter(p => p.alive).length;
+                timerDisplay.textContent = `Players Left: ${playersLeft} | Time: ${currentOverallTime.toFixed(2)}s`;
+
+                // Update individual player elapsed times (only for display, finalTime recorded on loss)
+                players.forEach(player => {
+                    if (player.alive && player.startTime) {
+                        player.elapsedTime = (currentOverallTime).toFixed(2);
+                    }
+                });
+            } else {
+                 const activePlayersCount = players.filter(p => p.active).length;
+                 timerDisplay.innerHTML = `Players Left: ${numPlayers} | Time: 0.00s <br><span id="waitingMessage">Waiting for ${numPlayers - activePlayersCount} players to touch the screen...</span>`;
+            }
+        }
+
+        /**
+         * The main game loop, called continuously using requestAnimationFrame.
+         */
+        function gameLoop() {
+            if (gameRunning) {
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Update game elements if game has officially started (all touches registered)
+                if (gameStartedByTouches) {
+                    updateBall();
+                    players.forEach(player => checkCollisionForPlayer(player)); // Check collision for each player
+                }
+
+                updateTimer(); // Always update timer
+
+                // Draw game elements
+                drawBall();
+                players.forEach(player => drawPlayerTouch(player)); // Draw all active players
+
+                // Request the next frame
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        /**
+         * Sets up the game based on the number of players.
+         */
+        function setupGame() {
+            numPlayers = parseInt(numPlayersInput.value, 10);
+            if (isNaN(numPlayers) || numPlayers < 1 || numPlayers > 4) {
+                numPlayers = 1; // Default to 1 if invalid
+                numPlayersInput.value = 1;
+            }
+
+            // Initialize player array
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                players.push(createPlayer(i));
+            }
+
+            // Reset game state
+            gameRunning = true;
+            gameStartedByTouches = false;
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = 0; // Ball starts static
+            ball.dy = 0;
+            ball.speedMultiplier = 1;
+
+            initialScreen.style.display = 'none'; // Hide initial screen
+            gameOverScreen.style.display = 'none'; // Ensure game over screen is hidden
+
+            // Start the animation loop (ball won't move until gameStartedByTouches is true)
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        /**
+         * Starts the ball movement and overall game timer once all players are touching.
+         */
+        function activateGame() {
+            if (!gameStartedByTouches) { // Only activate once
+                gameStartedByTouches = true;
+                gameOverallStartTime = Date.now(); // Record overall game start time
+
+                // Set initial ball speed randomly
+                ball.dx = (Math.random() > 0.5 ? 1 : -1) * (5 + Math.random() * 2);
+                ball.dy = (Math.random() > 0.5 ? 1 : -1) * (5 + Math.random() * 2);
+
+                // Set individual player start times (though we use overall time for now)
+                players.forEach(player => {
+                    if (player.active && player.alive) {
+                        player.startTime = gameOverallStartTime;
+                    }
+                });
+            }
+        }
+
+        /**
+         * Ends the entire game session.
+         */
+        function endGame() {
+            gameRunning = false;
+            gameStartedByTouches = false;
+            cancelAnimationFrame(animationFrameId); // Stop the animation loop
+
+            // Populate results list
+            resultsList.innerHTML = '';
+            players.forEach(player => {
+                const li = document.createElement('li');
+                li.textContent = `${player.name}: ${player.finalTime !== null ? player.finalTime + 's' : 'Did not participate'}`;
+                resultsList.appendChild(li);
+            });
+
+            gameOverScreen.style.display = 'flex'; // Show game over screen
+        }
+
+        // --- Touch Event Handlers ---
+
+        /**
+         * Finds a player by their touch identifier.
+         * @param {number} identifier - The touch identifier.
+         * @returns {object|null} The player object or null if not found.
+         */
+        function findPlayerByIdentifier(identifier) {
+            return players.find(p => p.touchIdentifier === identifier);
+        }
+
+        /**
+         * Assigns a touch to a free player slot.
+         * @param {number} identifier - The touch identifier.
+         * @returns {object|null} The assigned player object or null if no free slot.
+         */
+        function assignTouchToPlayer(identifier) {
+            for (let i = 0; i < players.length; i++) {
+                if (players[i].alive && players[i].touchIdentifier === null) {
+                    players[i].touchIdentifier = identifier;
+                    return players[i];
+                }
+            }
+            return null; // No free player slot
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent default browser touch actions
+
+            const rect = canvas.getBoundingClientRect();
+
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                let player = findPlayerByIdentifier(touch.identifier);
+
+                if (!player) { // If this touch is new, try to assign it to an available player slot
+                    player = assignTouchToPlayer(touch.identifier);
+                }
+
+                if (player && player.alive) {
+                    // Clamp player x, y coordinates within canvas bounds
+                    const clientX_clamped = Math.max(rect.left + playerTouchRadius, Math.min(rect.right - playerTouchRadius, touch.clientX));
+                    const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, touch.clientY));
+
+                    player.x = clientX_clamped - rect.left;
+                    player.y = clientY_clamped - rect.top;
+                    player.active = true;
+                }
+            }
+
+            // Check if all players are active to start the game
+            const activePlayers = players.filter(p => p.active && p.alive).length;
+            if (activePlayers === numPlayers && !gameStartedByTouches) {
+                activateGame();
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent default browser touch actions
+
+            const rect = canvas.getBoundingClientRect();
+
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                const player = findPlayerByIdentifier(touch.identifier);
+
+                if (player && player.alive && player.active) {
+                    // Clamp player x, y coordinates within canvas bounds
+                    const clientX_clamped = Math.max(rect.left + playerTouchRadius, Math.min(rect.right - playerTouchRadius, touch.clientX));
+                    const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, touch.clientY));
+
+                    player.x = clientX_clamped - rect.left;
+                    player.y = clientY_clamped - rect.top;
+                }
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault(); // Prevent default browser touch actions
+
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                const player = findPlayerByIdentifier(touch.identifier);
+
+                if (player) {
+                    player.active = false;
+                    player.touchIdentifier = null; // Free up this player slot's touch ID
+                    player.x = -100; // Move off-screen
+                    player.y = -100;
+                }
+            }
+        });
+
+
+        // --- Mouse Events for Desktop Testing (simulates single touch) ---
+        // Note: For actual multi-touch, a mouse cannot fully replicate.
+        // It's still useful for single-player testing on desktop.
+        canvas.addEventListener('mousedown', (e) => {
+            // If the game is not running and we are in single player mode,
+            // then initialize the game for a single player when mouse down occurs.
+            if (!gameRunning && numPlayersInput.value == 1) {
+                 setupGame(); // Set up game for 1 player (from input)
+            }
+
+            // If game is running and it's a single player game AND the first player is alive
+            if (gameRunning && numPlayers === 1 && players[0] && players[0].alive) {
+                const rect = canvas.getBoundingClientRect();
+
+                // Clamp mouse x, y coordinates within canvas bounds
+                const clientX_clamped = Math.max(rect.left + playerTouchRadius, Math.min(rect.right - playerTouchRadius, e.clientX));
+                const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, e.clientY));
+
+                players[0].x = clientX_clamped - rect.left;
+                players[0].y = clientY_clamped - rect.top;
+                players[0].active = true;
+                players[0].touchIdentifier = 'mouse'; // Unique identifier for mouse
+
+                // Activate game if this is the first touch for a 1-player game
+                if (!gameStartedByTouches) {
+                    activateGame();
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameRunning && numPlayers === 1 && players[0] && players[0].active && players[0].alive) {
+                const rect = canvas.getBoundingClientRect();
+
+                // Clamp mouse x, y coordinates within canvas bounds
+                const clientX_clamped = Math.max(rect.left + playerTouchRadius, Math.min(rect.right - playerTouchRadius, e.clientX));
+                const clientY_clamped = Math.max(rect.top + playerTouchRadius, Math.min(rect.bottom - playerTouchRadius, e.clientY));
+
+                players[0].x = clientX_clamped - rect.left;
+                players[0].y = clientY_clamped - rect.top;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (gameRunning && numPlayers === 1 && players[0]) {
+                players[0].active = false;
+                players[0].touchIdentifier = null;
+                players[0].x = -100;
+                players[0].y = -100;
+            }
+        });
+
+        // --- Event Listeners for Buttons ---
+        startGameButton.addEventListener('click', setupGame);
+        playAgainButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none';
+            initialScreen.style.display = 'flex'; // Show initial screen again
+            // Ensure canvas is resized in case of orientation change before next game
+            resizeCanvas();
+        });
+
+        // Resize canvas initially and on window resize
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup on window load
+        window.onload = function() {
+            resizeCanvas(); // Set initial canvas size
+            initialScreen.style.display = 'flex'; // Show initial player count screen
+        };
+    </script>
+</body>
+</html>
