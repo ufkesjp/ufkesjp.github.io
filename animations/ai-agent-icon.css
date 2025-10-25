@@ -1,0 +1,168 @@
+/* --- Icon Container and Base Styling --- */
+.ai-agent-icon-container {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Optional: Center on the page for demonstration */
+    margin: 50px;
+}
+
+.bubble {
+    position: relative;
+    width: 50px;
+    height: 40px;
+    background-color: #3f51b5; /* Deep Blue/Purple for AI */
+    border-radius: 50% / 60% 60% 40% 40%;
+    /* Add a small tail to look like a thought bubble */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: cycle-states 4s infinite; /* Main animation loop */
+}
+
+.bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 15px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid #3f51b5;
+    transform: rotate(-25deg);
+}
+
+
+/* --- Thinking Dots (Initial State) --- */
+.dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 1; /* Visible in the thinking state */
+}
+
+.dot-1 { left: 10px; animation: loading-dot 1s infinite alternate; }
+.dot-2 { left: 22px; animation: loading-dot 1s infinite alternate 0.2s; } /* Staggered delay */
+.dot-3 { left: 34px; animation: loading-dot 1s infinite alternate 0.4s; }
+
+
+/* --- Checkmark (Answered State) --- */
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: solid white;
+    border-width: 0 4px 4px 0;
+    transform: translate(-50%, -50%) rotate(45deg) scale(0); /* Start scaled down and hidden */
+    opacity: 0;
+}
+
+
+/* --- Keyframe Animations --- */
+
+/* 1. Dot Pulsing Animation */
+@keyframes loading-dot {
+    from { transform: translateY(-50%) scale(1); }
+    to { transform: translateY(-50%) scale(1.2); } /* Subtle pulse effect */
+}
+
+/* 2. Checkmark Drawing Animation */
+@keyframes draw-checkmark {
+    0% { width: 0; height: 0; opacity: 1; }
+    50% { width: 10px; height: 20px; opacity: 1; }
+    100% { width: 10px; height: 20px; opacity: 1; }
+}
+
+/* 3. Main State Cycling Animation */
+@keyframes cycle-states {
+    /* State 1: Thinking (Dots Visible) */
+    0% { transform: scale(1); }
+    25% { transform: scale(1); }
+
+    /* Transition to Answered */
+    30% { transform: scale(0.8); }
+
+    /* State 2: Answered (Checkmark Visible) */
+    35% { transform: scale(1.1); background-color: #4caf50; } /* Bubble changes to green */
+    65% { transform: scale(1); background-color: #4caf50; }
+
+    /* Transition back to Thinking */
+    70% { transform: scale(0.8); background-color: #3f51b5; }
+
+    /* State 3: Back to Thinking */
+    100% { transform: scale(1); background-color: #3f51b5; }
+}
+
+/* Control which elements are visible based on the main animation's time */
+.ai-agent-icon-container .bubble {
+    animation-iteration-count: infinite;
+}
+
+/* Dots are visible during the first part of the cycle (0% to 35%) */
+.ai-agent-icon-container .dot {
+    animation-delay: 0s; /* Reset dot animation start */
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+}
+
+.ai-agent-icon-container .bubble:nth-child(1) {
+    animation-name: cycle-states;
+}
+
+/* Use animation-play-state or separate classes in a real application, 
+   but for pure CSS cycle, we target the elements based on time. 
+   Since we can't use keyframes to hide elements on the main element, 
+   we'll control the visibility/animation of children by coupling the keyframes
+   with specific class applications (which would require a few lines of JS).
+   For a **pure CSS cycle**, we apply the dot/checkmark visibility to the
+   main animation timing, though this is less precise without JS. 
+   
+   **Simplified Pure CSS Approach (Less Control but no JS):** We'll use steps within the main animation to control the appearance.
+*/
+
+@keyframes cycle-states {
+    /* Step 1: Thinking (0-30%) */
+    0% { transform: scale(1); background-color: #3f51b5; }
+    30% { transform: scale(1); background-color: #3f51b5; }
+    
+    /* Step 2: Answering (30-60%) */
+    30.1% { background-color: #4caf50; }
+    60% { transform: scale(1.1); background-color: #4caf50; }
+    
+    /* Step 3: Reset (60-100%) */
+    60.1% { background-color: #3f51b5; }
+    100% { transform: scale(1); background-color: #3f51b5; }
+}
+
+/* Dot Visibility Control */
+.dot {
+    /* Dots are hidden when the checkmark is showing (30.1% to 60.1%) */
+    animation: dot-visibility 4s infinite;
+}
+
+@keyframes dot-visibility {
+    0%, 30% { opacity: 1; }
+    30.1%, 60% { opacity: 0; }
+    60.1%, 100% { opacity: 1; }
+}
+
+/* Checkmark Visibility/Draw Control */
+.checkmark {
+    /* Checkmark draws and stays visible from 30.1% to 60% */
+    animation: checkmark-draw 4s infinite;
+}
+
+@keyframes checkmark-draw {
+    0%, 30% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0); }
+    30.1% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(0); } /* Start draw */
+    35% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); } /* Fully drawn */
+    60% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); } /* Hold */
+    60.1%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0); } /* Hide */
+}
