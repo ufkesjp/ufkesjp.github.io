@@ -1,0 +1,92 @@
+USESOUNDS HOOK — QUICK REFERENCE
+=================================
+
+SETUP
+-----
+1. Drop useSounds.js into your project, e.g. src/sounds/useSounds.js
+2. Import the hook in any component that needs sound.
+
+
+IMPORT
+------
+import { useSounds } from "../sounds/useSounds";
+
+
+BASIC USAGE
+-----------
+function MyComponent() {
+  const { play } = useSounds();
+
+  return (
+    <button
+      onMouseEnter={() => play("select")}
+      onClick={() => play("accept")}
+    >
+      Save
+    </button>
+  );
+}
+
+
+SOUND NAMES & WHEN TO USE THEM
+-------------------------------
+  "select"   Hover, focus, cursor movement between items
+  "cancel"   Back, dismiss, close, undo
+  "accept"   Save, submit, confirm, complete — rings longest
+  "reject"   Error, invalid input, forbidden action — staccato
+  "aiOpen"   Opening the AI assistant — use for this exclusively
+
+
+COMMON PATTERNS
+---------------
+
+// Hover + click
+onMouseEnter={() => play("select")}
+onClick={() => play("accept")}
+
+// Modal close button
+onClick={() => { play("cancel"); closeModal(); }}
+
+// Form validation
+const handleSubmit = () => {
+  if (!isValid) { play("reject"); return; }
+  play("accept");
+  submitForm();
+};
+
+// AI panel trigger
+onClick={() => { play("aiOpen"); setAiOpen(true); }}
+
+// Tab / menu navigation
+onChange={(tab) => { play("select"); setActiveTab(tab); }}
+
+// Delete / destructive action
+onClick={() => { play("reject"); deleteItem(id); }}
+
+
+MUTE TOGGLE
+-----------
+import { useSounds, toggleMute, muted } from "../sounds/useSounds";
+
+<button onClick={toggleMute}>
+  {muted ? "Unmute" : "Mute"}
+</button>
+
+
+IMPORTANT: BROWSER AUTOPLAY RULE
+---------------------------------
+Always call play() inside a real user event (onClick, onMouseEnter, etc.).
+Never call it inside useEffect on mount — browsers will silently block it
+until the user has interacted with the page at least once.
+
+
+SOUND HIERARCHY (shortest to longest tail)
+------------------------------------------
+  reject   ~0.1s   Clipped, dry, staccato
+  select   ~0.3s   Brief, silky
+  cancel   ~0.4s   Gentle fade
+  aiOpen   ~0.9s   Layered, grand
+  accept   ~1.0s   Rings the longest — intentional
+
+
+NO DEPENDENCIES. NO AUDIO FILES. WORKS IN ALL MODERN BROWSERS.
