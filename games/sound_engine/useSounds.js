@@ -2,7 +2,7 @@
 // Drop into your project at: src/sounds/useSounds.js
 // No dependencies. No audio files. Works in all modern browsers.
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 // ─── Audio Context ────────────────────────────────────────────────────────────
 
@@ -126,15 +126,123 @@ export const sounds = {
     tone({ freq: 1108, vol: 0.04, attack: 0.10, release: 0.45, delay: 0.32, reverbMix: 0.70 });
     tone({ freq: 1480, vol: 0.02, attack: 0.12, release: 0.35, delay: 0.44, reverbMix: 0.80 });
   },
+
+  // App boot — staggered ascending tones, like a system coming online.
+  // Fires on first user interaction, not mount (browser autoplay policy).
+  appOpen: () => {
+    tone({ freq: 164,  vol: 0.10, attack: 0.06, release: 0.45, reverbMix: 0.40, delay: 0.00 });
+    tone({ freq: 246,  vol: 0.09, attack: 0.06, release: 0.45, reverbMix: 0.45, delay: 0.12 });
+    tone({ freq: 329,  vol: 0.08, attack: 0.06, release: 0.50, reverbMix: 0.50, delay: 0.22 });
+    tone({ freq: 494,  vol: 0.07, attack: 0.06, release: 0.55, reverbMix: 0.55, delay: 0.30 });
+    tone({ freq: 659,  vol: 0.05, attack: 0.07, release: 0.60, reverbMix: 0.60, delay: 0.38 });
+    tone({ freq: 988,  vol: 0.03, attack: 0.08, release: 0.55, reverbMix: 0.65, delay: 0.46 });
+  },
+
+  // App close — descending mirror of appOpen, resolving downward into silence.
+  // Front-loaded so it's audible even if the browser cuts it short on unload.
+  appClose: () => {
+    tone({ freq: 659,  vol: 0.10, attack: 0.03, release: 0.30, reverbMix: 0.35, delay: 0.00 });
+    tone({ freq: 494,  vol: 0.09, attack: 0.03, release: 0.30, reverbMix: 0.38, delay: 0.10 });
+    tone({ freq: 329,  vol: 0.08, attack: 0.04, release: 0.32, reverbMix: 0.40, delay: 0.18 });
+    tone({ freq: 246,  vol: 0.06, attack: 0.04, release: 0.30, reverbMix: 0.42, delay: 0.25 });
+    tone({ freq: 164,  vol: 0.05, attack: 0.05, release: 0.35, reverbMix: 0.45, delay: 0.32 });
+  },
 };
+
+// ─── Idle Drone ───────────────────────────────────────────────────────────────
+// A continuously running low-volume oscillator that slowly pulses.
+// Subliminal presence — felt more than heard.
+
+let _droneOsc = null;
+let _droneGain = null;
+let _droneLfo = null;
+
+export function startIdle() {
+  if (_droneOsc || muted) return;
+  const ctx = getCtx();
+
+  // Primary drone — low warm fundamental
+  _droneOsc = ctx.createOscillator();
+  _droneGain = ctx.createGain();
+  _droneOsc.type = "sine";
+  _droneOsc.frequency.value = 82; // E2 — low, unobtrusive
+  _droneOsc.connect(_droneGain);
+  _droneGain.connect(ctx.destination);
+  _droneGain.gain.setValueAtTime(0, ctx.currentTime);
+  _droneGain.gain.linearRampToValueAtTime(0.018, ctx.currentTime + 2.5); // fade in slowly
+
+  // LFO — slow volume pulse, ~8 second cycle
+  _droneLfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  _droneLfo.type = "sine";
+  _droneLfo.frequency.value = 0.12; // one breath every ~8s
+  lfoGain.gain.value = 0.010; // modulation depth — very subtle
+  _droneLfo.connect(lfoGain);
+  lfoGain.connect(_droneGain.gain);
+
+  _droneOsc.start();
+  _droneLfo.start();
+}
+
+export function stopIdle() {
+  if (!_droneOsc) return;
+  const ctx = getCtx();
+  _droneGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5);
+  setTimeout(() => {
+    try { _droneOsc.stop(); _droneLfo.stop(); } catch (_) {}
+    _droneOsc = null;
+    _droneGain = null;
+    _droneLfo = null;
+  }, 1600);
+}
 
 // ─── Optional: Mute Toggle ────────────────────────────────────────────────────
 
 export let muted = false;
-export const toggleMute = () => { muted = !muted; };
+export const toggleMute = () => {
+  muted = !muted;
+  if (muted) stopIdle();
+  else startIdle();
+};
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
+// useAppSounds: place once at your app root.
+// Handles appOpen (first interaction), idle drone, and appClose (beforeunload).
 
+export function useAppSounds() {
+  const opened = useRef(false);
+
+  useEffect(() => {
+    // Fire appOpen on first interaction anywhere in the app
+    const handleFirstInteraction = () => {
+      if (opened.current || muted) return;
+      opened.current = true;
+      sounds.appOpen();
+      setTimeout(() => startIdle(), 900); // let appOpen finish first
+      window.removeEventListener("pointerdown", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+
+    window.addEventListener("pointerdown", handleFirstInteraction);
+    window.addEventListener("keydown", handleFirstInteraction);
+
+    // Fire appClose on tab/window exit
+    const handleUnload = () => {
+      stopIdle();
+      if (!muted) sounds.appClose();
+    };
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      window.removeEventListener("pointerdown", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+      window.removeEventListener("beforeunload", handleUnload);
+      stopIdle();
+    };
+  }, []);
+}
+
+// useSounds: use anywhere in the component tree for individual sound events.
 export function useSounds() {
   const play = useCallback((name) => {
     if (!muted && sounds[name]) sounds[name]();
