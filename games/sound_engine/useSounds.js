@@ -85,10 +85,10 @@ function chord({ root, ratios = [1, 1.5, 2], vols, type = "sine",
 
 export const sounds = {
 
-  // Silk — barely-there warm sine. Use on hover / focus.
+  // Whisper — almost subliminal. Barely registers on a single hover,
+  // stays pleasant even through rapid scrolling.
   select: () => {
-    tone({ freq: 740,  vol: 0.09, attack: 0.03, release: 0.28, reverbMix: 0.4  });
-    tone({ freq: 1108, vol: 0.04, attack: 0.05, release: 0.20, delay: 0.02, reverbMix: 0.45 });
+    tone({ freq: 740, vol: 0.04, attack: 0.02, release: 0.10, reverbMix: 0.25 });
   },
 
   // Receding pool — gentle harmonic drift. Use on back / dismiss / close.
