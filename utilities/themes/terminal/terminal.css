@@ -1,0 +1,207 @@
+/* ============================================================
+   CLEAN TERMINAL
+   Pure black & white · IBM Plex Mono · green cursor accent
+   Scanline texture · blinking caret · utilitarian precision
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+:root {
+  --bg:         #0d0d0d;
+  --surface:    #111111;
+  --surface-2:  #1a1a1a;
+  --ink:        #e8e8e8;
+  --ink-muted:  #888888;
+  --ink-faint:  #444444;
+  --accent:     #00ff88;
+  --accent-dim: rgba(0,255,136,0.12);
+  --accent-2:   #00cc66;
+  --warn:       #ff4444;
+  --bord:       1px solid #2a2a2a;
+  --bord-accent:1px solid #00ff88;
+  --font-head:  'IBM Plex Mono', 'Courier New', monospace;
+  --font-body:  'IBM Plex Sans', system-ui, sans-serif;
+  --radius:     0px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cursor blink animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+h1 { font-size: clamp(1.8rem, 4vw, 3rem); }
+h2 { font-size: clamp(1.3rem, 2.5vw, 1.9rem); }
+h3 { font-size: 1.15rem; }
+
+/* Prompt prefix on headings */
+h1::before { content: "$ "; color: var(--accent); font-size: 0.7em; }
+
+p  { margin-bottom: 1rem; color: var(--ink-muted); }
+a  { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Blinking cursor pseudo-element */
+.cursor::after {
+  content: "█";
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  border-bottom: var(--bord-accent);
+  padding: 1.25rem 5%;
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-head);
+}
+
+header::before {
+  content: "// ";
+  color: var(--accent-2);
+}
+
+/* Footer */
+footer {
+  background: var(--surface);
+  border-top: var(--bord);
+  padding: 1rem 5%;
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  text-align: left;
+}
+footer::before { content: "> "; color: var(--accent); }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: var(--bord);
+  border-left: 3px solid var(--accent);
+  padding: 1.25rem;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s;
+}
+.card:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent-dim);
+}
+.card::before {
+  content: "//";
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  background: transparent;
+  color: var(--accent);
+  border: var(--bord-accent);
+  padding: 0.65rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  position: relative;
+}
+button::before, .btn::before { content: "> "; }
+button:hover, .btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+.btn-primary:hover { background: var(--accent-2); }
+.btn-danger { border-color: var(--warn); color: var(--warn); }
+.btn-danger:hover { background: var(--warn); color: var(--bg); }
+
+/* Inputs */
+input, textarea, select {
+  font-family: var(--font-head);
+  font-size: 0.875rem;
+  background: var(--bg);
+  color: var(--ink);
+  border: var(--bord);
+  padding: 0.7rem 0.9rem;
+  width: 100%;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  caret-color: var(--accent);
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+::placeholder { color: var(--ink-faint); font-style: italic; }
+
+/* Tags / Badges */
+.tag {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  padding: 2px 8px;
+  background: var(--accent-dim);
+}
+.tag::before { content: "["; }
+.tag::after  { content: "]"; }
+
+/* Utility */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 5%; position: relative; z-index: 1; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.muted { color: var(--ink-muted); }
+.mono { font-family: var(--font-head); }
+.comment { color: var(--ink-faint); font-family: var(--font-head); font-size: 0.8rem; }
+.comment::before { content: "// "; }
