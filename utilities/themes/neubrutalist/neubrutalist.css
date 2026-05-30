@@ -1,0 +1,164 @@
+/* ============================================================
+   NEU-BRUTALIST
+   Thick ink borders · hard shadows · JetBrains Mono
+   Cream background · yellow accent · dot-grid texture
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+:root {
+  --bg:         #f4ede0;
+  --ink:        #0a0a0a;
+  --paper:      #ffffff;
+  --accent:     #ffd60a;
+  --accent-alt: #ff3b30;
+  --muted:      rgba(10,10,10,0.5);
+  --bord:       3px solid #0a0a0a;
+  --shadow:     6px 6px 0 #0a0a0a;
+  --shadow-sm:  4px 4px 0 #0a0a0a;
+  --shadow-xs:  3px 3px 0 #0a0a0a;
+  --font-head:  'JetBrains Mono', monospace;
+  --font-body:  'Space Grotesk', system-ui, sans-serif;
+  --radius:     0px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(10,10,10,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,10,10,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+h3 { font-size: 1.25rem; }
+p  { margin-bottom: 1rem; }
+a  { color: var(--ink); text-decoration: underline; }
+a:hover { background: var(--accent); }
+
+/* Header */
+header {
+  background: var(--paper);
+  border-bottom: var(--bord);
+  box-shadow: 0 6px 0 #0a0a0a;
+  padding: 1.5rem 5%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Footer */
+footer {
+  background: var(--paper);
+  border-top: var(--bord);
+  padding: 1.5rem 5%;
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Cards */
+.card {
+  background: var(--paper);
+  border: var(--bord);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+.card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 var(--ink);
+}
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--bord);
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+button:hover, .btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+button:active, .btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.btn-primary { background: var(--accent); }
+.btn-danger  { background: var(--accent-alt); color: #fff; }
+
+/* Inputs */
+input, textarea, select {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--bord);
+  padding: 0.75rem;
+  width: 100%;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Tags / Badges */
+.tag {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 2px solid var(--ink);
+}
+.tag-accent { background: var(--accent); }
+
+/* Utility */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 5%; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+.muted { opacity: 0.55; }
+.mono { font-family: var(--font-head); }
