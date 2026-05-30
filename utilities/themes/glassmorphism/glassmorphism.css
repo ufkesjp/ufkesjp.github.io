@@ -1,0 +1,226 @@
+/* ============================================================
+   GLASSMORPHISM
+   Frosted cards · deep violet mesh · DM Sans + Syne
+   Blurred surfaces · luminous borders · modern SaaS
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg:          #0f0820;
+  --bg-2:        #130b28;
+  --glass:       rgba(255,255,255,0.06);
+  --glass-hover: rgba(255,255,255,0.10);
+  --ink:         #f0ecff;
+  --ink-muted:   #a89fc0;
+  --ink-faint:   #5a5270;
+  --accent:      #a78bfa;
+  --accent-2:    #7c3aed;
+  --accent-glow: rgba(167,139,250,0.25);
+  --pink:        #f472b6;
+  --teal:        #2dd4bf;
+  --bord:        1px solid rgba(255,255,255,0.1);
+  --bord-accent: 1px solid rgba(167,139,250,0.4);
+  --blur:        blur(16px);
+  --font-head:   'Syne', system-ui, sans-serif;
+  --font-body:   'DM Sans', system-ui, sans-serif;
+  --radius:      12px;
+  --radius-sm:   8px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* Mesh gradient background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(124,58,237,0.35)  0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%,  rgba(244,114,182,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 60% 40%,  rgba(45,212,191,0.12)  0%, transparent 60%),
+    radial-gradient(ellipse 100% 80% at 50% 100%,rgba(15, 8, 32, 1) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+h1 { font-size: clamp(2rem, 5vw, 4rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); }
+h3 { font-size: 1.2rem; font-weight: 700; }
+p  { margin-bottom: 1rem; color: var(--ink-muted); }
+a  { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--ink); }
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 60%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Header */
+header {
+  padding: 2rem 5%;
+  position: relative;
+  z-index: 1;
+  border-bottom: var(--bord);
+  backdrop-filter: var(--blur);
+  background: rgba(15,8,32,0.5);
+}
+
+/* Footer */
+footer {
+  border-top: var(--bord);
+  padding: 1.5rem 5%;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: var(--blur);
+}
+
+/* Glass cards */
+.card {
+  background: var(--glass);
+  border: var(--bord);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  backdrop-filter: var(--blur);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.card:hover {
+  background: var(--glass-hover);
+  border-color: rgba(167,139,250,0.3);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.25), 0 0 0 1px rgba(167,139,250,0.2);
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  background: var(--glass);
+  color: var(--ink);
+  border: var(--bord);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.4rem;
+  cursor: pointer;
+  backdrop-filter: var(--blur);
+  transition: all 0.2s;
+}
+button:hover, .btn:hover {
+  background: var(--glass-hover);
+  border-color: rgba(167,139,250,0.5);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+button:active, .btn:active {
+  transform: scale(0.98);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border-color: transparent;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 28px var(--accent-glow);
+  filter: brightness(1.1);
+}
+.btn-danger {
+  background: linear-gradient(135deg, #be185d, var(--pink));
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(244,114,182,0.3);
+}
+
+/* Inputs */
+input, textarea, select {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.05);
+  color: var(--ink);
+  border: var(--bord);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  width: 100%;
+  outline: none;
+  backdrop-filter: var(--blur);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+::placeholder { color: var(--ink-faint); }
+
+/* Tags / Badges */
+.tag {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: var(--bord-accent);
+  border-radius: 100px;
+  padding: 3px 12px;
+  background: var(--accent-glow);
+  backdrop-filter: var(--blur);
+}
+.tag-pink { color: var(--pink); border-color: rgba(244,114,182,0.4); background: rgba(244,114,182,0.12); }
+.tag-teal { color: var(--teal); border-color: rgba(45,212,191,0.4);  background: rgba(45,212,191,0.12);  }
+
+/* Dividers */
+.rule {
+  border: none;
+  border-top: var(--bord);
+  margin: 1.5rem 0;
+}
+
+/* Utility */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 5%; position: relative; z-index: 1; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+.muted { color: var(--ink-muted); }
+.surface {
+  background: var(--glass);
+  border: var(--bord);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  backdrop-filter: var(--blur);
+}
