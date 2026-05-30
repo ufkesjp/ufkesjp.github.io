@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clean Terminal — Theme Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;border-radius:0!important;}
+:root{--bg:#0d0d0d;--surface:#111;--surface-2:#1a1a1a;--ink:#e8e8e8;--ink-muted:#888;--ink-faint:#444;--accent:#00ff88;--accent-dim:rgba(0,255,136,0.12);--warn:#ff4444;--bord:1px solid #2a2a2a;--bord-accent:1px solid #00ff88;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+html,body{min-height:100vh;background:var(--bg);font-family:'IBM Plex Sans',sans-serif;font-weight:300;color:var(--ink);}
+body::before{content:"";position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:0;}
+.top-bar{position:relative;z-index:10;background:var(--surface);border-bottom:var(--bord-accent);padding:12px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.back-link{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);text-decoration:none;letter-spacing:0.04em;}
+.back-link::before{content:"> ";}
+.back-link:hover{text-decoration:underline;}
+.dl-btn{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;background:var(--accent);color:var(--bg);border:none;padding:7px 16px;cursor:pointer;text-decoration:none;display:inline-block;transition:background 0.1s;}
+.dl-btn::before{content:"> ";}
+.dl-btn:hover{background:#00cc66;}
+main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:36px 5% 60px;}
+header{background:var(--surface);border:var(--bord);border-left:3px solid var(--accent);padding:20px 24px;margin-bottom:28px;}
+header h1{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:clamp(1.5rem,3.5vw,2.5rem);letter-spacing:-0.02em;margin-bottom:6px;}
+header h1::before{content:"$ ";color:var(--accent);font-size:0.7em;}
+.cursor::after{content:"█";color:var(--accent);animation:blink 1s step-end infinite;margin-left:2px;}
+header p{color:var(--ink-muted);font-size:13px;}
+header p::before{content:"// ";color:var(--ink-faint);}
+.section{margin-bottom:28px;}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);margin-bottom:10px;}
+.section-label::before{content:"// ";}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;}
+.card{background:var(--surface);border:var(--bord);border-left:3px solid var(--accent);padding:16px;position:relative;transition:background 0.15s;}
+.card:hover{background:var(--surface-2);}
+.card::after{content:"//";position:absolute;top:10px;right:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);}
+.card h3{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:6px;}
+.card h3::before{content:"$ ";}
+.card p{font-size:12px;color:var(--ink-muted);margin:0;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.btn{font-family:'IBM Plex Mono',monospace;font-size:11px;background:transparent;color:var(--accent);border:var(--bord-accent);padding:8px 16px;cursor:pointer;transition:background 0.1s,color 0.1s;}
+.btn::before{content:"> ";}
+.btn:hover{background:var(--accent);color:var(--bg);}
+.btn.primary{background:var(--accent);color:var(--bg);}
+.btn.primary:hover{background:#00cc66;}
+.btn.danger{border-color:var(--warn);color:var(--warn);}
+.btn.danger:hover{background:var(--warn);color:var(--bg);}
+input[type=text]{width:100%;max-width:380px;padding:9px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--bg);border:var(--bord);color:var(--ink);outline:none;display:block;margin-bottom:8px;caret-color:var(--accent);}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+input::placeholder{color:var(--ink-faint);font-style:italic;}
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);border:1px solid var(--accent-dim);padding:2px 8px;background:var(--accent-dim);margin-right:6px;}
+.tag::before{content:"[";}
+.tag::after{content:"]";}
+.body-text{background:var(--surface);border:var(--bord);border-left:3px solid var(--accent);padding:20px 24px;font-size:14px;}
+.body-text h2{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:16px;color:var(--ink);margin-bottom:10px;}
+.body-text h2::before{content:"$ ";color:var(--accent);}
+.body-text p{color:var(--ink-muted);line-height:1.7;margin:0;}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a class="back-link" href="../">themes</a>
+  <a class="dl-btn" href="terminal.css" download>download.css</a>
+  <button id="copy-btn" class="dl-btn" onclick="copyCss()" >⧉ Copy CSS</button>
+</div>
+<main>
+  <header>
+    <h1 class="cursor">Clean Terminal</h1>
+    <p>Pure black · IBM Plex Mono · green cursor accents · scanline texture</p>
+  </header>
+
+  <div class="section">
+    <div class="section-label">cards</div>
+    <div class="grid">
+      <div class="card"><h3>module_one</h3><p>Bordered with an accent left rule. Hover to shift the surface tone.</p></div>
+      <div class="card"><h3>module_two</h3><p>Comment marks echo in the corner. Every element has a quiet purpose.</p></div>
+      <div class="card"><h3>module_three</h3><p>Scanlines texture the background. Monospace everywhere. Pure signal.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">buttons</div>
+    <div class="btn-row">
+      <button class="btn">default</button>
+      <button class="btn primary">execute</button>
+      <button class="btn danger">destroy</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">input</div>
+    <input type="text" placeholder="enter command..." />
+  </div>
+
+  <div class="section">
+    <div class="section-label">tags</div>
+    <span class="tag">status</span>
+    <span class="tag">v3.0</span>
+    <span class="tag">active</span>
+  </div>
+
+  <div class="section">
+    <div class="section-label">typography</div>
+    <div class="body-text">
+      <h2>body_copy_example</h2>
+      <p>IBM Plex Sans carries body text with technical authority. IBM Plex Mono owns headings, labels, and interactive elements. Nothing is decorative — every typographic choice earns its place by functioning precisely.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+async function copyCss() {
+  try {
+    const resp = await fetch("terminal.css");
+    const text = await resp.text();
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#2d7a3d';
+    btn.style.color = '#fff';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  } catch(e) {
+    alert('Copy failed — try the download button instead.');
+  }
+}
+</script>
+
+</body>
+</html>
