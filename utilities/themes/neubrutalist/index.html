@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neu-brutalist — Theme Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
+:root {
+  --bg:#f4ede0;--ink:#0a0a0a;--paper:#ffffff;--accent:#ffd60a;--danger:#ff3b30;
+  --bord:3px solid #0a0a0a;--shadow:6px 6px 0 #0a0a0a;--shadow-sm:4px 4px 0 #0a0a0a;
+}
+html,body{min-height:100vh;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--ink);}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(10,10,10,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,10,10,0.06) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
+.top-bar{position:relative;z-index:10;background:var(--paper);border-bottom:var(--bord);box-shadow:0 6px 0 #0a0a0a;padding:14px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.back-link{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:2px solid var(--ink);padding:5px 12px;box-shadow:2px 2px 0 var(--ink);transition:transform 0.08s,box-shadow 0.08s;}
+.back-link:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}
+.dl-btn{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;background:var(--accent);color:var(--ink);border:var(--bord);padding:8px 18px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.08s,box-shadow 0.08s;text-decoration:none;display:inline-block;}
+.dl-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 5% 60px;}
+header{background:var(--paper);border:var(--bord);box-shadow:var(--shadow);padding:24px;margin-bottom:28px;}
+header h1{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-0.02em;margin-bottom:6px;}
+header p{opacity:0.6;font-size:0.95rem;}
+.section{margin-bottom:28px;}
+.section-label{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.45;margin-bottom:12px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;}
+.card{background:var(--paper);border:var(--bord);box-shadow:var(--shadow);padding:18px;transition:transform 0.08s,box-shadow 0.08s;}
+.card:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--ink);}
+.card h3{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;}
+.card p{font-size:13px;opacity:0.6;margin:0;}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.btn{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;background:var(--paper);color:var(--ink);border:var(--bord);padding:10px 18px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.08s,box-shadow 0.08s;}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+.btn.primary{background:var(--accent);}
+.btn.danger{background:var(--danger);color:#fff;}
+input[type=text]{width:100%;max-width:360px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;background:var(--paper);border:var(--bord);color:var(--ink);outline:none;display:block;margin-bottom:10px;}
+input:focus{outline:2px solid var(--ink);outline-offset:2px;}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 10px;border:2px solid var(--ink);margin-right:6px;}
+.tag.accent{background:var(--accent);}
+.body-text{background:var(--paper);border:var(--bord);box-shadow:var(--shadow-sm);padding:20px;font-size:15px;line-height:1.7;}
+.body-text h2{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:18px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a class="back-link" href="./index.html">← Themes</a>
+  <a class="dl-btn" href="neubrutalist.css" download>↓ Download CSS</a>
+  <button id="copy-btn" class="dl-btn" onclick="copyCss()" style="cursor:pointer;border:none;">⧉ Copy CSS</button>
+</div>
+<main>
+  <header>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <span class="tag accent">Theme 01</span>
+      <span class="tag">Neu-brutalist</span>
+    </div>
+    <h1>Neu-brutalist</h1>
+    <p>Thick ink borders · hard shadows · JetBrains Mono · cream background · yellow accent</p>
+  </header>
+
+  <div class="section">
+    <div class="section-label">Cards</div>
+    <div class="grid">
+      <div class="card"><h3>Card title</h3><p>A panel of content with a hard ink shadow and thick border. Hover to lift.</p></div>
+      <div class="card"><h3>Card title</h3><p>Every surface is white paper sitting on a cream grid background.</p></div>
+      <div class="card"><h3>Card title</h3><p>No rounded corners anywhere. Everything is square and intentional.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Buttons</div>
+    <div class="btn-row">
+      <button class="btn">Default</button>
+      <button class="btn primary">Primary</button>
+      <button class="btn danger">Danger</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Input</div>
+    <input type="text" placeholder="Type something here..." />
+  </div>
+
+  <div class="section">
+    <div class="section-label">Tags</div>
+    <span class="tag accent">Featured</span>
+    <span class="tag">Default</span>
+    <span class="tag">v1.0</span>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <div class="body-text">
+      <h2>Body copy example</h2>
+      <p>Space Grotesk carries the body text with clarity and warmth. JetBrains Mono handles all headings and labels. The combination reads as purposeful and systematic — built for clarity, not decoration.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+async function copyCss() {
+  try {
+    const resp = await fetch("neubrutalist.css");
+    const text = await resp.text();
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#2d7a3d';
+    btn.style.color = '#fff';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  } catch(e) {
+    alert('Copy failed — try the download button instead.');
+  }
+}
+</script>
+
+</body>
+</html>
