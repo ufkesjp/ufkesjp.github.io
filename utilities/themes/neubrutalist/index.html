@@ -45,7 +45,7 @@ input:focus{outline:2px solid var(--ink);outline-offset:2px;}
 </head>
 <body>
 <div class="top-bar">
-  <a class="back-link" href="./index.html">← Themes</a>
+  <a class="back-link" href="../">← Themes</a>
   <a class="dl-btn" href="neubrutalist.css" download>↓ Download CSS</a>
   <button id="copy-btn" class="dl-btn" onclick="copyCss()" >⧉ Copy CSS</button>
 </div>
@@ -98,12 +98,13 @@ input:focus{outline:2px solid var(--ink);outline-offset:2px;}
   </div>
 </main>
 
+
+
 <script>
 async function copyCss() {
   try {
-    const resp = await fetch("neubrutalist.css");
-    const text = await resp.text();
-    await navigator.clipboard.writeText(text);
+    const css = "/* ============================================================\n   NEU-BRUTALIST\n   Thick ink borders \u00b7 hard shadows \u00b7 JetBrains Mono\n   Cream background \u00b7 yellow accent \u00b7 dot-grid texture\n   ============================================================ */\n\n@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap');\n\n*, *::before, *::after {\n  box-sizing: border-box;\n  border-radius: 0 !important;\n}\n\n:root {\n  --bg:         #f4ede0;\n  --ink:        #0a0a0a;\n  --paper:      #ffffff;\n  --accent:     #ffd60a;\n  --accent-alt: #ff3b30;\n  --muted:      rgba(10,10,10,0.5);\n  --bord:       3px solid #0a0a0a;\n  --shadow:     6px 6px 0 #0a0a0a;\n  --shadow-sm:  4px 4px 0 #0a0a0a;\n  --shadow-xs:  3px 3px 0 #0a0a0a;\n  --font-head:  'JetBrains Mono', monospace;\n  --font-body:  'Space Grotesk', system-ui, sans-serif;\n  --radius:     0px;\n}\n\nhtml, body {\n  background: var(--bg);\n  color: var(--ink);\n  font-family: var(--font-body);\n  font-size: 16px;\n  line-height: 1.6;\n  min-height: 100vh;\n}\n\nbody::before {\n  content: \"\";\n  position: fixed;\n  inset: 0;\n  background-image:\n    linear-gradient(rgba(10,10,10,0.06) 1px, transparent 1px),\n    linear-gradient(90deg, rgba(10,10,10,0.06) 1px, transparent 1px);\n  background-size: 32px 32px;\n  pointer-events: none;\n  z-index: 0;\n}\n\n/* Typography */\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-head);\n  font-weight: 800;\n  letter-spacing: -0.02em;\n  line-height: 1.1;\n}\nh1 { font-size: clamp(2rem, 5vw, 3.5rem); }\nh2 { font-size: clamp(1.4rem, 3vw, 2rem); }\nh3 { font-size: 1.25rem; }\np  { margin-bottom: 1rem; }\na  { color: var(--ink); text-decoration: underline; }\na:hover { background: var(--accent); }\n\n/* Header */\nheader {\n  background: var(--paper);\n  border-bottom: var(--bord);\n  box-shadow: 0 6px 0 #0a0a0a;\n  padding: 1.5rem 5%;\n  position: relative;\n  z-index: 1;\n}\n\n/* Footer */\nfooter {\n  background: var(--paper);\n  border-top: var(--bord);\n  padding: 1.5rem 5%;\n  font-family: var(--font-head);\n  font-size: 0.75rem;\n  font-weight: 700;\n  letter-spacing: 0.08em;\n  text-transform: uppercase;\n  text-align: center;\n}\n\n/* Cards */\n.card {\n  background: var(--paper);\n  border: var(--bord);\n  box-shadow: var(--shadow);\n  padding: 1.25rem;\n  position: relative;\n  z-index: 1;\n}\n.card:hover {\n  transform: translate(-3px, -3px);\n  box-shadow: 9px 9px 0 var(--ink);\n}\n\n/* Buttons */\nbutton, .btn {\n  font-family: var(--font-head);\n  font-weight: 800;\n  font-size: 0.8rem;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  background: var(--paper);\n  color: var(--ink);\n  border: var(--bord);\n  box-shadow: var(--shadow-sm);\n  padding: 0.75rem 1.25rem;\n  cursor: pointer;\n  transition: transform 0.08s, box-shadow 0.08s;\n}\nbutton:hover, .btn:hover {\n  transform: translate(-2px, -2px);\n  box-shadow: 6px 6px 0 var(--ink);\n}\nbutton:active, .btn:active {\n  transform: translate(2px, 2px);\n  box-shadow: 1px 1px 0 var(--ink);\n}\n.btn-primary { background: var(--accent); }\n.btn-danger  { background: var(--accent-alt); color: #fff; }\n\n/* Inputs */\ninput, textarea, select {\n  font-family: var(--font-head);\n  font-weight: 700;\n  font-size: 0.9rem;\n  background: var(--paper);\n  color: var(--ink);\n  border: var(--bord);\n  padding: 0.75rem;\n  width: 100%;\n  outline: none;\n  -webkit-appearance: none;\n  appearance: none;\n}\ninput:focus, textarea:focus, select:focus {\n  outline: 2px solid var(--ink);\n  outline-offset: 2px;\n}\n\n/* Tags / Badges */\n.tag {\n  display: inline-block;\n  font-family: var(--font-head);\n  font-weight: 700;\n  font-size: 0.7rem;\n  letter-spacing: 0.1em;\n  text-transform: uppercase;\n  padding: 3px 10px;\n  border: 2px solid var(--ink);\n}\n.tag-accent { background: var(--accent); }\n\n/* Utility */\n.container { max-width: 1100px; margin: 0 auto; padding: 0 5%; }\n.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }\n.muted { opacity: 0.55; }\n.mono { font-family: var(--font-head); }\n";
+    await navigator.clipboard.writeText(css);
     const btn = document.getElementById('copy-btn');
     const orig = btn.textContent;
     btn.textContent = '✓ Copied!';
@@ -119,6 +120,5 @@ async function copyCss() {
   }
 }
 </script>
-
 </body>
 </html>
