@@ -11,46 +11,49 @@
         <h1>Jacob Ufkes' Portfolio</h1>
         <p>Problems have patterns. This site is a collection of solutions to patterns of problems I've come across in my career or in my free time.</p>
     </header>
-
     <main class="project-grid">
         <div class="project-card" data-project-url="blog/">
             <div class="card-image-container">
-                <img src="images/blog_thumbnail.jpg" alt="Thumbnail for Blog", title="Original Photo by Xence Diocena from Unsplash">
+                <img src="images/blog_thumbnail.jpg" alt="Thumbnail for Blog" title="Original Photo by Xence Diocena from Unsplash">
             </div>
             <div class="card-title-banner">
                 <h3>Blog</h3>
             </div>
         </div>
-        
+
         <div class="project-card" data-project-url="projects/">
             <div class="card-image-container">
-                <img src="images/projects_thumbnail.jpg" alt="Thumbnail for Projects", title="Original Photo by Mohammad Rahmani from Unsplash">
+                <img src="images/projects_thumbnail.jpg" alt="Thumbnail for Projects" title="Original Photo by Mohammad Rahmani from Unsplash">
             </div>
             <div class="card-title-banner">
                 <h3>Projects</h3>
             </div>
         </div>
-        
-              <div class="project-card" data-project-url="games/">
+
+        <div class="project-card" data-project-url="games/">
             <div class="card-image-container">
-                <img src="images/games_thumbnail.jpg" alt="Thumbnail for Games", title="Original Photo by">
+                <img src="images/games_thumbnail.jpg" alt="Thumbnail for Games" title="Original Photo by">
             </div>
             <div class="card-title-banner">
                 <h3>Games Built With AI</h3>
             </div>
         </div>
 
-        </main>
-
+        <div class="project-card" data-project-url="utilities/">
+            <div class="card-image-container">
+                <img src="images/utilities_thumbnail.jpg" alt="Thumbnail for Utilities" title="">
+            </div>
+            <div class="card-title-banner">
+                <h3>Utilities</h3>
+            </div>
+        </div>
+    </main>
     <footer>
         <p>&copy; 2025 Jacob Ufkes - Built with AI assistance</p>
-<!--         <p>Connect with me on <a href="YOUR_LINKEDIN_PROFILE_URL" target="_blank">LinkedIn</a> | <a href="YOUR_GITHUB_PROFILE_URL" target="_blank">GitHub</a></p> -->
     </footer>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const projectCards = document.querySelectorAll('.project-card');
-
             projectCards.forEach(card => {
                 card.addEventListener('click', () => {
                     const projectUrl = card.dataset.projectUrl;
