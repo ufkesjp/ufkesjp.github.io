@@ -47,7 +47,7 @@ input::placeholder{color:var(--ink-faint);font-style:italic;}
 </head>
 <body>
 <div class="top-bar">
-  <a class="back-link" href="./index.html">← Themes</a>
+  <a class="back-link" href="../">← Themes</a>
   <a class="dl-btn" href="darkbotanical.css" download>↓ Download CSS</a>
   <button id="copy-btn" class="dl-btn" onclick="copyCss()" >⧉ Copy CSS</button>
 </div>
@@ -96,12 +96,13 @@ input::placeholder{color:var(--ink-faint);font-style:italic;}
   </div>
 </main>
 
+
+
 <script>
 async function copyCss() {
   try {
-    const resp = await fetch("darkbotanical.css");
-    const text = await resp.text();
-    await navigator.clipboard.writeText(text);
+    const css = "/* ============================================================\n   DARK BOTANICAL\n   Deep navy-black \u00b7 Cormorant Garamond serif \u00b7 teal accents\n   Glowing gradients \u00b7 whisper-light borders \u00b7 poetic spacing\n   ============================================================ */\n\n@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');\n\n*, *::before, *::after {\n  box-sizing: border-box;\n}\n\n:root {\n  --bg:         #060c14;\n  --surface:    #0d1e2e;\n  --surface-2:  rgba(255,255,255,0.04);\n  --ink:        #cfe7d8;\n  --ink-muted:  #8fb0a4;\n  --ink-faint:  #4a6b62;\n  --accent:     #5ec9b0;\n  --accent-glow:rgba(94,201,176,0.18);\n  --accent-2:   #3a8a78;\n  --bord:       1px solid rgba(143,176,164,0.18);\n  --bord-accent:1px solid rgba(94,201,176,0.4);\n  --shadow:     0 8px 40px rgba(0,0,0,0.5);\n  --font-head:  'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;\n  --font-body:  'Jost', system-ui, sans-serif;\n  --radius:     2px;\n}\n\nhtml, body {\n  background: var(--bg);\n  color: var(--ink);\n  font-family: var(--font-body);\n  font-size: 16px;\n  font-weight: 300;\n  line-height: 1.7;\n  min-height: 100vh;\n}\n\nbody::before {\n  content: \"\";\n  position: fixed;\n  inset: 0;\n  background-image:\n    radial-gradient(ellipse at 20% 30%, rgba(40,180,150,0.07) 0%, transparent 50%),\n    radial-gradient(ellipse at 80% 70%, rgba(80,200,255,0.05) 0%, transparent 50%);\n  pointer-events: none;\n  z-index: 0;\n}\n\n/* Typography */\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-head);\n  font-weight: 300;\n  font-style: italic;\n  letter-spacing: 0.01em;\n  line-height: 1.1;\n  color: var(--ink);\n}\nh1 { font-size: clamp(2.5rem, 6vw, 5rem); }\nh2 { font-size: clamp(1.8rem, 3.5vw, 3rem); }\nh3 { font-size: 1.5rem; }\np  { margin-bottom: 1.2rem; color: var(--ink-muted); }\na  { color: var(--accent); text-decoration: none; }\na:hover { color: var(--ink); }\n\n/* Overline / eyebrow label */\n.overline {\n  font-family: var(--font-body);\n  font-size: 0.7rem;\n  letter-spacing: 0.5em;\n  text-transform: uppercase;\n  color: var(--accent);\n}\n\n/* Header */\nheader {\n  padding: 2.5rem 6%;\n  position: relative;\n  z-index: 1;\n  border-bottom: var(--bord);\n}\n\n/* Footer */\nfooter {\n  border-top: var(--bord);\n  padding: 2rem 6%;\n  font-size: 0.75rem;\n  letter-spacing: 0.25em;\n  text-transform: uppercase;\n  color: var(--ink-faint);\n  text-align: center;\n}\n\n/* Cards */\n.card {\n  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));\n  border: var(--bord);\n  border-radius: var(--radius);\n  padding: 2rem 1.75rem;\n  backdrop-filter: blur(8px);\n  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);\n  position: relative;\n  overflow: hidden;\n}\n.card::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  background: radial-gradient(ellipse at top left, var(--accent-glow), transparent 65%);\n  opacity: 0;\n  transition: opacity 0.6s;\n}\n.card:hover {\n  border: var(--bord-accent);\n  box-shadow: 0 0 40px rgba(94,201,176,0.12);\n}\n.card:hover::before { opacity: 1; }\n\n/* Buttons */\nbutton, .btn {\n  font-family: var(--font-body);\n  font-weight: 400;\n  font-size: 0.8rem;\n  letter-spacing: 0.35em;\n  text-transform: uppercase;\n  background: transparent;\n  color: var(--accent);\n  border: var(--bord-accent);\n  border-radius: var(--radius);\n  padding: 0.8rem 1.75rem;\n  cursor: pointer;\n  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);\n}\nbutton:hover, .btn:hover {\n  background: var(--accent-glow);\n  box-shadow: 0 0 20px rgba(94,201,176,0.2);\n}\n.btn-primary {\n  background: var(--accent);\n  color: var(--bg);\n  border-color: var(--accent);\n}\n.btn-primary:hover {\n  background: #7ad9c4;\n  box-shadow: 0 0 30px rgba(94,201,176,0.35);\n}\n\n/* Inputs */\ninput, textarea, select {\n  font-family: var(--font-body);\n  font-weight: 300;\n  font-size: 0.95rem;\n  background: var(--surface-2);\n  color: var(--ink);\n  border: var(--bord);\n  border-radius: var(--radius);\n  padding: 0.85rem 1rem;\n  width: 100%;\n  outline: none;\n  transition: border-color 0.3s;\n  -webkit-appearance: none;\n  appearance: none;\n}\ninput:focus, textarea:focus, select:focus {\n  border-color: var(--accent);\n  box-shadow: 0 0 0 2px var(--accent-glow);\n}\n::placeholder { color: var(--ink-faint); }\n\n/* Tags / Badges */\n.tag {\n  display: inline-block;\n  font-size: 0.65rem;\n  letter-spacing: 0.3em;\n  text-transform: uppercase;\n  color: var(--accent);\n  padding: 4px 12px;\n  border: var(--bord-accent);\n  border-radius: var(--radius);\n}\n\n/* Utility */\n.container { max-width: 1100px; margin: 0 auto; padding: 0 6%; }\n.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }\n.muted { color: var(--ink-muted); }\n.surface { background: var(--surface); border: var(--bord); border-radius: var(--radius); padding: 1.5rem; }\n";
+    await navigator.clipboard.writeText(css);
     const btn = document.getElementById('copy-btn');
     const orig = btn.textContent;
     btn.textContent = '✓ Copied!';
@@ -117,6 +118,5 @@ async function copyCss() {
   }
 }
 </script>
-
 </body>
 </html>
