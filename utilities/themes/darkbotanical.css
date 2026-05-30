@@ -1,0 +1,188 @@
+/* ============================================================
+   DARK BOTANICAL
+   Deep navy-black · Cormorant Garamond serif · teal accents
+   Glowing gradients · whisper-light borders · poetic spacing
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg:         #060c14;
+  --surface:    #0d1e2e;
+  --surface-2:  rgba(255,255,255,0.04);
+  --ink:        #cfe7d8;
+  --ink-muted:  #8fb0a4;
+  --ink-faint:  #4a6b62;
+  --accent:     #5ec9b0;
+  --accent-glow:rgba(94,201,176,0.18);
+  --accent-2:   #3a8a78;
+  --bord:       1px solid rgba(143,176,164,0.18);
+  --bord-accent:1px solid rgba(94,201,176,0.4);
+  --shadow:     0 8px 40px rgba(0,0,0,0.5);
+  --font-head:  'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-body:  'Jost', system-ui, sans-serif;
+  --radius:     2px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(40,180,150,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(80,200,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
+h2 { font-size: clamp(1.8rem, 3.5vw, 3rem); }
+h3 { font-size: 1.5rem; }
+p  { margin-bottom: 1.2rem; color: var(--ink-muted); }
+a  { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--ink); }
+
+/* Overline / eyebrow label */
+.overline {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Header */
+header {
+  padding: 2.5rem 6%;
+  position: relative;
+  z-index: 1;
+  border-bottom: var(--bord);
+}
+
+/* Footer */
+footer {
+  border-top: var(--bord);
+  padding: 2rem 6%;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* Cards */
+.card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border: var(--bord);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  backdrop-filter: blur(8px);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, var(--accent-glow), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+.card:hover {
+  border: var(--bord-accent);
+  box-shadow: 0 0 40px rgba(94,201,176,0.12);
+}
+.card:hover::before { opacity: 1; }
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--accent);
+  border: var(--bord-accent);
+  border-radius: var(--radius);
+  padding: 0.8rem 1.75rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+button:hover, .btn:hover {
+  background: var(--accent-glow);
+  box-shadow: 0 0 20px rgba(94,201,176,0.2);
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background: #7ad9c4;
+  box-shadow: 0 0 30px rgba(94,201,176,0.35);
+}
+
+/* Inputs */
+input, textarea, select {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.95rem;
+  background: var(--surface-2);
+  color: var(--ink);
+  border: var(--bord);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.3s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+::placeholder { color: var(--ink-faint); }
+
+/* Tags / Badges */
+.tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 4px 12px;
+  border: var(--bord-accent);
+  border-radius: var(--radius);
+}
+
+/* Utility */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 6%; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.muted { color: var(--ink-muted); }
+.surface { background: var(--surface); border: var(--bord); border-radius: var(--radius); padding: 1.5rem; }
