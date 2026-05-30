@@ -4,13 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#f4ede0" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Countdown" />
-<title>Countdown</title>
+<title>Utilities</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after {
     box-sizing: border-box;
@@ -25,8 +22,6 @@
     --ink: #0a0a0a;
     --paper: #ffffff;
     --accent: #ffd60a;
-    --danger: #ff3b30;
-    --safe: #2d7a3d;
     --bord: 3px solid #0a0a0a;
     --shadow: 6px 6px 0 #0a0a0a;
     --shadow-sm: 4px 4px 0 #0a0a0a;
@@ -51,415 +46,245 @@
     z-index: 0;
   }
 
-  #app {
+  header {
     position: relative;
     z-index: 1;
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
+    background: var(--paper);
+    border-bottom: var(--bord);
+    box-shadow: 0 6px 0 #0a0a0a;
+    padding: 24px 5%;
+    margin-bottom: 40px;
   }
 
-  .wordmark {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: -0.02em;
-    margin-bottom: 24px;
+  .header-top {
     display: flex;
     align-items: center;
     gap: 12px;
-  }
-
-  .tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 11px;
-    padding: 4px 10px;
-    border: 2px solid var(--ink);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .tag.accent { background: var(--accent); }
-
-  .panel {
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-
-  .panel-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: var(--bord);
-  }
-
-  input[type="text"],
-  input[type="datetime-local"] {
-    width: 100%;
-    padding: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 14px;
-    background: var(--paper);
-    border: var(--bord);
-    color: var(--ink);
-    outline: none;
-    margin-bottom: 12px;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  input:focus {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: var(--paper);
-    border: var(--bord);
-    color: var(--ink);
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.08s, box-shadow 0.08s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--ink);
-  }
-
-  .btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--ink);
-  }
-
-  .btn.primary { background: var(--accent); }
-  .btn.warn { background: var(--danger); color: #fff; }
-
-  .btn-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .err {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--danger);
-    margin-top: 10px;
-    display: none;
-  }
-
-  .timer-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .timer-header-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.5;
-    margin-bottom: 4px;
-  }
-
-  .timer-header-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 20px;
-    word-break: break-word;
-  }
-
-  .big-time {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: clamp(28px, 8vw, 44px);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    padding: 20px;
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow);
-    text-align: center;
-    margin-bottom: 16px;
-    word-break: break-all;
-  }
-
-  .big-time.done { color: var(--safe); }
-
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .stat-box {
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow-sm);
-    padding: 12px 14px;
-  }
-
-  .stat-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    margin-bottom: 4px;
-  }
-
-  .stat-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 16px;
-    line-height: 1.3;
-    word-break: break-word;
-  }
-
-  .progress-bar-wrap {
-    background: var(--paper);
-    border: var(--bord);
-    padding: 3px;
-    box-shadow: var(--shadow-sm);
     margin-bottom: 6px;
   }
 
-  .progress-bar-inner {
-    height: 24px;
-    background: var(--ink);
-    width: 0%;
-    transition: width 0.9s linear;
-  }
-
-  .progress-bar-inner.done { background: var(--safe); }
-
-  .progress-label {
+  .back-link {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-weight: 700;
+    font-size: 11px;
     letter-spacing: 0.08em;
-    opacity: 0.5;
-    text-align: right;
-    margin-bottom: 16px;
     text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: transform 0.08s, box-shadow 0.08s;
   }
 
-  #setup-view { display: block; }
-  #timer-view { display: none; }
+  .back-link:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .back-link:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 2em;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  header p {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1em;
+    opacity: 0.6;
+    margin: 0;
+    max-width: 520px;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 5% 60px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    margin-bottom: 16px;
+  }
+
+  .util-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .util-card {
+    background: var(--paper);
+    border: var(--bord);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+
+  .util-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--ink);
+  }
+
+  .util-card:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .card-icon {
+    padding: 28px 24px 20px;
+    font-size: 36px;
+    border-bottom: var(--bord);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+  }
+
+  .card-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .card-body {
+    padding: 18px 20px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .card-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .card-desc {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    opacity: 0.6;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card-banner {
+    background: var(--accent);
+    border-top: var(--bord);
+    padding: 10px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1.5em 5%;
+    background: var(--paper);
+    border-top: var(--bord);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.5em; }
+    .util-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <div class="wordmark">
-    COUNTDOWN
-    <span class="tag accent">v1.0</span>
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../">← Home</a>
   </div>
+  <h1>Utilities</h1>
+  <p>Small tools for everyday use.</p>
+</header>
 
-  <!-- Setup -->
-  <div id="setup-view">
-    <div class="panel">
-      <div class="panel-title">New countdown</div>
-      <input type="text" id="label-in" placeholder="Event name (e.g. SUMMER)" maxlength="32" />
-      <input type="datetime-local" id="target-in" />
-      <button class="btn primary" onclick="start()">Begin ›</button>
-      <div class="err" id="err-msg">Please choose a future date and time.</div>
-    </div>
+<main>
+  <div class="section-label">Available tools</div>
+  <div class="util-grid">
+
+    <a class="util-card" href="countdown/">
+      <div class="card-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="40" height="40" stroke="#0a0a0a" stroke-width="3" fill="none"/>
+          <line x1="24" y1="4" x2="24" y2="10" stroke="#0a0a0a" stroke-width="3"/>
+          <line x1="24" y1="38" x2="24" y2="44" stroke="#0a0a0a" stroke-width="3"/>
+          <line x1="4" y1="24" x2="10" y2="24" stroke="#0a0a0a" stroke-width="3"/>
+          <line x1="38" y1="24" x2="44" y2="24" stroke="#0a0a0a" stroke-width="3"/>
+          <line x1="24" y1="24" x2="24" y2="13" stroke="#0a0a0a" stroke-width="3" stroke-linecap="square"/>
+          <line x1="24" y1="24" x2="33" y2="24" stroke="#0a0a0a" stroke-width="3" stroke-linecap="square"/>
+          <rect x="21" y="21" width="6" height="6" fill="#0a0a0a"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Countdown</div>
+        <div class="card-desc">Set a target date and track how much time remains. Progress bar updates in real time.</div>
+      </div>
+      <div class="card-banner">
+        Open tool <span>›</span>
+      </div>
+    </a>
+
+    <a class="util-card" href="worklog/">
+      <div class="card-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="40" height="40" stroke="#0a0a0a" stroke-width="3" fill="none"/>
+          <line x1="12" y1="16" x2="36" y2="16" stroke="#0a0a0a" stroke-width="3" stroke-linecap="square"/>
+          <line x1="12" y1="24" x2="28" y2="24" stroke="#0a0a0a" stroke-width="3" stroke-linecap="square"/>
+          <line x1="12" y1="32" x2="22" y2="32" stroke="#0a0a0a" stroke-width="3" stroke-linecap="square"/>
+          <rect x="30" y="28" width="10" height="12" stroke="#0a0a0a" stroke-width="3" fill="#ffd60a"/>
+          <line x1="35" y1="24" x2="35" y2="28" stroke="#0a0a0a" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Work Log</div>
+        <div class="card-desc">Start a stopwatch for any task. Pause, resume, and build a session log of completed work.</div>
+      </div>
+      <div class="card-banner">
+        Open tool <span>›</span>
+      </div>
+    </a>
+
   </div>
+</main>
 
-  <!-- Timer -->
-  <div id="timer-view">
-    <div class="panel" style="margin-bottom:16px;">
-      <div class="timer-header">
-        <div>
-          <div class="timer-header-label">Counting down to</div>
-          <div class="timer-header-name" id="t-label">—</div>
-        </div>
-        <span class="tag" id="t-status">ACTIVE</span>
-      </div>
-    </div>
+<footer>
+  &copy; 2025 Jacob Ufkes &mdash; Built with AI assistance
+</footer>
 
-    <div class="big-time" id="t-countdown">—</div>
-
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-label">Target</div>
-        <div class="stat-val" id="t-target">—</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Elapsed</div>
-        <div class="stat-val" id="t-elapsed">—</div>
-      </div>
-    </div>
-
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-inner" id="prog-bar"></div>
-    </div>
-    <div class="progress-label" id="prog-label">0% complete</div>
-
-    <div class="btn-row">
-      <button class="btn" onclick="reset()">↺ Reset</button>
-      <button class="btn warn" onclick="clear_countdown()">✕ Clear</button>
-    </div>
-  </div>
-
-</div>
-<script>
-'use strict';
-
-const STORE_KEY = 'countdown-v1';
-let targetTime = null;
-let startTime = null;
-let ticker = null;
-let arrived = false;
-
-function save(label, target, start) {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ label, target: target.toISOString(), start: start.toISOString() }));
-  } catch(e) {}
-}
-
-function load() {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (!raw) return null;
-    const d = JSON.parse(raw);
-    return { label: d.label, target: new Date(d.target), start: new Date(d.start) };
-  } catch(e) { return null; }
-}
-
-function clear_store() {
-  try { localStorage.removeItem(STORE_KEY); } catch(e) {}
-}
-
-function pad(n) { return String(n).padStart(2, '0'); }
-
-function fmtRemaining(ms) {
-  if (ms <= 0) return 'ARRIVED';
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sc = s % 60;
-  if (d > 0) return d + 'd ' + pad(h) + 'h ' + pad(m) + 'm';
-  if (h > 0) return pad(h) + ':' + pad(m) + ':' + pad(sc);
-  return pad(m) + ':' + pad(sc);
-}
-
-function fmtElapsed(ms) {
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return d + 'd ' + pad(h) + 'h';
-  if (h > 0) return pad(h) + 'h ' + pad(m) + 'm';
-  return Math.floor(s / 60) + 'm ' + pad(s % 60) + 's';
-}
-
-function fmtDate(d) {
-  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
-function showTimer(label, target, start) {
-  targetTime = target;
-  startTime = start;
-  arrived = false;
-
-  document.getElementById('t-label').textContent = label.toUpperCase();
-  document.getElementById('t-target').textContent = fmtDate(target);
-  document.getElementById('t-status').textContent = 'ACTIVE';
-  document.getElementById('t-countdown').classList.remove('done');
-  document.getElementById('prog-bar').classList.remove('done');
-
-  document.getElementById('setup-view').style.display = 'none';
-  document.getElementById('timer-view').style.display = 'block';
-
-  tick();
-  if (ticker) clearInterval(ticker);
-  ticker = setInterval(tick, 1000);
-}
-
-function tick() {
-  const now = new Date();
-  const rem = targetTime - now;
-  const total = targetTime - startTime;
-  const elapsed = now - startTime;
-  const pct = Math.min(1, Math.max(0, elapsed / total));
-
-  document.getElementById('t-countdown').textContent = fmtRemaining(rem);
-  document.getElementById('t-elapsed').textContent = fmtElapsed(Math.max(0, elapsed));
-  document.getElementById('prog-bar').style.width = Math.round(pct * 100) + '%';
-  document.getElementById('prog-label').textContent = Math.round(pct * 100) + '% complete';
-
-  if (rem <= 0 && !arrived) {
-    arrived = true;
-    clearInterval(ticker);
-    document.getElementById('t-status').textContent = 'ARRIVED';
-    document.getElementById('t-countdown').classList.add('done');
-    document.getElementById('prog-bar').classList.add('done');
-  }
-}
-
-function start() {
-  const label = document.getElementById('label-in').value.trim() || 'COUNTDOWN';
-  const val = document.getElementById('target-in').value;
-  const err = document.getElementById('err-msg');
-  if (!val) { err.style.display = 'block'; return; }
-  const target = new Date(val);
-  if (target <= new Date()) { err.style.display = 'block'; return; }
-  err.style.display = 'none';
-  const start = new Date();
-  save(label, target, start);
-  showTimer(label, target, start);
-}
-
-function reset() {
-  if (ticker) clearInterval(ticker);
-  document.getElementById('timer-view').style.display = 'none';
-  document.getElementById('setup-view').style.display = 'block';
-}
-
-function clear_countdown() {
-  if (ticker) clearInterval(ticker);
-  clear_store();
-  document.getElementById('label-in').value = '';
-  document.getElementById('target-in').value = '';
-  document.getElementById('t-countdown').classList.remove('done');
-  document.getElementById('prog-bar').classList.remove('done');
-  document.getElementById('timer-view').style.display = 'none';
-  document.getElementById('setup-view').style.display = 'block';
-}
-
-(function restore() {
-  const d = load();
-  if (!d) return;
-  document.getElementById('label-in').value = d.label;
-  document.getElementById('target-in').value = d.target.toISOString().slice(0, 16);
-  showTimer(d.label, d.target, d.start);
-})();
-</script>
 </body>
 </html>
