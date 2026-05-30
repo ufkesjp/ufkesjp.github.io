@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSS Themes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
+  :root {
+    --bg: #f4ede0; --ink: #0a0a0a; --paper: #ffffff; --accent: #ffd60a;
+    --bord: 3px solid #0a0a0a; --shadow: 6px 6px 0 #0a0a0a; --shadow-sm: 4px 4px 0 #0a0a0a;
+  }
+  html, body { min-height: 100vh; background: var(--bg); font-family: 'Space Grotesk', sans-serif; color: var(--ink); }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(10,10,10,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(10,10,10,0.06) 1px, transparent 1px);
+    background-size: 32px 32px; pointer-events: none; z-index: 0;
+  }
+  header {
+    position: relative; z-index: 1; background: var(--paper); border-bottom: var(--bord);
+    box-shadow: 0 6px 0 #0a0a0a; padding: 24px 5%; margin-bottom: 40px;
+  }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .back-link {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); text-decoration: none;
+    border: 2px solid var(--ink); padding: 4px 10px; box-shadow: 2px 2px 0 var(--ink);
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .back-link:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink); }
+  header h1 { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -0.02em; }
+  header p { font-size: 1em; opacity: 0.6; margin-top: 4px; }
+  main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 5% 60px; }
+  .section-label { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.45; margin-bottom: 16px; }
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .theme-card {
+    background: var(--paper); border: var(--bord); box-shadow: var(--shadow);
+    text-decoration: none; color: var(--ink); display: flex; flex-direction: column;
+    transition: transform 0.08s, box-shadow 0.08s; cursor: pointer;
+  }
+  .theme-card:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 var(--ink); }
+  .theme-card:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+  .theme-preview {
+    height: 140px; border-bottom: var(--bord);
+    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px;
+    flex-wrap: wrap;
+  }
+  .preview-chip {
+    height: 28px; padding: 0 14px; display: flex; align-items: center;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .theme-body { padding: 16px 18px; flex: 1; }
+  .theme-name { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; margin-bottom: 5px; }
+  .theme-desc { font-size: 13px; opacity: 0.6; line-height: 1.5; }
+  .theme-banner {
+    background: var(--accent); border-top: var(--bord); padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  footer {
+    position: relative; z-index: 1; text-align: center; padding: 1.5em 5%;
+    background: var(--paper); border-top: var(--bord);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75em; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5;
+  }
+  @media (max-width: 480px) { .theme-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../">← Home</a>
+  </div>
+  <h1>CSS Themes</h1>
+  <p>Five production-ready stylesheet themes. Preview and download.</p>
+</header>
+
+<main>
+  <div class="section-label">Available themes</div>
+  <div class="theme-grid">
+
+    <a class="theme-card" href="neubrutalist/">
+      <div class="theme-preview" style="background:#f4ede0;">
+        <div class="preview-chip" style="background:#fff;border:3px solid #0a0a0a;box-shadow:4px 4px 0 #0a0a0a;font-family:'JetBrains Mono',monospace;color:#0a0a0a;">HEADING</div>
+        <div class="preview-chip" style="background:#ffd60a;border:3px solid #0a0a0a;box-shadow:4px 4px 0 #0a0a0a;font-family:'JetBrains Mono',monospace;color:#0a0a0a;">BUTTON</div>
+        <div class="preview-chip" style="background:#ff3b30;border:3px solid #0a0a0a;box-shadow:4px 4px 0 #0a0a0a;font-family:'JetBrains Mono',monospace;color:#fff;">DANGER</div>
+      </div>
+      <div class="theme-body">
+        <div class="theme-name">Neu-brutalist</div>
+        <div class="theme-desc">Thick ink borders, hard shadows, cream background, JetBrains Mono, yellow accent.</div>
+      </div>
+      <div class="theme-banner">Preview & download <span>›</span></div>
+    </a>
+
+    <a class="theme-card" href="darkbotanical/">
+      <div class="theme-preview" style="background:linear-gradient(135deg,#060c14,#0d2030);">
+        <div class="preview-chip" style="background:rgba(255,255,255,0.05);border:1px solid rgba(94,201,176,0.4);color:#e8fff5;font-family:Georgia,serif;font-style:italic;font-size:13px;">Heading</div>
+        <div class="preview-chip" style="background:#5ec9b0;border:1px solid #5ec9b0;color:#060c14;font-size:11px;letter-spacing:0.3em;">BUTTON</div>
+        <div class="preview-chip" style="border:1px solid rgba(94,201,176,0.4);color:#5ec9b0;font-size:10px;letter-spacing:0.3em;">tag</div>
+      </div>
+      <div class="theme-body">
+        <div class="theme-name">Dark Botanical</div>
+        <div class="theme-desc">Deep navy-black, Cormorant Garamond serif, teal accents, glowing gradients.</div>
+      </div>
+      <div class="theme-banner">Preview & download <span>›</span></div>
+    </a>
+
+    <a class="theme-card" href="terminal/">
+      <div class="theme-preview" style="background:#0d0d0d;">
+        <div class="preview-chip" style="background:#111;border-left:3px solid #00ff88;color:#e8e8e8;font-family:'Courier New',monospace;font-size:12px;">$ heading</div>
+        <div class="preview-chip" style="background:#00ff88;color:#0d0d0d;font-family:'Courier New',monospace;font-size:11px;">> run</div>
+        <div class="preview-chip" style="border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-family:'Courier New',monospace;font-size:10px;">[tag]</div>
+      </div>
+      <div class="theme-body">
+        <div class="theme-name">Clean Terminal</div>
+        <div class="theme-desc">Pure black, IBM Plex Mono, green cursor accents, scanline texture, utilitarian precision.</div>
+      </div>
+      <div class="theme-banner">Preview & download <span>›</span></div>
+    </a>
+
+    <a class="theme-card" href="editorial/">
+      <div class="theme-preview" style="background:#faf6ee;">
+        <div class="preview-chip" style="background:#fffdf8;border-top:3px solid #1a1208;color:#1a1208;font-family:Georgia,serif;font-style:italic;font-size:14px;font-weight:700;">Heading</div>
+        <div class="preview-chip" style="background:#9e3a2f;color:#fffdf8;font-family:Georgia,serif;font-style:italic;font-size:12px;">Read More</div>
+        <div class="preview-chip" style="border:1px solid #9e3a2f;color:#9e3a2f;font-family:Georgia,serif;font-size:11px;font-style:italic;">tag</div>
+      </div>
+      <div class="theme-body">
+        <div class="theme-name">Warm Editorial</div>
+        <div class="theme-desc">Newspaper-inspired, Playfair Display, ivory background, crimson accents, print typography.</div>
+      </div>
+      <div class="theme-banner">Preview & download <span>›</span></div>
+    </a>
+
+    <a class="theme-card" href="glassmorphism/">
+      <div class="theme-preview" style="background:linear-gradient(135deg,#0f0820,#1a0a3a);position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(124,58,237,0.4),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(244,114,182,0.3),transparent 60%);"></div>
+        <div class="preview-chip" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#f0ecff;font-size:12px;font-weight:700;backdrop-filter:blur(8px);position:relative;">Heading</div>
+        <div class="preview-chip" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;font-size:11px;font-weight:700;position:relative;">Button</div>
+        <div class="preview-chip" style="border:1px solid rgba(167,139,250,0.4);color:#a78bfa;background:rgba(167,139,250,0.12);font-size:10px;border-radius:100px!important;position:relative;">tag</div>
+      </div>
+      <div class="theme-body">
+        <div class="theme-name">Glassmorphism</div>
+        <div class="theme-desc">Frosted cards, violet mesh gradient, Syne + DM Sans, luminous borders, modern SaaS.</div>
+      </div>
+      <div class="theme-banner">Preview & download <span>›</span></div>
+    </a>
+
+  </div>
+</main>
+
+<footer>&copy; 2025 Jacob Ufkes &mdash; Built with AI assistance</footer>
+
+</body>
+</html>
