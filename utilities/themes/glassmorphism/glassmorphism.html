@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glassmorphism — Theme Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0f0820;--glass:rgba(255,255,255,0.06);--glass-hover:rgba(255,255,255,0.10);--ink:#f0ecff;--ink-muted:#a89fc0;--ink-faint:#5a5270;--accent:#a78bfa;--accent-2:#7c3aed;--accent-glow:rgba(167,139,250,0.25);--pink:#f472b6;--teal:#2dd4bf;--bord:1px solid rgba(255,255,255,0.1);--bord-accent:1px solid rgba(167,139,250,0.4);--blur:blur(16px);}
+html,body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif;font-weight:300;color:var(--ink);}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(124,58,237,0.35) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(244,114,182,0.25) 0%,transparent 55%),radial-gradient(ellipse 70% 60% at 60% 40%,rgba(45,212,191,0.12) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.top-bar{position:relative;z-index:10;padding:14px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:var(--bord);backdrop-filter:var(--blur);background:rgba(15,8,32,0.5);}
+.back-link{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);text-decoration:none;transition:color 0.2s;}
+.back-link:hover{color:var(--ink);}
+.dl-btn{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff;border:none;padding:8px 18px;cursor:pointer;text-decoration:none;display:inline-block;border-radius:8px;box-shadow:0 4px 20px var(--accent-glow);transition:filter 0.2s;}
+.dl-btn:hover{filter:brightness(1.15);}
+main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 5% 60px;}
+header{padding:32px 0;margin-bottom:36px;border-bottom:var(--bord);}
+.eyebrow{font-family:'Syne',sans-serif;font-size:0.7rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,4rem);letter-spacing:-0.02em;margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,var(--pink) 60%,var(--teal) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+header p{color:var(--ink-muted);font-size:1rem;}
+.section{margin-bottom:32px;}
+.section-label{font-family:'Syne',sans-serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:16px;}
+.card{background:var(--glass);border:var(--bord);border-radius:12px;padding:20px;backdrop-filter:var(--blur);position:relative;overflow:hidden;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);}
+.card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 50%);border-radius:inherit;pointer-events:none;}
+.card:hover{background:var(--glass-hover);border-color:rgba(167,139,250,0.3);box-shadow:0 8px 32px rgba(124,58,237,0.25);transform:translateY(-2px);}
+.card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px;}
+.card p{font-size:13px;color:var(--ink-muted);margin:0;}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.btn{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;background:var(--glass);color:var(--ink);border:var(--bord);border-radius:8px;padding:9px 18px;cursor:pointer;backdrop-filter:var(--blur);transition:all 0.2s;}
+.btn:hover{background:var(--glass-hover);border-color:rgba(167,139,250,0.5);box-shadow:0 4px 16px var(--accent-glow);}
+.btn.primary{background:linear-gradient(135deg,var(--accent-2),var(--accent));border-color:transparent;box-shadow:0 4px 20px var(--accent-glow);}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn.pink{background:linear-gradient(135deg,#be185d,var(--pink));border-color:transparent;box-shadow:0 4px 20px rgba(244,114,182,0.3);}
+input[type=text]{width:100%;max-width:400px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-weight:300;font-size:14px;background:rgba(255,255,255,0.05);border:var(--bord);border-radius:8px;color:var(--ink);outline:none;display:block;margin-bottom:8px;backdrop-filter:var(--blur);transition:border-color 0.2s,box-shadow 0.2s;}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+input::placeholder{color:var(--ink-faint);}
+.tag{display:inline-block;font-family:'Syne',sans-serif;font-weight:700;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);border:var(--bord-accent);border-radius:100px;padding:3px 12px;background:var(--accent-glow);backdrop-filter:var(--blur);margin-right:8px;}
+.tag.pink{color:var(--pink);border-color:rgba(244,114,182,0.4);background:rgba(244,114,182,0.12);}
+.tag.teal{color:var(--teal);border-color:rgba(45,212,191,0.4);background:rgba(45,212,191,0.12);}
+.body-text{background:var(--glass);border:var(--bord);border-radius:12px;padding:24px;backdrop-filter:var(--blur);}
+.body-text h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--ink);margin-bottom:10px;}
+.body-text p{font-size:14px;color:var(--ink-muted);line-height:1.7;margin:0;}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a class="back-link" href="../">← Themes</a>
+  <a class="dl-btn" href="glassmorphism.css" download>↓ Download CSS</a>
+  <button id="copy-btn" class="dl-btn" onclick="copyCss()" >⧉ Copy CSS</button>
+</div>
+<main>
+  <header>
+    <div class="eyebrow">Theme 05</div>
+    <h1>Glassmorphism</h1>
+    <p>Frosted cards · violet mesh · Syne + DM Sans · luminous borders · modern SaaS</p>
+  </header>
+
+  <div class="section">
+    <div class="section-label">Cards</div>
+    <div class="grid">
+      <div class="card"><h3>Frosted panel</h3><p>Backdrop blur with translucent surfaces. The mesh bleeds through beautifully.</p></div>
+      <div class="card"><h3>Luminous border</h3><p>Hover to lift. Violet glow intensifies at the edges. Subtle and dimensional.</p></div>
+      <div class="card"><h3>Glass layer</h3><p>Each card is a pane of glass sitting above the gradient mesh below it.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Buttons</div>
+    <div class="btn-row">
+      <button class="btn">Default</button>
+      <button class="btn primary">Primary</button>
+      <button class="btn pink">Accent</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Input</div>
+    <input type="text" placeholder="Search..." />
+  </div>
+
+  <div class="section">
+    <div class="section-label">Tags</div>
+    <span class="tag">purple</span>
+    <span class="tag pink">pink</span>
+    <span class="tag teal">teal</span>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <div class="body-text">
+      <h2>Body copy example</h2>
+      <p>DM Sans brings legibility and warmth to body text — optical-size aware, refined at every weight. Syne owns the headings with geometric confidence. Together they feel intentionally crafted for screen-first, interface-first contexts.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+async function copyCss() {
+  try {
+    const resp = await fetch("glassmorphism.css");
+    const text = await resp.text();
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#2d7a3d';
+    btn.style.color = '#fff';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  } catch(e) {
+    alert('Copy failed — try the download button instead.');
+  }
+}
+</script>
+
+</body>
+</html>
