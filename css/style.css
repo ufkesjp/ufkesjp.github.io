@@ -6,6 +6,7 @@
     margin: 0;
     padding: 0;
     border-radius: 0 !important;
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -13,7 +14,6 @@
     --ink: #0a0a0a;
     --paper: #ffffff;
     --accent: #ffd60a;
-    --accent-dark: #e0bb00;
     --bord: 3px solid #0a0a0a;
     --shadow: 6px 6px 0 #0a0a0a;
     --shadow-sm: 4px 4px 0 #0a0a0a;
@@ -26,6 +26,9 @@ body {
     background-color: var(--bg);
     color: var(--ink);
     position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 body::before {
@@ -47,27 +50,27 @@ header {
     border-bottom: var(--bord);
     box-shadow: 0 6px 0 #0a0a0a;
     color: var(--ink);
-    padding: 2em 5%;
+    padding: 24px 5%;
     text-align: left;
-    margin-bottom: 2.5em;
+    margin-bottom: 40px;
     position: relative;
     z-index: 1;
 }
 
 header h1 {
     font-weight: 800;
-    font-size: 2.5em;
-    letter-spacing: -0.03em;
+    font-size: 2em;
+    letter-spacing: -0.02em;
     line-height: 1;
-    margin-bottom: 0.4em;
+    margin-bottom: 0.3em;
 }
 
 header p {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1em;
     font-weight: 400;
-    opacity: 0.65;
-    max-width: 640px;
+    opacity: 0.6;
+    max-width: 520px;
     margin: 0;
 }
 
@@ -75,66 +78,30 @@ header p {
 footer {
     text-align: center;
     padding: 1.5em 5%;
-    margin-top: 4em;
+    margin-top: auto;
     background-color: var(--paper);
     border-top: var(--bord);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8em;
+    font-size: 0.75em;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    opacity: 0.5;
     position: relative;
     z-index: 1;
-}
-
-footer a {
-    color: var(--ink);
-    text-decoration: underline;
-}
-
-footer a:hover {
-    color: #555;
-}
-
-/* ── Home Button ── */
-.home-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--accent);
-    color: var(--ink);
-    text-decoration: none;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: var(--bord);
-    box-shadow: var(--shadow-xs);
-    transition: transform 0.08s, box-shadow 0.08s;
-}
-
-.home-button:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--shadow-sm);
-    background-color: var(--accent);
-}
-
-.home-button:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--ink);
 }
 
 /* ── Project Grid ── */
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 28px;
-    padding: 0 5%;
-    max-width: 1200px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    padding: 0 5% 60px;
+    max-width: 900px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
+    width: 100%;
 }
 
 /* ── Project Card ── */
@@ -146,7 +113,6 @@ footer a:hover {
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     transition: transform 0.08s, box-shadow 0.08s;
 }
 
@@ -163,12 +129,13 @@ footer a:hover {
 /* ── Card Image ── */
 .card-image-container {
     width: 100%;
-    height: 180px;
+    min-height: 110px;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     border-bottom: var(--bord);
+    background: var(--bg);
 }
 
 .card-image-container img {
@@ -182,9 +149,8 @@ footer a:hover {
 .card-title-banner {
     background-color: var(--accent);
     color: var(--ink);
-    padding: 14px 16px;
+    padding: 10px 20px;
     text-align: left;
-    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -194,8 +160,8 @@ footer a:hover {
 .card-title-banner h3 {
     font-family: 'JetBrains Mono', monospace;
     font-weight: 800;
-    font-size: 1em;
-    letter-spacing: 0.04em;
+    font-size: 11px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     margin: 0;
     line-height: 1.2;
@@ -205,31 +171,20 @@ footer a:hover {
     content: "›";
     font-family: 'JetBrains Mono', monospace;
     font-weight: 800;
-    font-size: 1.4em;
-    opacity: 0.5;
+    font-size: 1.2em;
     flex-shrink: 0;
     margin-left: 8px;
-}
-
-/* ── Body Paragraphs ── */
-p {
-    margin-bottom: 20px;
-    margin-left: 5%;
-    margin-right: 5%;
 }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
     .project-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        padding: 0 20px;
+        padding: 0 20px 40px;
         gap: 20px;
     }
-
     header {
         padding: 1.5em 20px;
     }
-
     header h1 {
         font-size: 1.8em;
     }
@@ -238,13 +193,11 @@ p {
 @media (max-width: 480px) {
     .project-grid {
         grid-template-columns: 1fr;
-        padding: 0 15px;
+        padding: 0 15px 40px;
     }
-
     header h1 {
         font-size: 1.5em;
     }
-
     header p {
         font-size: 0.95em;
     }
