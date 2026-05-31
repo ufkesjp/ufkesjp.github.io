@@ -165,7 +165,11 @@ footer {
     text-transform: uppercase;
     margin: 0;
     line-height: 1.2;
+    white-space: nowrap;      /* ← add this */
+    overflow: hidden;          /* ← add this */
+    text-overflow: ellipsis;   /* ← add this */
 }
+
 
 .card-title-banner::after {
     content: "›";
