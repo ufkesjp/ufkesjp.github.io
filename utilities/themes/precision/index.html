@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiss Precision — Theme Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;900&family=Courier+Prime:wght@400;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="swissprecision.css">
+<style>
+  /* ── Preview-page chrome (not part of the theme) ── */
+  .preview-topnav {
+    background: var(--sp-ink);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: var(--sp-f-mono);
+    font-size: 11px;
+    border-bottom: 2px solid var(--sp-amber);
+  }
+  .preview-topnav a {
+    color: var(--sp-ink-dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+  }
+  .preview-topnav a:hover { color: var(--sp-bg); }
+  .preview-topnav .sep { color: #3A3830; }
+
+  .preview-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sp-f-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border: 1px solid #3A3830;
+    color: var(--sp-ink-dim);
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .preview-action:hover { color: var(--sp-bg); border-color: #6A6660; }
+  .preview-action--copy { margin-left: auto; }
+  .preview-action--copy.copied { color: var(--sp-amber); border-color: var(--sp-amber); }
+
+  /* ── Hero header ── */
+  .preview-hero {
+    background: var(--sp-ink);
+    color: var(--sp-bg);
+    padding: 48px 40px 40px;
+    border-bottom: 3px solid var(--sp-amber);
+  }
+  .preview-hero__eyebrow {
+    font-family: var(--sp-f-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    margin-bottom: 8px;
+  }
+  .preview-hero__title {
+    font-family: var(--sp-f-head);
+    font-size: 64px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .preview-hero__title span { color: var(--sp-amber); }
+  .preview-hero__desc {
+    font-family: var(--sp-f-mono);
+    font-size: 12px;
+    color: var(--sp-ink-dim);
+    letter-spacing: 0.04em;
+    max-width: 560px;
+  }
+  .preview-hero__desc strong { color: var(--sp-amber); }
+
+  /* ── Showcase grid ── */
+  .showcase {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .showcase-block__label {
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--sp-line-dark);
+    margin-bottom: 24px;
+  }
+
+  /* Colour swatches */
+  .swatch-row {
+    display: flex;
+    gap: 0;
+  }
+  .swatch {
+    height: 48px;
+    flex: 1;
+    position: relative;
+  }
+  .swatch span {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  /* Type specimens */
+  .type-specimen { display: flex; flex-direction: column; gap: 16px; }
+  .type-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: baseline;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--sp-line);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row__label {
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+  }
+
+  /* Components grid */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--sp-line-dark);
+    border: 1px solid var(--sp-line-dark);
+  }
+  .comp-cell {
+    background: var(--sp-bg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .comp-cell__label {
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    margin-bottom: 4px;
+  }
+
+  /* Mini KPI for showcase */
+  .mini-kpi-row { display: flex; gap: 1px; }
+  .mini-kpi {
+    flex: 1;
+    background: var(--sp-surface);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mini-kpi__label {
+    font-family: var(--sp-f-mono);
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    margin-bottom: 6px;
+  }
+  .mini-kpi__value {
+    font-family: var(--sp-f-head);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .mini-kpi__accent {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: var(--sp-amber);
+  }
+
+  /* Input */
+  .sp-input {
+    font-family: var(--sp-f-mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--sp-ink);
+    background: var(--sp-bg);
+    color: var(--sp-ink);
+    width: 100%;
+    outline: none;
+    transition: border-color 0.1s;
+  }
+  .sp-input:focus { border-color: var(--sp-amber); }
+  .sp-input::placeholder { color: var(--sp-ink-dim); }
+
+  .sp-label {
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .sp-select {
+    font-family: var(--sp-f-mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--sp-ink);
+    background: var(--sp-bg);
+    color: var(--sp-ink);
+    width: 100%;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  /* Button group */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Mini alert */
+  .mini-alert {
+    display: grid;
+    grid-template-columns: 3px 1fr;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--sp-line);
+  }
+  .mini-alert:last-child { border-bottom: none; }
+  .mini-alert__bar { background: var(--sp-red); }
+  .mini-alert__bar--amber { background: var(--sp-amber); }
+  .mini-alert__title { font-size: 12px; font-weight: 500; }
+  .mini-alert__meta {
+    font-family: var(--sp-f-mono);
+    font-size: 9px;
+    color: var(--sp-ink-dim);
+    margin-top: 2px;
+  }
+
+  /* Mini table */
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th {
+    font-family: var(--sp-f-mono);
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sp-ink-dim);
+    text-align: left;
+    padding: 5px 8px;
+    border-bottom: 2px solid var(--sp-ink);
+    background: var(--sp-surface);
+  }
+  .mini-table td {
+    padding: 7px 8px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--sp-line);
+  }
+
+  /* Footer */
+  .preview-footer {
+    border-top: 2px solid var(--sp-ink);
+    background: var(--sp-surface);
+    padding: 20px 40px;
+    font-family: var(--sp-f-mono);
+    font-size: 10px;
+    color: var(--sp-ink-dim);
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .preview-footer strong { color: var(--sp-amber); }
+</style>
+</head>
+<body>
+
+<!-- ── PREVIEW NAV ── -->
+<nav class="preview-topnav">
+  <a href="../">← Themes</a>
+  <span class="sep">·</span>
+  <a href="swissprecision.css" download class="preview-action">↓ Download CSS</a>
+  <button class="preview-action preview-action--copy" id="copyBtn" onclick="copyCss()">⧉ Copy CSS</button>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="preview-hero">
+  <div class="preview-hero__eyebrow">Theme 06 · Swiss Precision</div>
+  <div class="preview-hero__title">Swiss<br><span>Precision</span></div>
+  <div class="preview-hero__desc">
+    Warm off-white · <strong>electric amber</strong> accent · near-black ink ·
+    Barlow Condensed headings · Courier Prime data · strict grid geometry
+  </div>
+</div>
+
+<!-- ── SHOWCASE ── -->
+<div class="showcase">
+
+  <!-- COLOUR -->
+  <div class="showcase-block">
+    <div class="showcase-block__label">Colour Tokens</div>
+    <div class="swatch-row">
+      <div class="swatch" style="background:#F5F2ED"><span style="color:#5A564F">--sp-bg</span></div>
+      <div class="swatch" style="background:#EDEAE4"><span style="color:#5A564F">--sp-surface</span></div>
+      <div class="swatch" style="background:#C8C3BA"><span style="color:#1A1814">--sp-line</span></div>
+      <div class="swatch" style="background:#1A1814"><span style="color:#9A9690">--sp-ink</span></div>
+      <div class="swatch" style="background:#E8A000"><span style="color:#1A1814">--sp-amber</span></div>
+      <div class="swatch" style="background:#C4341C"><span style="color:#F5F2ED">--sp-red</span></div>
+      <div class="swatch" style="background:#2D7A4A"><span style="color:#F5F2ED">--sp-green</span></div>
+      <div class="swatch" style="background:#1A4A8C"><span style="color:#F5F2ED">--sp-blue</span></div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="showcase-block">
+    <div class="showcase-block__label">Typography</div>
+    <div class="type-specimen">
+      <div class="type-row">
+        <div class="type-row__label">Display / 64px 900</div>
+        <div style="font-family:var(--sp-f-head);font-size:64px;font-weight:900;text-transform:uppercase;line-height:1;letter-spacing:-0.02em">Demand</div>
+      </div>
+      <div class="type-row">
+        <div class="type-row__label">Heading / 28px 700</div>
+        <div style="font-family:var(--sp-f-head);font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em">Forecast vs Actuals</div>
+      </div>
+      <div class="type-row">
+        <div class="type-row__label">Subheading / 16px 500</div>
+        <div style="font-family:var(--sp-f-head);font-size:16px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em">Inventory Coverage · 13-Week Horizon</div>
+      </div>
+      <div class="type-row">
+        <div class="type-row__label">Body / 14px 400</div>
+        <div style="font-family:var(--sp-f-body);font-size:14px;line-height:1.6">Demand planning precision requires clean data, clear signals, and a visual language that stays out of the way of the numbers.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-row__label">Mono / 12px 400</div>
+        <div style="font-family:var(--sp-f-mono);font-size:12px;letter-spacing:0.04em">SKU-884021 · MAPE: 94.2% · Coverage: 38d · Δ +7.3% YoY</div>
+      </div>
+      <div class="type-row">
+        <div class="type-row__label">Label / 9px caps</div>
+        <div style="font-family:var(--sp-f-mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sp-ink-dim)">Forecast Accuracy (MAPE) · Units · Weekly</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="showcase-block">
+    <div class="showcase-block__label">KPI Cards</div>
+    <div class="mini-kpi-row">
+      <div class="mini-kpi">
+        <div class="mini-kpi__label">Forecast Accuracy</div>
+        <div class="mini-kpi__value">94.2<span style="font-size:14px;font-weight:400">%</span></div>
+        <div class="sp-kpi__delta sp-kpi__delta--up" style="font-size:10px;margin-top:4px">▲ +1.8pp</div>
+        <div class="mini-kpi__accent" style="width:94.2%"></div>
+      </div>
+      <div class="mini-kpi">
+        <div class="mini-kpi__label">Projected Demand</div>
+        <div class="mini-kpi__value">2.41<span style="font-size:14px;font-weight:400">M</span></div>
+        <div class="sp-kpi__delta sp-kpi__delta--up" style="font-size:10px;margin-top:4px">▲ +7.3% YoY</div>
+        <div class="mini-kpi__accent" style="width:73%;background:var(--sp-blue)"></div>
+      </div>
+      <div class="mini-kpi">
+        <div class="mini-kpi__label">Inventory Coverage</div>
+        <div class="mini-kpi__value">38<span style="font-size:14px;font-weight:400">d</span></div>
+        <div class="sp-kpi__delta sp-kpi__delta--dn" style="font-size:10px;margin-top:4px">▼ −4 days vs target</div>
+        <div class="mini-kpi__accent" style="width:63%;background:var(--sp-amber)"></div>
+      </div>
+      <div class="mini-kpi">
+        <div class="mini-kpi__label">At-Risk SKUs</div>
+        <div class="mini-kpi__value" style="color:var(--sp-red)">47</div>
+        <div class="sp-kpi__delta sp-kpi__delta--dn" style="font-size:10px;margin-top:4px">▲ 12 new alerts</div>
+        <div class="mini-kpi__accent" style="width:12%;background:var(--sp-red)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENT GRID -->
+  <div class="showcase-block">
+    <div class="showcase-block__label">Components</div>
+    <div class="comp-grid">
+
+      <!-- Buttons -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Buttons</div>
+        <div class="btn-row">
+          <button class="sp-btn">Default</button>
+          <button class="sp-btn sp-btn--primary">Primary</button>
+          <button class="sp-btn sp-btn--amber">Reforecast ▸</button>
+        </div>
+      </div>
+
+      <!-- Badges & Pills -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Badges &amp; Pills</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span class="sp-badge">1,204</span>
+          <span class="sp-badge sp-badge--warn">+12%</span>
+          <span class="sp-badge sp-badge--alert">!</span>
+          <span class="sp-pill sp-pill--ok">On Track</span>
+          <span class="sp-pill sp-pill--warn">Spike Alert</span>
+          <span class="sp-pill sp-pill--alert">Stockout Risk</span>
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Form Controls</div>
+        <label class="sp-label">Search SKU</label>
+        <input class="sp-input" type="text" placeholder="SKU-884021">
+        <div style="margin-top:8px">
+          <label class="sp-label">Region</label>
+          <select class="sp-select">
+            <option>North America</option>
+            <option>EMEA</option>
+            <option>APAC</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Alert Items</div>
+        <div>
+          <div class="mini-alert">
+            <div class="mini-alert__bar"></div>
+            <div>
+              <div class="mini-alert__title">Stockout risk in 6 days</div>
+              <div class="mini-alert__meta">SKU-884021 · Triggered 2h ago</div>
+            </div>
+          </div>
+          <div class="mini-alert">
+            <div class="mini-alert__bar mini-alert__bar--amber"></div>
+            <div>
+              <div class="mini-alert__title">Demand spike +34% above forecast</div>
+              <div class="mini-alert__meta">SKU-221043 · Triggered 5h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bars -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Fill Rate Bars</div>
+        <div class="sp-prog-list">
+          <div class="sp-prog-item">
+            <div class="sp-prog-item__head">
+              <span class="sp-prog-item__name">Consumer Electronics</span>
+              <span class="sp-prog-item__pct">97.2%</span>
+            </div>
+            <div class="sp-prog-track"><div class="sp-prog-fill" style="width:97.2%"></div></div>
+          </div>
+          <div class="sp-prog-item">
+            <div class="sp-prog-item__head">
+              <span class="sp-prog-item__name">Seasonal Goods</span>
+              <span class="sp-prog-item__pct">78.4%</span>
+            </div>
+            <div class="sp-prog-track"><div class="sp-prog-fill sp-prog-fill--alert" style="width:78.4%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini table -->
+      <div class="comp-cell">
+        <div class="comp-cell__label">Data Table</div>
+        <table class="mini-table">
+          <thead>
+            <tr><th>SKU</th><th>Forecast</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-001204</td>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">42,800</td>
+              <td><span class="sp-pill sp-pill--ok">On Track</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-884021</td>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">31,500</td>
+              <td><span class="sp-pill sp-pill--alert">Stockout</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-221043</td>
+              <td style="font-family:var(--sp-f-mono);font-size:11px">9,200</td>
+              <td><span class="sp-pill sp-pill--warn">Spike</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR EXAMPLE -->
+  <div class="showcase-block">
+    <div class="showcase-block__label">Sidebar Navigation</div>
+    <div style="width:220px;border:2px solid var(--sp-ink);background:var(--sp-surface)">
+      <div class="sp-sidebar__section">
+        <div class="sp-sidebar__label">Product Lines</div>
+        <div class="sp-sidebar__item active">All Categories <span class="sp-badge">1,204</span></div>
+        <div class="sp-sidebar__item">Consumer Electronics <span class="sp-badge">348</span></div>
+        <div class="sp-sidebar__item">Seasonal Goods <span class="sp-badge sp-badge--alert">!</span></div>
+      </div>
+      <div class="sp-sidebar__section">
+        <div class="sp-sidebar__label">Models</div>
+        <div class="sp-sidebar__item">ARIMA v4.1</div>
+        <div class="sp-sidebar__item">Hybrid ML <span class="sp-badge sp-badge--warn">live</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /showcase -->
+
+<!-- FOOTER -->
+<footer class="preview-footer">
+  <span>Swiss Precision · <strong>swissprecision.css</strong></span>
+  <span>Barlow Condensed · Courier Prime · Barlow · <strong>#E8A000</strong></span>
+</footer>
+
+<script>
+  async function copyCss() {
+    const btn = document.getElementById('copyBtn');
+    try {
+      const res = await fetch('swissprecision.css');
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '⧉ Copy CSS';
+        btn.classList.remove('copied');
+      }, 2000);
+    } catch {
+      btn.textContent = '✗ Failed';
+      setTimeout(() => { btn.textContent = '⧉ Copy CSS'; }, 2000);
+    }
+  }
+</script>
+</body>
+</html>
