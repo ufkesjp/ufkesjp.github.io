@@ -3,551 +3,981 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Swiss Precision — Theme Preview</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;900&family=Courier+Prime:wght@400;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="swissprecision.css">
+<title>DemandOS — Precision v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fira+Code:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ── Preview-page chrome (not part of the theme) ── */
-  .preview-topnav {
-    background: var(--sp-ink);
-    padding: 10px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-family: var(--sp-f-mono);
-    font-size: 11px;
-    border-bottom: 2px solid var(--sp-amber);
-  }
-  .preview-topnav a {
-    color: var(--sp-ink-dim);
-    text-decoration: none;
-    letter-spacing: 0.08em;
-  }
-  .preview-topnav a:hover { color: var(--sp-bg); }
-  .preview-topnav .sep { color: #3A3830; }
 
-  .preview-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--sp-f-mono);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    padding: 4px 12px;
-    border: 1px solid #3A3830;
-    color: var(--sp-ink-dim);
-    text-decoration: none;
-    cursor: pointer;
-    background: transparent;
-    transition: color 0.12s, border-color 0.12s;
-  }
-  .preview-action:hover { color: var(--sp-bg); border-color: #6A6660; }
-  .preview-action--copy { margin-left: auto; }
-  .preview-action--copy.copied { color: var(--sp-amber); border-color: var(--sp-amber); }
+/* ── NOISE TEXTURE via SVG data URI ── */
+:root {
+  --bg:        #1C1A16;
+  --bg-mid:    #242018;
+  --panel:     #2A2720;
+  --panel-lit: #302D25;
+  --ruled:     #302D25;
+  --border:    #3D3930;
+  --border-hi: #5A5448;
+  --ink:       #E8E0CC;
+  --ink-mid:   #A89E88;
+  --ink-dim:   #6A6358;
+  --copper:    #C8824A;
+  --copper-lo: #8A5530;
+  --copper-hi: #E09A60;
+  --green:     #5A9E6A;
+  --red:       #B85040;
+  --blue:      #4A78A8;
+  --yellow:    #C8A840;
 
-  /* ── Hero header ── */
-  .preview-hero {
-    background: var(--sp-ink);
-    color: var(--sp-bg);
-    padding: 48px 40px 40px;
-    border-bottom: 3px solid var(--sp-amber);
-  }
-  .preview-hero__eyebrow {
-    font-family: var(--sp-f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    margin-bottom: 8px;
-  }
-  .preview-hero__title {
-    font-family: var(--sp-f-head);
-    font-size: 64px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    line-height: 1;
-    margin-bottom: 12px;
-  }
-  .preview-hero__title span { color: var(--sp-amber); }
-  .preview-hero__desc {
-    font-family: var(--sp-f-mono);
-    font-size: 12px;
-    color: var(--sp-ink-dim);
-    letter-spacing: 0.04em;
-    max-width: 560px;
-  }
-  .preview-hero__desc strong { color: var(--sp-amber); }
+  --f-display: 'DM Serif Display', serif;
+  --f-data:    'Fira Code', monospace;
+  --f-body:    'Instrument Sans', sans-serif;
 
-  /* ── Showcase grid ── */
-  .showcase {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 48px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 56px;
-  }
+  --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
 
-  .showcase-block__label {
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--sp-line-dark);
-    margin-bottom: 24px;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
 
-  /* Colour swatches */
-  .swatch-row {
-    display: flex;
-    gap: 0;
-  }
-  .swatch {
-    height: 48px;
-    flex: 1;
-    position: relative;
-  }
-  .swatch span {
-    position: absolute;
-    bottom: 6px;
-    left: 8px;
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    opacity: 0.7;
-  }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  min-height: 100vh;
+  position: relative;
+}
 
-  /* Type specimens */
-  .type-specimen { display: flex; flex-direction: column; gap: 16px; }
-  .type-row {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    align-items: baseline;
-    gap: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--sp-line);
-  }
-  .type-row:last-child { border-bottom: none; }
-  .type-row__label {
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-  }
+/* Subtle global noise */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: var(--noise);
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  /* Components grid */
-  .comp-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--sp-line-dark);
-    border: 1px solid var(--sp-line-dark);
-  }
-  .comp-cell {
-    background: var(--sp-bg);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .comp-cell__label {
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    margin-bottom: 4px;
-  }
+/* ── APP SHELL ── */
+.app {
+  display: grid;
+  grid-template-rows: 48px 1fr 36px;
+  min-height: 100vh;
+}
 
-  /* Mini KPI for showcase */
-  .mini-kpi-row { display: flex; gap: 1px; }
-  .mini-kpi {
-    flex: 1;
-    background: var(--sp-surface);
-    padding: 14px 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .mini-kpi__label {
-    font-family: var(--sp-f-mono);
-    font-size: 8px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    margin-bottom: 6px;
-  }
-  .mini-kpi__value {
-    font-family: var(--sp-f-head);
-    font-size: 28px;
-    font-weight: 900;
-    line-height: 1;
-  }
-  .mini-kpi__accent {
-    position: absolute;
-    bottom: 0; left: 0;
-    height: 3px;
-    background: var(--sp-amber);
-  }
+/* ── TOPBAR ── */
+.topbar {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: stretch;
+  background: var(--bg-mid);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--copper) 30%, var(--copper) 70%, transparent);
+  opacity: 0.4;
+}
 
-  /* Input */
-  .sp-input {
-    font-family: var(--sp-f-mono);
-    font-size: 12px;
-    padding: 8px 12px;
-    border: 1.5px solid var(--sp-ink);
-    background: var(--sp-bg);
-    color: var(--sp-ink);
-    width: 100%;
-    outline: none;
-    transition: border-color 0.1s;
-  }
-  .sp-input:focus { border-color: var(--sp-amber); }
-  .sp-input::placeholder { color: var(--sp-ink-dim); }
+.topbar__brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+}
+.topbar__sigil {
+  width: 24px; height: 24px;
+  border: 1px solid var(--copper);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.topbar__sigil::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--copper);
+  opacity: 0.25;
+}
+.topbar__sigil span {
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--copper);
+  position: relative;
+  z-index: 1;
+}
+.topbar__wordmark {
+  font-family: var(--f-data);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+.topbar__wordmark strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 
-  .sp-label {
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    display: block;
-    margin-bottom: 6px;
-  }
+.topbar__nav {
+  display: flex; align-items: stretch;
+  padding: 0 8px;
+}
+.topbar__nav a {
+  display: flex; align-items: center;
+  padding: 0 16px;
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.topbar__nav a:hover { color: var(--ink-mid); }
+.topbar__nav a.active {
+  color: var(--copper);
+  border-bottom-color: var(--copper);
+}
 
-  .sp-select {
-    font-family: var(--sp-f-mono);
-    font-size: 12px;
-    padding: 8px 12px;
-    border: 1.5px solid var(--sp-ink);
-    background: var(--sp-bg);
-    color: var(--sp-ink);
-    width: 100%;
-    outline: none;
-    appearance: none;
-    cursor: pointer;
-  }
+.topbar__right {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 16px;
+  border-left: 1px solid var(--border);
+}
+.topbar__clock {
+  font-family: var(--f-data);
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+}
+.topbar__clock strong { color: var(--copper); }
+.topbar__user {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border-hi);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-mid);
+  background: var(--panel);
+}
 
-  /* Button group */
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+/* ── BODY ── */
+.body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  overflow: hidden;
+}
 
-  /* Mini alert */
-  .mini-alert {
-    display: grid;
-    grid-template-columns: 3px 1fr;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--sp-line);
-  }
-  .mini-alert:last-child { border-bottom: none; }
-  .mini-alert__bar { background: var(--sp-red); }
-  .mini-alert__bar--amber { background: var(--sp-amber); }
-  .mini-alert__title { font-size: 12px; font-weight: 500; }
-  .mini-alert__meta {
-    font-family: var(--sp-f-mono);
-    font-size: 9px;
-    color: var(--sp-ink-dim);
-    margin-top: 2px;
-  }
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg-mid);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
 
-  /* Mini table */
-  .mini-table { width: 100%; border-collapse: collapse; }
-  .mini-table th {
-    font-family: var(--sp-f-mono);
-    font-size: 8px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sp-ink-dim);
-    text-align: left;
-    padding: 5px 8px;
-    border-bottom: 2px solid var(--sp-ink);
-    background: var(--sp-surface);
-  }
-  .mini-table td {
-    padding: 7px 8px;
-    font-size: 12px;
-    border-bottom: 1px solid var(--sp-line);
-  }
+.sidebar__group {
+  padding: 18px 0 6px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar__group:last-child { border-bottom: none; }
 
-  /* Footer */
-  .preview-footer {
-    border-top: 2px solid var(--sp-ink);
-    background: var(--sp-surface);
-    padding: 20px 40px;
-    font-family: var(--sp-f-mono);
-    font-size: 10px;
-    color: var(--sp-ink-dim);
-    letter-spacing: 0.08em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .preview-footer strong { color: var(--sp-amber); }
+.sidebar__heading {
+  font-family: var(--f-data);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  padding: 0 14px 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.sidebar__heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.sidebar__item {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  font-family: var(--f-body);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  border-left: 2px solid transparent;
+  gap: 8px;
+}
+.sidebar__item:hover { background: var(--panel); color: var(--ink-mid); }
+.sidebar__item.active {
+  background: var(--panel-lit);
+  color: var(--ink);
+  border-left-color: var(--copper);
+}
+
+.sidebar__pip {
+  font-family: var(--f-data);
+  font-size: 9px;
+  padding: 1px 5px;
+  background: var(--panel);
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar__pip.hi { background: var(--copper-lo); color: var(--copper-hi); border-color: var(--copper-lo); }
+.sidebar__pip.alert { background: #5A1A10; color: #E07060; border-color: #7A2A20; }
+
+/* ── MAIN ── */
+.main { overflow-y: auto; }
+
+/* ── PAGE HEADER ── */
+.page-hd {
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  background: var(--bg-mid);
+}
+.page-hd__crumb {
+  font-family: var(--f-data);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.page-hd__crumb::before {
+  content: '//';
+  color: var(--copper);
+  opacity: 0.6;
+}
+.page-hd__title {
+  font-family: var(--f-display);
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.page-hd__title em {
+  font-style: italic;
+  color: var(--copper);
+}
+.page-hd__sub {
+  font-family: var(--f-data);
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+.page-hd__actions { display: flex; gap: 8px; align-items: flex-end; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border: 1px solid var(--border-hi);
+  background: var(--panel);
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btn:hover { border-color: var(--ink-dim); color: var(--ink); background: var(--panel-lit); }
+
+.btn--copper {
+  background: var(--copper-lo);
+  border-color: var(--copper);
+  color: var(--copper-hi);
+}
+.btn--copper:hover { background: var(--copper); color: var(--bg); }
+
+/* ── KPI BAND ── */
+.kpi-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.kpi {
+  padding: 18px 22px;
+  border-right: 1px solid var(--border);
+  position: relative;
+  /* Ruled lines background */
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 19px,
+    var(--ruled) 19px,
+    var(--ruled) 20px
+  );
+}
+.kpi:last-child { border-right: none; }
+
+/* Copper corner accent */
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 24px; height: 2px;
+  background: var(--copper);
+  opacity: 0.5;
+}
+
+.kpi__label {
+  font-family: var(--f-data);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.kpi__value {
+  font-family: var(--f-display);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  position: relative;
+}
+.kpi__value sup {
+  font-family: var(--f-data);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  vertical-align: super;
+  letter-spacing: 0;
+}
+
+.kpi__delta {
+  font-family: var(--f-data);
+  font-size: 10px;
+  margin-top: 8px;
+  position: relative;
+  display: flex; align-items: center; gap: 4px;
+}
+.kpi__delta.up { color: var(--green); }
+.kpi__delta.dn { color: var(--red); }
+
+.kpi__rule {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--copper), transparent);
+}
+
+/* ── SECTION GRID ── */
+.sect-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+}
+
+.pane {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.pane + .pane { border-left: 1px solid var(--border); }
+
+.pane__hd {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 14px;
+}
+.pane__title {
+  font-family: var(--f-data);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  display: flex; align-items: center; gap: 8px;
+}
+.pane__title::before {
+  content: '▸';
+  color: var(--copper);
+  font-size: 8px;
+}
+.pane__meta {
+  font-family: var(--f-data);
+  font-size: 9px;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+}
+
+/* ── CHART ── */
+.chart-wrap { height: 190px; position: relative; }
+canvas { width: 100% !important; height: 100% !important; }
+
+/* ── ALERT FEED ── */
+.alert-feed { display: flex; flex-direction: column; }
+
+.alert-row {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  cursor: default;
+}
+.alert-row:hover { background: var(--panel); margin: 0 -24px; padding: 10px 24px; }
+.alert-row:last-child { border-bottom: none; }
+
+.alert-row__stripe { }
+.alert-row__stripe.r { background: var(--red); }
+.alert-row__stripe.a { background: var(--yellow); }
+.alert-row__stripe.b { background: var(--blue); }
+
+.alert-row__id {
+  font-family: var(--f-data);
+  font-size: 9px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.alert-row__msg {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  line-height: 1.4;
+}
+.alert-row__ts {
+  font-family: var(--f-data);
+  font-size: 8px;
+  color: var(--ink-dim);
+  margin-top: 3px;
+  letter-spacing: 0.06em;
+}
+
+/* ── DATA TABLE ── */
+.sect-full {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-tbl { width: 100%; border-collapse: collapse; }
+
+.data-tbl thead tr {
+  background: var(--bg-mid);
+}
+.data-tbl th {
+  font-family: var(--f-data);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-hi);
+}
+.data-tbl td {
+  padding: 9px 10px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-mid);
+  vertical-align: middle;
+}
+.data-tbl tr:hover td { background: var(--panel); color: var(--ink); }
+.data-tbl .mono {
+  font-family: var(--f-data);
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+
+/* ── STATUS CHIPS ── */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--f-data);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+}
+.chip::before { content: '●'; font-size: 6px; }
+.chip.ok    { color: var(--green); }
+.chip.warn  { color: var(--yellow); }
+.chip.alert { color: var(--red); }
+
+/* ── PROGRESS ── */
+.fill-sect { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.fill-list { display: flex; flex-direction: column; gap: 14px; }
+
+.fill-item__hd {
+  display: flex; justify-content: space-between;
+  margin-bottom: 5px;
+}
+.fill-item__name {
+  font-family: var(--f-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+.fill-item__pct {
+  font-family: var(--f-data);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fill-track {
+  height: 4px;
+  background: var(--border);
+  position: relative;
+}
+.fill-bar {
+  height: 100%;
+  background: var(--copper);
+  position: relative;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+.fill-bar::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -4px;
+  width: 1px; height: 12px;
+  background: var(--copper-hi);
+  opacity: 0.8;
+}
+.fill-bar.warn  { background: var(--yellow); }
+.fill-bar.alert { background: var(--red); }
+
+/* ── STATUS BAR ── */
+.statusbar {
+  background: var(--bg-mid);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 20px;
+  padding: 0 20px;
+  font-family: var(--f-data);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  overflow: hidden;
+}
+.statusbar__item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.statusbar__item strong { color: var(--copper); font-weight: 500; }
+.statusbar__sep { color: var(--border-hi); flex-shrink: 0; }
+.statusbar__live {
+  display: flex; align-items: center; gap: 5px;
+}
+.statusbar__dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--green); }
+  50% { opacity: 0.3; box-shadow: none; }
+}
+.statusbar__spacer { flex: 1; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.kpi { animation: fadeIn 0.5s ease both; }
+.kpi:nth-child(1) { animation-delay: 0.06s; }
+.kpi:nth-child(2) { animation-delay: 0.12s; }
+.kpi:nth-child(3) { animation-delay: 0.18s; }
+.kpi:nth-child(4) { animation-delay: 0.24s; }
+.pane { animation: fadeIn 0.5s 0.25s ease both; }
+
 </style>
 </head>
 <body>
+<div class="app">
 
-<!-- ── PREVIEW NAV ── -->
-<nav class="preview-topnav">
-  <a href="../">← Themes</a>
-  <span class="sep">·</span>
-  <a href="swissprecision.css" download class="preview-action">↓ Download CSS</a>
-  <button class="preview-action preview-action--copy" id="copyBtn" onclick="copyCss()">⧉ Copy CSS</button>
-</nav>
-
-<!-- ── HERO ── -->
-<div class="preview-hero">
-  <div class="preview-hero__eyebrow">Theme 06 · Swiss Precision</div>
-  <div class="preview-hero__title">Swiss<br><span>Precision</span></div>
-  <div class="preview-hero__desc">
-    Warm off-white · <strong>electric amber</strong> accent · near-black ink ·
-    Barlow Condensed headings · Courier Prime data · strict grid geometry
-  </div>
-</div>
-
-<!-- ── SHOWCASE ── -->
-<div class="showcase">
-
-  <!-- COLOUR -->
-  <div class="showcase-block">
-    <div class="showcase-block__label">Colour Tokens</div>
-    <div class="swatch-row">
-      <div class="swatch" style="background:#F5F2ED"><span style="color:#5A564F">--sp-bg</span></div>
-      <div class="swatch" style="background:#EDEAE4"><span style="color:#5A564F">--sp-surface</span></div>
-      <div class="swatch" style="background:#C8C3BA"><span style="color:#1A1814">--sp-line</span></div>
-      <div class="swatch" style="background:#1A1814"><span style="color:#9A9690">--sp-ink</span></div>
-      <div class="swatch" style="background:#E8A000"><span style="color:#1A1814">--sp-amber</span></div>
-      <div class="swatch" style="background:#C4341C"><span style="color:#F5F2ED">--sp-red</span></div>
-      <div class="swatch" style="background:#2D7A4A"><span style="color:#F5F2ED">--sp-green</span></div>
-      <div class="swatch" style="background:#1A4A8C"><span style="color:#F5F2ED">--sp-blue</span></div>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <div class="topbar__sigil"><span>D</span></div>
+      <div class="topbar__wordmark"><strong>Demand</strong>OS</div>
     </div>
-  </div>
-
-  <!-- TYPOGRAPHY -->
-  <div class="showcase-block">
-    <div class="showcase-block__label">Typography</div>
-    <div class="type-specimen">
-      <div class="type-row">
-        <div class="type-row__label">Display / 64px 900</div>
-        <div style="font-family:var(--sp-f-head);font-size:64px;font-weight:900;text-transform:uppercase;line-height:1;letter-spacing:-0.02em">Demand</div>
-      </div>
-      <div class="type-row">
-        <div class="type-row__label">Heading / 28px 700</div>
-        <div style="font-family:var(--sp-f-head);font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em">Forecast vs Actuals</div>
-      </div>
-      <div class="type-row">
-        <div class="type-row__label">Subheading / 16px 500</div>
-        <div style="font-family:var(--sp-f-head);font-size:16px;font-weight:500;text-transform:uppercase;letter-spacing:0.1em">Inventory Coverage · 13-Week Horizon</div>
-      </div>
-      <div class="type-row">
-        <div class="type-row__label">Body / 14px 400</div>
-        <div style="font-family:var(--sp-f-body);font-size:14px;line-height:1.6">Demand planning precision requires clean data, clear signals, and a visual language that stays out of the way of the numbers.</div>
-      </div>
-      <div class="type-row">
-        <div class="type-row__label">Mono / 12px 400</div>
-        <div style="font-family:var(--sp-f-mono);font-size:12px;letter-spacing:0.04em">SKU-884021 · MAPE: 94.2% · Coverage: 38d · Δ +7.3% YoY</div>
-      </div>
-      <div class="type-row">
-        <div class="type-row__label">Label / 9px caps</div>
-        <div style="font-family:var(--sp-f-mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sp-ink-dim)">Forecast Accuracy (MAPE) · Units · Weekly</div>
-      </div>
+    <nav class="topbar__nav">
+      <a href="#" class="active">Overview</a>
+      <a href="#">Forecast</a>
+      <a href="#">Inventory</a>
+      <a href="#">Procurement</a>
+      <a href="#">Scenarios</a>
+      <a href="#">Reports</a>
+    </nav>
+    <div class="topbar__right">
+      <div class="topbar__clock">Q2 2026 · <strong>Wk 23</strong></div>
+      <div class="topbar__user">JU</div>
     </div>
-  </div>
+  </header>
 
-  <!-- KPI CARDS -->
-  <div class="showcase-block">
-    <div class="showcase-block__label">KPI Cards</div>
-    <div class="mini-kpi-row">
-      <div class="mini-kpi">
-        <div class="mini-kpi__label">Forecast Accuracy</div>
-        <div class="mini-kpi__value">94.2<span style="font-size:14px;font-weight:400">%</span></div>
-        <div class="sp-kpi__delta sp-kpi__delta--up" style="font-size:10px;margin-top:4px">▲ +1.8pp</div>
-        <div class="mini-kpi__accent" style="width:94.2%"></div>
-      </div>
-      <div class="mini-kpi">
-        <div class="mini-kpi__label">Projected Demand</div>
-        <div class="mini-kpi__value">2.41<span style="font-size:14px;font-weight:400">M</span></div>
-        <div class="sp-kpi__delta sp-kpi__delta--up" style="font-size:10px;margin-top:4px">▲ +7.3% YoY</div>
-        <div class="mini-kpi__accent" style="width:73%;background:var(--sp-blue)"></div>
-      </div>
-      <div class="mini-kpi">
-        <div class="mini-kpi__label">Inventory Coverage</div>
-        <div class="mini-kpi__value">38<span style="font-size:14px;font-weight:400">d</span></div>
-        <div class="sp-kpi__delta sp-kpi__delta--dn" style="font-size:10px;margin-top:4px">▼ −4 days vs target</div>
-        <div class="mini-kpi__accent" style="width:63%;background:var(--sp-amber)"></div>
-      </div>
-      <div class="mini-kpi">
-        <div class="mini-kpi__label">At-Risk SKUs</div>
-        <div class="mini-kpi__value" style="color:var(--sp-red)">47</div>
-        <div class="sp-kpi__delta sp-kpi__delta--dn" style="font-size:10px;margin-top:4px">▲ 12 new alerts</div>
-        <div class="mini-kpi__accent" style="width:12%;background:var(--sp-red)"></div>
-      </div>
-    </div>
-  </div>
+  <!-- BODY -->
+  <div class="body">
 
-  <!-- COMPONENT GRID -->
-  <div class="showcase-block">
-    <div class="showcase-block__label">Components</div>
-    <div class="comp-grid">
-
-      <!-- Buttons -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Buttons</div>
-        <div class="btn-row">
-          <button class="sp-btn">Default</button>
-          <button class="sp-btn sp-btn--primary">Primary</button>
-          <button class="sp-btn sp-btn--amber">Reforecast ▸</button>
-        </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar__group">
+        <div class="sidebar__heading">Product Lines</div>
+        <div class="sidebar__item active">All Categories <span class="sidebar__pip hi">1,204</span></div>
+        <div class="sidebar__item">Consumer Electronics <span class="sidebar__pip">348</span></div>
+        <div class="sidebar__item">Home Appliances <span class="sidebar__pip hi">+12%</span></div>
+        <div class="sidebar__item">Industrial Parts <span class="sidebar__pip">219</span></div>
+        <div class="sidebar__item">Seasonal Goods <span class="sidebar__pip alert">!</span></div>
       </div>
-
-      <!-- Badges & Pills -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Badges &amp; Pills</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <span class="sp-badge">1,204</span>
-          <span class="sp-badge sp-badge--warn">+12%</span>
-          <span class="sp-badge sp-badge--alert">!</span>
-          <span class="sp-pill sp-pill--ok">On Track</span>
-          <span class="sp-pill sp-pill--warn">Spike Alert</span>
-          <span class="sp-pill sp-pill--alert">Stockout Risk</span>
-        </div>
+      <div class="sidebar__group">
+        <div class="sidebar__heading">Regions</div>
+        <div class="sidebar__item">North America</div>
+        <div class="sidebar__item">EMEA</div>
+        <div class="sidebar__item">APAC</div>
+        <div class="sidebar__item">LATAM</div>
       </div>
-
-      <!-- Inputs -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Form Controls</div>
-        <label class="sp-label">Search SKU</label>
-        <input class="sp-input" type="text" placeholder="SKU-884021">
-        <div style="margin-top:8px">
-          <label class="sp-label">Region</label>
-          <select class="sp-select">
-            <option>North America</option>
-            <option>EMEA</option>
-            <option>APAC</option>
-          </select>
-        </div>
+      <div class="sidebar__group">
+        <div class="sidebar__heading">Active Model</div>
+        <div class="sidebar__item">ARIMA v4.1</div>
+        <div class="sidebar__item">XGBoost Ensemble</div>
+        <div class="sidebar__item active">Hybrid ML <span class="sidebar__pip hi">live</span></div>
       </div>
+    </aside>
 
-      <!-- Alerts -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Alert Items</div>
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- PAGE HEADER -->
+      <div class="page-hd">
         <div>
-          <div class="mini-alert">
-            <div class="mini-alert__bar"></div>
-            <div>
-              <div class="mini-alert__title">Stockout risk in 6 days</div>
-              <div class="mini-alert__meta">SKU-884021 · Triggered 2h ago</div>
-            </div>
+          <div class="page-hd__crumb">Dashboard · Q2 2026 · Hybrid ML</div>
+          <div class="page-hd__title">Demand <em>Overview</em></div>
+          <div class="page-hd__sub">refreshed 4 min ago &nbsp;·&nbsp; 1,204 active SKUs &nbsp;·&nbsp; 6 regions &nbsp;·&nbsp; confidence 94.2%</div>
+        </div>
+        <div class="page-hd__actions">
+          <button class="btn">Export</button>
+          <button class="btn">Scenario</button>
+          <button class="btn btn--copper">Reforecast ▸</button>
+        </div>
+      </div>
+
+      <!-- KPI BAND -->
+      <div class="kpi-band">
+        <div class="kpi">
+          <div class="kpi__label">Forecast Accuracy</div>
+          <div class="kpi__value">94.2<sup>%</sup></div>
+          <div class="kpi__delta up">▲ +1.8pp vs prior period</div>
+          <div class="kpi__rule" style="width:94.2%"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Projected Demand</div>
+          <div class="kpi__value">2.41<sup>M</sup></div>
+          <div class="kpi__delta up">▲ +7.3% year on year</div>
+          <div class="kpi__rule" style="width:73%;background:linear-gradient(90deg,var(--blue),transparent)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Inventory Coverage</div>
+          <div class="kpi__value">38<sup>d</sup></div>
+          <div class="kpi__delta dn">▼ −4 days vs target</div>
+          <div class="kpi__rule" style="width:55%;background:linear-gradient(90deg,var(--yellow),transparent)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">At-Risk SKUs</div>
+          <div class="kpi__value" style="color:var(--red)">47</div>
+          <div class="kpi__delta dn">▲ 12 new this period</div>
+          <div class="kpi__rule" style="width:18%;background:linear-gradient(90deg,var(--red),transparent)"></div>
+        </div>
+      </div>
+
+      <!-- CHART + ALERTS -->
+      <div class="sect-grid">
+        <div class="pane">
+          <div class="pane__hd">
+            <div class="pane__title">Forecast vs Actuals</div>
+            <div class="pane__meta">Units · Weekly · Q1–Q3 2026</div>
           </div>
-          <div class="mini-alert">
-            <div class="mini-alert__bar mini-alert__bar--amber"></div>
-            <div>
-              <div class="mini-alert__title">Demand spike +34% above forecast</div>
-              <div class="mini-alert__meta">SKU-221043 · Triggered 5h ago</div>
+          <div class="chart-wrap"><canvas id="chart"></canvas></div>
+        </div>
+        <div class="pane">
+          <div class="pane__hd">
+            <div class="pane__title">Active Alerts</div>
+            <div class="pane__meta">47 open</div>
+          </div>
+          <div class="alert-feed">
+            <div class="alert-row">
+              <div class="alert-row__stripe r"></div>
+              <div>
+                <div class="alert-row__id">SKU-884021 · Consumer Electronics</div>
+                <div class="alert-row__msg">Stockout risk in 6 days — reorder breached</div>
+                <div class="alert-row__ts">2h ago</div>
+              </div>
+            </div>
+            <div class="alert-row">
+              <div class="alert-row__stripe a"></div>
+              <div>
+                <div class="alert-row__id">SKU-221043 · Seasonal Goods</div>
+                <div class="alert-row__msg">Demand spike +34% above forecast</div>
+                <div class="alert-row__ts">5h ago</div>
+              </div>
+            </div>
+            <div class="alert-row">
+              <div class="alert-row__stripe r"></div>
+              <div>
+                <div class="alert-row__id">SKU-990312 · Industrial Parts</div>
+                <div class="alert-row__msg">Supplier lead time extended 11 days</div>
+                <div class="alert-row__ts">8h ago</div>
+              </div>
+            </div>
+            <div class="alert-row">
+              <div class="alert-row__stripe b"></div>
+              <div>
+                <div class="alert-row__id">SKU-443201 · Home Appliances</div>
+                <div class="alert-row__msg">Safety stock below minimum threshold</div>
+                <div class="alert-row__ts">1d ago</div>
+              </div>
+            </div>
+            <div class="alert-row">
+              <div class="alert-row__stripe a"></div>
+              <div>
+                <div class="alert-row__id">SKU-102938 · Consumer Electronics</div>
+                <div class="alert-row__msg">Overstock detected — 92d coverage vs 45d target</div>
+                <div class="alert-row__ts">1d ago</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Progress bars -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Fill Rate Bars</div>
-        <div class="sp-prog-list">
-          <div class="sp-prog-item">
-            <div class="sp-prog-item__head">
-              <span class="sp-prog-item__name">Consumer Electronics</span>
-              <span class="sp-prog-item__pct">97.2%</span>
-            </div>
-            <div class="sp-prog-track"><div class="sp-prog-fill" style="width:97.2%"></div></div>
-          </div>
-          <div class="sp-prog-item">
-            <div class="sp-prog-item__head">
-              <span class="sp-prog-item__name">Seasonal Goods</span>
-              <span class="sp-prog-item__pct">78.4%</span>
-            </div>
-            <div class="sp-prog-track"><div class="sp-prog-fill sp-prog-fill--alert" style="width:78.4%"></div></div>
+      <!-- SKU TABLE -->
+      <div class="sect-full">
+        <div class="pane__hd">
+          <div class="pane__title">Top SKUs by Forecast Volume</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn" style="font-size:9px;padding:4px 10px">Filter</button>
+            <button class="btn" style="font-size:9px;padding:4px 10px">Export</button>
           </div>
         </div>
-      </div>
-
-      <!-- Mini table -->
-      <div class="comp-cell">
-        <div class="comp-cell__label">Data Table</div>
-        <table class="mini-table">
+        <table class="data-tbl">
           <thead>
-            <tr><th>SKU</th><th>Forecast</th><th>Status</th></tr>
+            <tr>
+              <th>SKU</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Forecast Q2</th>
+              <th>Actual Q1</th>
+              <th>Variance</th>
+              <th>Coverage</th>
+              <th>Status</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-001204</td>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">42,800</td>
-              <td><span class="sp-pill sp-pill--ok">On Track</span></td>
+              <td class="mono">SKU-001204</td>
+              <td>4K Smart TV 55"</td>
+              <td style="color:var(--ink-dim);font-size:11.5px">Consumer Electronics</td>
+              <td class="mono">42,800</td>
+              <td class="mono">39,210</td>
+              <td class="mono" style="color:var(--green)">+9.1%</td>
+              <td class="mono">52d</td>
+              <td><span class="chip ok">On Track</span></td>
             </tr>
             <tr>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-884021</td>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">31,500</td>
-              <td><span class="sp-pill sp-pill--alert">Stockout</span></td>
+              <td class="mono">SKU-002891</td>
+              <td>Refrigerator XL Series</td>
+              <td style="color:var(--ink-dim);font-size:11.5px">Home Appliances</td>
+              <td class="mono">18,400</td>
+              <td class="mono">17,900</td>
+              <td class="mono" style="color:var(--green)">+2.8%</td>
+              <td class="mono">41d</td>
+              <td><span class="chip ok">On Track</span></td>
             </tr>
             <tr>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">SKU-221043</td>
-              <td style="font-family:var(--sp-f-mono);font-size:11px">9,200</td>
-              <td><span class="sp-pill sp-pill--warn">Spike</span></td>
+              <td class="mono">SKU-884021</td>
+              <td>Wireless Earbuds Pro</td>
+              <td style="color:var(--ink-dim);font-size:11.5px">Consumer Electronics</td>
+              <td class="mono">31,500</td>
+              <td class="mono">28,800</td>
+              <td class="mono" style="color:var(--yellow)">+9.4%</td>
+              <td class="mono" style="color:var(--red)">6d</td>
+              <td><span class="chip alert">Stockout</span></td>
+            </tr>
+            <tr>
+              <td class="mono">SKU-221043</td>
+              <td>Garden BBQ Set</td>
+              <td style="color:var(--ink-dim);font-size:11.5px">Seasonal Goods</td>
+              <td class="mono">9,200</td>
+              <td class="mono">6,100</td>
+              <td class="mono" style="color:var(--red)">+50.8%</td>
+              <td class="mono">28d</td>
+              <td><span class="chip warn">Spike</span></td>
+            </tr>
+            <tr>
+              <td class="mono">SKU-443201</td>
+              <td>HVAC Filter — HEPA</td>
+              <td style="color:var(--ink-dim);font-size:11.5px">Industrial Parts</td>
+              <td class="mono">55,000</td>
+              <td class="mono">53,400</td>
+              <td class="mono" style="color:var(--green)">+3.0%</td>
+              <td class="mono" style="color:var(--yellow)">22d</td>
+              <td><span class="chip warn">Low Stock</span></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-    </div>
+      <!-- FILL RATES -->
+      <div class="fill-sect">
+        <div class="pane__hd">
+          <div class="pane__title">Fill Rate by Category</div>
+          <div class="pane__meta">Target 95%</div>
+        </div>
+        <div class="fill-list">
+          <div class="fill-item">
+            <div class="fill-item__hd">
+              <span class="fill-item__name">Consumer Electronics</span>
+              <span class="fill-item__pct">97.2%</span>
+            </div>
+            <div class="fill-track"><div class="fill-bar" style="width:97.2%"></div></div>
+          </div>
+          <div class="fill-item">
+            <div class="fill-item__hd">
+              <span class="fill-item__name">Home Appliances</span>
+              <span class="fill-item__pct">93.5%</span>
+            </div>
+            <div class="fill-track"><div class="fill-bar warn" style="width:93.5%"></div></div>
+          </div>
+          <div class="fill-item">
+            <div class="fill-item__hd">
+              <span class="fill-item__name">Industrial Parts</span>
+              <span class="fill-item__pct">91.0%</span>
+            </div>
+            <div class="fill-track"><div class="fill-bar warn" style="width:91%"></div></div>
+          </div>
+          <div class="fill-item">
+            <div class="fill-item__hd">
+              <span class="fill-item__name">Seasonal Goods</span>
+              <span class="fill-item__pct">78.4%</span>
+            </div>
+            <div class="fill-track"><div class="fill-bar alert" style="width:78.4%"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
   </div>
 
-  <!-- SIDEBAR EXAMPLE -->
-  <div class="showcase-block">
-    <div class="showcase-block__label">Sidebar Navigation</div>
-    <div style="width:220px;border:2px solid var(--sp-ink);background:var(--sp-surface)">
-      <div class="sp-sidebar__section">
-        <div class="sp-sidebar__label">Product Lines</div>
-        <div class="sp-sidebar__item active">All Categories <span class="sp-badge">1,204</span></div>
-        <div class="sp-sidebar__item">Consumer Electronics <span class="sp-badge">348</span></div>
-        <div class="sp-sidebar__item">Seasonal Goods <span class="sp-badge sp-badge--alert">!</span></div>
-      </div>
-      <div class="sp-sidebar__section">
-        <div class="sp-sidebar__label">Models</div>
-        <div class="sp-sidebar__item">ARIMA v4.1</div>
-        <div class="sp-sidebar__item">Hybrid ML <span class="sp-badge sp-badge--warn">live</span></div>
-      </div>
+  <!-- STATUS BAR -->
+  <footer class="statusbar">
+    <div class="statusbar__live">
+      <div class="statusbar__dot"></div>
+      <div class="statusbar__item">Live · Hybrid ML v2.3</div>
     </div>
-  </div>
+    <span class="statusbar__sep">·</span>
+    <div class="statusbar__item">Horizon <strong>13 weeks</strong></div>
+    <span class="statusbar__sep">·</span>
+    <div class="statusbar__item">Last run <strong>06:02 UTC</strong></div>
+    <span class="statusbar__sep">·</span>
+    <div class="statusbar__item">MAPE <strong>94.2%</strong></div>
+    <span class="statusbar__sep">·</span>
+    <div class="statusbar__item">SKUs <strong>1,204</strong></div>
+    <div class="statusbar__spacer"></div>
+    <div class="statusbar__item">DemandOS <strong>v4.1.0</strong> · Q2 2026</div>
+  </footer>
 
-</div><!-- /showcase -->
+</div>
 
-<!-- FOOTER -->
-<footer class="preview-footer">
-  <span>Swiss Precision · <strong>swissprecision.css</strong></span>
-  <span>Barlow Condensed · Courier Prime · Barlow · <strong>#E8A000</strong></span>
-</footer>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-  async function copyCss() {
-    const btn = document.getElementById('copyBtn');
-    try {
-      const res = await fetch('swissprecision.css');
-      const text = await res.text();
-      await navigator.clipboard.writeText(text);
-      btn.textContent = '✓ Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.textContent = '⧉ Copy CSS';
-        btn.classList.remove('copied');
-      }, 2000);
-    } catch {
-      btn.textContent = '✗ Failed';
-      setTimeout(() => { btn.textContent = '⧉ Copy CSS'; }, 2000);
+const weeks = ['W01','W02','W03','W04','W05','W06','W07','W08','W09','W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20'];
+const actuals  = [41200,42800,40100,43500,44200,41900,45800,43200,null,null,null,null,null,null,null,null,null,null,null,null];
+const forecast = [41000,42400,40800,43000,44800,42500,46200,43800,45100,46400,47200,45800,48100,47500,49000,48300,50100,49200,51400,50800];
+const upper    = forecast.map(v => v ? v * 1.07 : null);
+const lower    = forecast.map(v => v ? v * 0.93 : null);
+
+new Chart(document.getElementById('chart').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { data: upper, fill: '+1', borderWidth: 0, pointRadius: 0, backgroundColor: 'rgba(200,130,74,0.07)', tension: 0.35 },
+      { data: lower, fill: false, borderWidth: 0, pointRadius: 0, tension: 0.35 },
+      {
+        label: 'Forecast',
+        data: forecast,
+        borderColor: 'rgba(200,130,74,0.7)',
+        borderWidth: 1.5,
+        borderDash: [4,3],
+        pointRadius: 0,
+        fill: false,
+        tension: 0.35,
+      },
+      {
+        label: 'Actuals',
+        data: actuals,
+        borderColor: '#E8E0CC',
+        borderWidth: 2,
+        pointRadius: 2.5,
+        pointBackgroundColor: '#E8E0CC',
+        pointBorderColor: 'transparent',
+        fill: false,
+        tension: 0.35,
+      },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          font: { family: 'Fira Code', size: 9 },
+          color: '#6A6358',
+          boxWidth: 14,
+          filter: i => i.text === 'Forecast' || i.text === 'Actuals',
+        }
+      },
+      tooltip: {
+        backgroundColor: '#2A2720',
+        borderColor: '#3D3930',
+        borderWidth: 1,
+        titleFont: { family: 'Fira Code', size: 9 },
+        bodyFont:  { family: 'Fira Code', size: 10 },
+        padding: 10,
+        filter: i => i.dataset.label === 'Forecast' || i.dataset.label === 'Actuals',
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: '#2A2720', lineWidth: 1 },
+        ticks: { font: { family: 'Fira Code', size: 8 }, color: '#6A6358' }
+      },
+      y: {
+        grid: { color: '#2A2720', lineWidth: 1 },
+        ticks: {
+          font: { family: 'Fira Code', size: 8 },
+          color: '#6A6358',
+          callback: v => (v/1000).toFixed(0)+'k'
+        }
+      }
     }
   }
+});
 </script>
 </body>
 </html>
