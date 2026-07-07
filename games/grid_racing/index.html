@@ -731,6 +731,15 @@ function resetTrash(){
   }
   for(const d of debris){ d.live = false; d.m.visible = false; }
 }
+/* knock a can over, tipping it away from (px,pz). Shared by the live player
+   (runner or chaser) and by the replayed ghost, so either can topple a can. */
+function knockCan(c, px, pz){
+  c.knocked = true;
+  const ddx = c.x - px, ddz = c.z - pz;
+  const l = Math.hypot(ddx,ddz)||1;
+  c.dx = ddx/l; c.dz = ddz/l;      /* tips away from whoever hit it */
+  spillTrash(c.x, c.z, px, pz);
+}
 /* boulders on the slopes */
 const ROCK_MAT = new THREE.MeshLambertMaterial({color:0x767a88, flatShading:true});
 for(let i=0;i<8;i++){
@@ -1178,10 +1187,7 @@ function stepPhysics(spd, inputOn){
     if(!c.knocked){
       const ddx = player.x - c.x, ddz = player.z - c.z;
       if(ddx*ddx + ddz*ddz < .52 && player.y < 1.0){
-        c.knocked = true;
-        const l = Math.hypot(ddx,ddz)||1;
-        c.dx = -ddx/l; c.dz = -ddz/l;      /* tips away from the runner */
-        spillTrash(c.x, c.z, player.x, player.z);
+        knockCan(c, player.x, player.z);
       }
     }
   }
@@ -1299,6 +1305,16 @@ function frame(t){
         const inputOn = tick>=HEAD_START_TICKS;
         stepPhysics(CHASE_SPEED, inputOn);
         const g = ghostPos(tick);
+        /* ghost topples cans along its replayed path (chaser knocks them in
+           stepPhysics; this lets the ghost knock them too) */
+        for(const c of cans){
+          if(!c.knocked){
+            const gdx = g[0]-c.x, gdz = g[2]-c.z;
+            if(gdx*gdx + gdz*gdz < .52 && g[1] < 1.0){
+              knockCan(c, g[0], g[2]);
+            }
+          }
+        }
         const dx=player.x-g[0], dy=player.y-g[1], dz=player.z-g[2];
         const dist = Math.sqrt(dx*dx+dy*dy+dz*dz);
         gapEl.textContent = "GAP "+dist.toFixed(1)+" m" + (inputOn?"":"  ·  HOLD");
