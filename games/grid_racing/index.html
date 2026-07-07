@@ -65,6 +65,19 @@
     font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.24em;
     color:var(--dim);text-transform:uppercase;white-space:nowrap}
 
+  /* free-play HUD */
+  #freeTag{position:absolute;top:18px;left:50%;transform:translateX(-50%);display:none;
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.3em;
+    color:var(--amber);text-transform:uppercase;text-shadow:0 2px 10px rgba(4,8,16,.7)}
+  #btnExitFree{position:absolute;top:16px;left:18px;display:none;pointer-events:auto;cursor:pointer;
+    padding:9px 16px;border-radius:20px;font-family:ui-monospace,Menlo,monospace;
+    font-size:11px;letter-spacing:.22em;font-weight:700;text-transform:uppercase;
+    color:var(--ink);background:rgba(8,13,26,.62);border:1px solid var(--line)}
+  #btnExitFree:hover{border-color:var(--amber);color:var(--amber)}
+  .hud.free #clockWrap{display:none}
+  .hud.free #freeTag{display:block}
+  .hud.free #btnExitFree{display:block}
+
   /* ---------- touch controls ---------- */
   #touchUI{position:absolute;inset:0;display:none;pointer-events:none}
   body.touch .hud.on #touchUI{display:block}
@@ -177,6 +190,8 @@
     <div id="roleTag">Runner</div>
   </div>
   <div id="crosshair"></div>
+  <div id="freeTag">Free play — explore</div>
+  <button id="btnExitFree">Exit</button>
   <div id="gapMeter">GAP —.— m</div>
   <div id="flowMeter">FLOW ×1</div>
   <div id="keysHint">WASD move · Space jump · Mouse look · Click to lock cursor</div>
@@ -201,6 +216,7 @@
       <div><b>Score</b>Tag = chaser point. Escape = runner point. First to 5.</div>
     </div>
     <button class="btn ghostb" id="btnPractice">Practice — race your own ghost</button>
+    <button class="btn ghostb" id="btnFree">Free play — explore the course</button>
     <button class="btn blue" id="btnCreate">Create a duel</button>
     <button class="btn orange" id="btnJoin">Join with a code</button>
     <div class="msg err" id="homeErr"></div>
@@ -1025,7 +1041,11 @@ function resetPlayer(sp){
   player.flow=0; player.sinceLand=999;
 }
 const keys = {};
-addEventListener("keydown", e=>{ keys[e.code]=true; if(e.code==="Space") e.preventDefault(); });
+addEventListener("keydown", e=>{
+  keys[e.code]=true;
+  if(e.code==="Space") e.preventDefault();
+  if(e.code==="Escape" && gameMode==="free") endFree();
+});
 addEventListener("keyup",   e=>{ keys[e.code]=false; });
 
 let locked = false;
@@ -1271,6 +1291,26 @@ function endPhase(result){             // result: {type:'runDone'|'tag'|'escape'
   if(cb) cb(result);
 }
 
+/* ---------- free play: no timer, no ghost, just the course ---------- */
+function startFree(){
+  hideScreens();
+  gameMode="free"; tick=0; acc=0;
+  resetPlayer(SPAWN);
+  resetTrash();
+  ghostMesh.visible=false; trail.forEach(d=>d.visible=false); thread.visible=false;
+  hud.className="hud on free";
+  $("keysHint").textContent = IS_TOUCH ? "" : "WASD move · Space jump · Mouse look · Esc or Exit to leave";
+  if(!IS_TOUCH) canvas.requestPointerLock();
+}
+function endFree(){
+  gameMode="idle"; hud.className="hud";
+  document.exitPointerLock && document.exitPointerLock();
+  $("keysHint").textContent = "WASD move · Space jump · Mouse look · Click to lock cursor";
+  show("scrHome");
+}
+$("btnFree").onclick = startFree;
+$("btnExitFree").onclick = endFree;
+
 /* ---------- fixed-step loop ---------- */
 function frame(t){
   requestAnimationFrame(frame);
@@ -1292,11 +1332,13 @@ function frame(t){
       }
     }
   }
-  else if(gameMode==="run" || gameMode==="chase"){
+  else if(gameMode==="run" || gameMode==="chase" || gameMode==="free"){
     acc += dt;
     while(acc>=TICK){
       acc-=TICK;
-      if(gameMode==="run"){
+      if(gameMode==="free"){
+        stepPhysics(RUN_SPEED, true);
+      }else if(gameMode==="run"){
         stepPhysics(RUN_SPEED, true);
         recFrames.push([+player.x.toFixed(2),+player.y.toFixed(2),+player.z.toFixed(2),+player.yaw.toFixed(3)]);
         tick++;
@@ -1327,6 +1369,11 @@ function frame(t){
         }
       }
     }
+    /* free play: only the flow meter updates — no clock, no ghost */
+    if(gameMode==="free"){
+      flowEl.style.display = player.flow ? "block" : "none";
+      flowEl.textContent = "FLOW \u00d7"+player.flow;
+    }else{
     /* HUD clock */
     const total = gameMode==="chase"? (ghostFrames?ghostFrames.length:TURN_TICKS) : TURN_TICKS;
     const remain = Math.max(0,(total-tick))*TICK;
@@ -1361,6 +1408,7 @@ function frame(t){
       }
       tp.needsUpdate = true;
       thread.visible = visN>1;
+    }
     }
   }
   /* ambient life: clouds drift, birds glide */
@@ -1413,7 +1461,7 @@ function frame(t){
 
   /* first-person: the gallop lives in the camera. Paws gather and reach
      together while the view itself hops and rocks — bouncy, not punchy. */
-  const inPlay = (gameMode==="run" || gameMode==="chase");
+  const inPlay = (gameMode==="run" || gameMode==="chase" || gameMode==="free");
   paws.visible = inPlay;
   let camBob = 0, camRoll = 0;
   if(inPlay){
