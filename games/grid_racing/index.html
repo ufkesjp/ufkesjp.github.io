@@ -447,8 +447,8 @@ box(0,1.5,-4, 12,3,1.2,"cliff");
 box(-20,0.25,8, 11,0.5,16,"timber");     /* wraparound porch deck */
 box(-21.5,1.9,8, 6,2.8,8,"timber");      /* lodge body */
 box(-21.5,3.5,8, 7,0.4,9,"sod");         /* walkable sod roof, top 3.7m */
-box(-16.5,1.05,3, 1.7,1.1,1.7,"timber"); /* crate on the porch */
-box(-19,1.6,2, 1.7,2.2,1.7,"timber");    /* stacked crates */
+box(-16.5,1.05,3.2, 2.4,1.1,3,"timber");  /* long crate on the porch */
+box(-19.2,1.6,2.2, 2.6,2.2,2.4,"timber"); /* stacked crates */
 /* hostel dressing (visual only) */
 const WOOD_DARK = new THREE.MeshLambertMaterial({color:0x4a3826});
 const LANTERN_GLOW = new THREE.MeshBasicMaterial({color:0xffc46b});
@@ -480,8 +480,8 @@ box(-28,0.75,24, 3.5,1.5,3.5,"mound");
 
 /* waterfall crag: three 1.1m stone tiers — jump-chain to the 3.3m summit */
 box(-14,0.55,-22, 7.5,1.1,7.5,"crag");
-box(-14,1.65,-22, 5.5,1.1,5.5,"crag");
-box(-14,2.75,-22, 3.5,1.1,3.5,"crag");
+box(-14,1.65,-22, 6.2,1.1,6.2,"crag");
+box(-14,2.75,-22, 4.5,1.1,4.5,"crag");
 
 /* boulder field (mid): varied hop heights */
 box(-8,0.45,-12, 5,0.9,5,"boulder");
@@ -494,25 +494,33 @@ box(3,0.55,-13, 1.2,1.1,14,"log");
 /* creek bed: low grass berms flank the water, stepping stones cross it */
 box(-4,0.25,-8.4, 6,0.5,1.8,"mound");
 box(6,0.25,1.6, 5,0.5,1.8,"mound");
-box(0,0.2,-2.5, 1.5,0.4,1.5,"boulder");  /* stepping stones (0.4m, walk across) */
-box(10,0.2,2.3, 1.4,0.4,1.4,"boulder");
-box(18,0.2,5, 1.4,0.4,1.4,"boulder");
+box(0,0.2,-2.5, 1.8,0.4,1.8,"boulder");  /* stepping stones (0.4m, walk across) */
+box(10,0.2,2.3, 1.8,0.4,1.8,"boulder");
+box(18,0.2,5, 1.8,0.4,1.8,"boulder");
 
 /* standing stones (east): the slalom */
 for(let i=0;i<5;i++) box(20+(i%2?3.5:-3.5),1.75,26-8*i, 2.4,3.5,2.4,"cliff");
 
-/* rock arch (far end): run through, around — or climb boulders to the sod top */
+/* NATURAL ROCK ARCH (far end): hollow pass beneath, grassy top above —
+   run UNDER it at full speed, or climb either flank and run OVER it */
 box(0,3.6,-28, 14,1.2,6,"sod");          /* arch top: grassy, walkable */
 box(-6.4,1.5,-28, 1.2,3,6,"cliff");      /* arch legs */
 box(6.4,1.5,-28, 1.2,3,6,"cliff");
-box(10,0.55,-28, 2.6,1.1,2.6,"boulder");
-box(9.4,1.65,-28, 2.2,1.1,2.2,"boulder");
-box(8.1,2.75,-28, 2,1.1,2,"boulder");    /* then hop onto the arch (4.2m) */
+box(-4.6,3.0,-28, 2.6,1.6,5.6,"cliff");  /* corbel shoulders: opening narrows into an arch profile */
+box(4.6,3.0,-28, 2.6,1.6,5.6,"cliff");
+box(-7.6,0.55,-28, 2.6,1.1,7.4,"boulder"); /* flared rock feet, doubling as long run-up ledges */
+box(7.6,0.55,-28, 2.6,1.1,7.4,"boulder");
+box(10,0.55,-28, 3.2,1.1,6,"boulder");   /* east climb (lengthened) */
+box(9.4,1.65,-28, 2.8,1.1,5,"boulder");
+box(8.2,2.75,-28, 2.4,1.1,4,"boulder");  /* then hop onto the arch (4.2m) */
+box(-10,0.55,-28, 3.2,1.1,6,"boulder");  /* mirrored west climb */
+box(-9.4,1.65,-28, 2.8,1.1,5,"boulder");
+box(-8.2,2.75,-28, 2.4,1.1,4,"boulder");
 
 /* sky route (right rear): flat-top boulders with 3m gaps — fast with flow */
-box(24,0.55,-8, 4,1.1,4,"boulder");
-box(27,0.55,-15, 4,1.1,4,"boulder");
-box(24,0.55,-22, 4,1.1,4,"boulder");     /* chains into the far corner boulder */
+box(24,0.55,-7, 4.5,1.1,5,"boulder");
+box(27,0.55,-15, 4.5,1.1,5,"boulder");
+box(24,0.55,-23, 4.5,1.1,5,"boulder");   /* chains into the far corner boulder */
 box(-28,0.55,-30, 6,1.1,6,"boulder");
 box(28,0.55,-30, 6,1.1,6,"boulder");
 
@@ -616,14 +624,16 @@ function ridgeRange(mirror, seedPh, dipAt){
     const peak = (Math.sin(t*23+seedPh)*.5+.5) * (Math.sin(t*9.5+seedPh*1.7)*.5+.5);
     let h = 9 + 26*Math.pow(t,1.15) + peak*16;   /* taller toward the convergence */
     if(dipAt >= 0) h *= 1 - .78*Math.exp(-Math.pow(t-dipAt,2)/.004);   /* sun notch */
-    return {x:cx, z, h, w:20 + h*.85, ax:Math.sin(t*37+seedPh)*3};
+    let w = 20 + h*.85;
+    if(Math.abs(z) < 55) w = Math.min(w, Math.abs(cx) - 44);   /* never cross the boundary walls */
+    return {x:cx, z, h, w, ax:Math.sin(t*37+seedPh)*3};
   });
 }
 ridgeRange(-1, 1.7, .30);    /* WEST range — saddle notch frames the setting sun */
 ridgeRange( 1, 4.2, -1);     /* EAST range */
 /* low spur folds reaching from the ranges toward the valley floor */
-makeRidge(18, t=>({ x:-74+40*t, z:12-52*t, h:4+Math.sin(Math.PI*t)*14, w:10+Math.sin(Math.PI*t)*11, ax:0 }));
-makeRidge(18, t=>({ x:70-36*t,  z:-2-44*t, h:4+Math.sin(Math.PI*t)*12, w:9+Math.sin(Math.PI*t)*10,  ax:0 }));
+makeRidge(18, t=>({ x:-98+34*t, z:20-56*t, h:4+Math.sin(Math.PI*t)*14, w:8+Math.sin(Math.PI*t)*8, ax:0 }));
+makeRidge(18, t=>({ x:94-30*t,  z:-2-48*t, h:4+Math.sin(Math.PI*t)*12, w:8+Math.sin(Math.PI*t)*7, ax:0 }));
 /* pine trees on the hills */
 const TREE_GREENS = [0x33684a, 0x2c5c40, 0x3f7355];
 function pine(x,z,s){
@@ -652,6 +662,74 @@ for(let c=0;c<8;c++){
 for(let i=0;i<10;i++){
   const a = rnd(0, Math.PI*2), d = rnd(44, 88);
   pine(Math.cos(a)*d, Math.sin(a)*d, rnd(1.0, 2.3));
+}
+/* pines inside the arena — trunks collide so they play fair */
+function arenaPine(x,z,s){
+  pine(x,z,s);
+  colliders.push({minx:x-.28*s, maxx:x+.28*s, miny:0, maxy:1.9*s, minz:z-.28*s, maxz:z+.28*s});
+}
+arenaPine(-6,24,1.5); arenaPine(12,14,1.3); arenaPine(-25,-4,1.4);
+arenaPine(20,-30,1.2); arenaPine(-32,10,1.6);
+
+/* ---------- knockable trash cans (the raccoon mandate) ---------- */
+const CAN_BODY = new THREE.MeshLambertMaterial({color:0x9aa0ab, flatShading:true});
+const CAN_DARK = new THREE.MeshLambertMaterial({color:0x565c68, flatShading:true});
+const cans = [];
+const _tip = new THREE.Vector3();
+function trashCan(x,z,ry){
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.32,.27,.85,8), CAN_BODY);
+  body.position.y = .425; g.add(body);
+  const rim = new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.08,8), CAN_DARK);
+  rim.position.y = .86; g.add(rim);
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(.36,.3,.12,8), CAN_DARK);
+  lid.position.y = .95; g.add(lid);
+  g.traverse(o=>{ if(o.isMesh) o.castShadow = true; });
+  g.position.set(x,0,z); g.rotation.y = ry||0;
+  scene.add(g);
+  cans.push({g, x, z, ry:ry||0, knocked:false, anim:0, dx:0, dz:0});
+}
+trashCan(-13.8,10,.4);    /* beside the hostel porch */
+trashCan(2.6,27,-.3);     /* near the start path */
+trashCan(8.6,-24.4,.9);   /* by the arch climb */
+trashCan(-10.5,-7.2,.2);  /* mid meadow near the creek berm */
+/* spilled-trash debris pool */
+const debris = [];
+const DEB_MATS = [
+  new THREE.MeshLambertMaterial({color:0xd8d2c2, flatShading:true}),
+  new THREE.MeshLambertMaterial({color:0x8fae63, flatShading:true}),
+  new THREE.MeshLambertMaterial({color:0xc46a4a, flatShading:true})
+];
+for(let i=0;i<24;i++){
+  let mesh;
+  if(i%3===0) mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(.09,0), DEB_MATS[0]);
+  else if(i%3===1) mesh = new THREE.Mesh(new THREE.BoxGeometry(.14,.09,.12), DEB_MATS[1]);
+  else mesh = new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.17,5), DEB_MATS[2]);
+  mesh.visible = false; mesh.castShadow = true; scene.add(mesh);
+  debris.push({m:mesh, vx:0, vy:0, vz:0, rx:0, rz:0, live:false});
+}
+let debNext = 0;
+function spillTrash(cx, cz, px, pz){
+  const away = Math.atan2(cz-pz, cx-px);
+  for(let n=0;n<6;n++){
+    const d = debris[debNext]; debNext = (debNext+1)%debris.length;
+    d.live = true; d.m.visible = true;
+    d.m.position.set(cx, .8, cz);
+    const a = away + rnd(-1.1,1.1), sp = rnd(1.5,3.6);
+    d.vx = Math.cos(a)*sp; d.vz = Math.sin(a)*sp; d.vy = rnd(2,3.6);
+    d.rx = rnd(-6,6); d.rz = rnd(-6,6);
+  }
+  tone(150,.1,"square",.1); tone(95,.16,"square",.08,.03);
+  tone(520,.05,"square",.04,.01); tone(330,.06,"square",.04,.08);
+}
+function resetTrash(){
+  for(const c of cans){
+    c.knocked = false; c.anim = 0;
+    c.g.quaternion.set(0,0,0,1);
+    c.g.rotation.set(0,c.ry,0);
+    c.g.position.set(c.x,0,c.z);
+  }
+  for(const d of debris){ d.live = false; d.m.visible = false; }
 }
 /* boulders on the slopes */
 const ROCK_MAT = new THREE.MeshLambertMaterial({color:0x767a88, flatShading:true});
@@ -712,12 +790,12 @@ lightBeacon(-24,4.6,11.4);    /* hostel roof corner */
 const WATER_MAT = new THREE.MeshLambertMaterial({color:0x2f6f7d, side:THREE.DoubleSide});
 const FOAM_MAT  = new THREE.MeshLambertMaterial({color:0xdfe8f4, side:THREE.DoubleSide});
 /* sheets cascade down the crag's front face */
-[[2.75,-20.22],[1.65,-19.22],[0.55,-18.22]].forEach(([y,z])=>{
+[[2.75,-19.72],[1.65,-18.86],[0.55,-18.22]].forEach(([y,z])=>{
   const s = new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.1), WATER_MAT);
   s.position.set(-14,y,z); scene.add(s);
 });
 /* white lip foam at each tier edge */
-[[3.3,-20.25],[2.2,-19.25],[1.1,-18.25]].forEach(([y,z])=>{
+[[3.3,-19.75],[2.2,-18.9],[1.1,-18.25]].forEach(([y,z])=>{
   const f = new THREE.Mesh(new THREE.BoxGeometry(2.5,.12,.3), FOAM_MAT);
   f.position.set(-14,y+.02,z+.1); scene.add(f);
 });
@@ -1095,6 +1173,18 @@ function stepPhysics(spd, inputOn){
     player.sinceLand = wasGrounded ? player.sinceLand+1 : 0;
     if(player.sinceLand>FLOW_WINDOW && player.flow) player.flow = 0;
   }
+  /* knockable trash cans: plow through one and it tips + spills */
+  for(const c of cans){
+    if(!c.knocked){
+      const ddx = player.x - c.x, ddz = player.z - c.z;
+      if(ddx*ddx + ddz*ddz < .52 && player.y < 1.0){
+        c.knocked = true;
+        const l = Math.hypot(ddx,ddz)||1;
+        c.dx = -ddx/l; c.dz = -ddz/l;      /* tips away from the runner */
+        spillTrash(c.x, c.z, player.x, player.z);
+      }
+    }
+  }
 }
 
 /* ---------- recording / replay ---------- */
@@ -1138,6 +1228,7 @@ function startCountdown(label, next, spawn){
   subTxt.textContent = label; subTxt.classList.add("on");
   bigEl.classList.add("on");
   resetPlayer(spawn);
+  resetTrash();
   if(!IS_TOUCH) canvas.requestPointerLock();
 }
 function startRun(after){
@@ -1282,6 +1373,27 @@ function frame(t){
     mp.array[mi*3]   = mistBase[mi*3] + Math.sin(t*.001+mi)*.2;
   }
   mp.needsUpdate = true;
+  /* trash cans tip over; spilled trash tumbles and settles */
+  for(const c of cans){
+    if(c.knocked && c.anim < 1){
+      c.anim = Math.min(1, c.anim + dt*3.4);
+      const e = 1 - Math.pow(1-c.anim, 2);
+      _tip.set(c.dz, 0, -c.dx).normalize();
+      c.g.quaternion.setFromAxisAngle(_tip, e*1.52);
+      c.g.position.set(c.x + c.dx*e*.4, Math.sin(Math.min(1,c.anim*1.5)*Math.PI)*.12, c.z + c.dz*e*.4);
+    }
+  }
+  for(const d of debris){
+    if(!d.live) continue;
+    d.vy -= 14*dt;
+    d.m.position.x += d.vx*dt; d.m.position.y += d.vy*dt; d.m.position.z += d.vz*dt;
+    d.m.rotation.x += d.rx*dt; d.m.rotation.z += d.rz*dt;
+    if(d.m.position.y < .07){
+      d.m.position.y = .07;
+      if(d.vy < -1.4){ d.vy = -d.vy*.35; d.vx *= .6; d.vz *= .6; }
+      else { d.vy = 0; d.vx *= .82; d.vz *= .82; d.rx *= .85; d.rz *= .85; }
+    }
+  }
 
   /* first-person: the gallop lives in the camera. Paws gather and reach
      together while the view itself hops and rocks — bouncy, not punchy. */
