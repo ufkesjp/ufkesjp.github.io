@@ -1,881 +1,926 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../css/style.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grid Racing Game</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHOST TAG — 15 second pursuit duels</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-    body {
-        font-family: 'Space Grotesk', system-ui, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        overflow: hidden;
-    }
+  :root{
+    --ink:#15171c;
+    --paper:#e9e6df;
+    --runner:#2456e6;
+    --chaser:#ff5a1f;
+    --line:#c9c4b8;
+    --ok:#1a9a4a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--ink)}
+  body{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--paper)}
+  #c{position:fixed;inset:0;display:block}
 
-    #gameContainer {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--paper);
-        border: var(--bord);
-        box-shadow: var(--shadow);
-        padding: 0.5rem;
-        width: 98vw;
-        height: 76.5vh;
-        position: relative;
-        box-sizing: border-box;
-    }
+  /* ---------- HUD ---------- */
+  .hud{position:fixed;inset:0;pointer-events:none;display:none}
+  .hud.on{display:block}
 
-    canvas {
-        background-color: var(--bg);
-        display: block;
-        touch-action: none;
-        border: var(--bord);
-        width: 100%;
-        height: 100%;
-    }
+  /* signature chronometer */
+  #clockWrap{position:absolute;top:18px;left:50%;transform:translateX(-50%);text-align:center}
+  #clock{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:clamp(44px,7vw,84px);font-weight:700;letter-spacing:-0.02em;
+    line-height:1;color:var(--paper);
+    text-shadow:0 2px 0 rgba(0,0,0,.55);
+    font-variant-numeric:tabular-nums;
+  }
+  #clockBar{width:min(340px,60vw);height:6px;background:rgba(0,0,0,.45);margin:8px auto 0;border-radius:3px;overflow:hidden}
+  #clockFill{height:100%;width:100%;background:var(--paper);transition:none}
+  #roleTag{
+    display:inline-block;margin-top:10px;padding:4px 14px;border-radius:3px;
+    font-family:Impact,"Arial Black",sans-serif;font-size:15px;letter-spacing:.22em;
+    color:#fff;background:var(--runner);text-transform:uppercase;
+  }
+  .hud.chase #roleTag{background:var(--chaser)}
+  .hud.chase #clockFill{background:var(--chaser)}
+  .hud.run #clockFill{background:var(--runner)}
 
-    #timerDisplay {
-        position: absolute;
-        top: 1rem;
-        color: var(--ink);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-align: center;
-        z-index: 10;
-        background-color: var(--accent);
-        border: var(--bord);
-        box-shadow: var(--shadow-xs);
-        padding: 0.4rem 1rem;
-        width: fit-content;
-        left: 50%;
-        transform: translateX(-50%);
-        pointer-events: none;
-    }
+  #gapMeter{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);
+    font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.1em;
+    color:#fff;background:rgba(0,0,0,.5);padding:5px 12px;border-radius:3px;display:none}
+  .hud.chase #gapMeter{display:block}
 
-    #initialScreen, #gameOverScreen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(244, 237, 224, 0.92);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 1rem;
-        box-sizing: border-box;
-        z-index: 20;
-    }
+  #crosshair{position:absolute;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;
+    border-radius:50%;background:#fff;opacity:.85;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
 
-    #initialScreen h2, #gameOverScreen p {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 2rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        color: var(--ink);
-        margin-bottom: 1rem;
-    }
+  #keysHint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    font-size:12px;letter-spacing:.12em;color:rgba(233,230,223,.75);text-transform:uppercase}
 
-    #initialScreen label {
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 1rem;
-        opacity: 0.6;
-        margin-bottom: 0.5rem;
-    }
+  /* ---------- screens ---------- */
+  .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(21,23,28,.86);z-index:10;overflow-y:auto}
+  .screen.on{display:flex}
+  .card{width:min(560px,92vw);background:var(--paper);color:var(--ink);
+    border-radius:6px;padding:34px 36px;margin:24px 0}
+  .brand{font-family:Impact,"Arial Black",sans-serif;font-size:clamp(40px,7vw,60px);
+    line-height:.95;letter-spacing:.01em;text-transform:uppercase}
+  .brand .g{color:var(--runner)}
+  .brand .t{color:var(--chaser)}
+  .sub{margin-top:10px;font-size:14px;line-height:1.55;color:#43423d}
+  .rulebar{display:flex;gap:0;margin:20px 0 6px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .rulebar div{flex:1;padding:10px 12px;font-size:12px;line-height:1.45}
+  .rulebar div+div{border-left:1px solid var(--line)}
+  .rulebar b{display:block;font-family:Impact,"Arial Black",sans-serif;font-size:13px;
+    letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px}
+  .rulebar .r b{color:var(--runner)}
+  .rulebar .c b{color:var(--chaser)}
 
-    #numPlayersInput {
-        background-color: var(--paper);
-        color: var(--ink);
-        border: var(--bord);
-        box-shadow: var(--shadow-xs);
-        padding: 0.5rem 1rem;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.5rem;
-        font-weight: 700;
-        width: 80px;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        outline: none;
-    }
+  .btn{display:block;width:100%;margin-top:12px;padding:14px 16px;border:0;border-radius:4px;
+    font-family:Impact,"Arial Black",sans-serif;font-size:17px;letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer;color:#fff;background:var(--ink)}
+  .btn:hover{filter:brightness(1.12)}
+  .btn.blue{background:var(--runner)}
+  .btn.orange{background:var(--chaser)}
+  .btn.ghostb{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+  .btn:focus-visible{outline:3px solid var(--chaser);outline-offset:2px}
 
-    .game-button {
-        background-color: var(--accent);
-        color: var(--ink);
-        padding: 0.8rem 2rem;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.85rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        cursor: pointer;
-        border: var(--bord);
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.08s, box-shadow 0.08s;
-        margin-top: 1rem;
-    }
+  .row{display:flex;gap:10px;margin-top:12px}
+  .row .btn{margin-top:0}
+  input[type=text]{width:100%;padding:13px 14px;border:2px solid var(--ink);border-radius:4px;
+    font-family:ui-monospace,Menlo,monospace;font-size:17px;letter-spacing:.2em;text-transform:uppercase;
+    background:#fff;color:var(--ink)}
+  input[type=text]:focus{outline:3px solid var(--runner);outline-offset:1px}
+  label{display:block;margin-top:16px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:#57554e;margin-bottom:6px;font-weight:700}
 
-    .game-button:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: var(--shadow);
-    }
+  .code{font-family:ui-monospace,Menlo,monospace;font-size:clamp(34px,8vw,52px);
+    letter-spacing:.28em;text-align:center;padding:16px 0 12px;font-weight:700}
+  .score{display:flex;justify-content:center;align-items:baseline;gap:18px;margin:8px 0 4px;
+    font-family:Impact,"Arial Black",sans-serif}
+  .score .n{font-size:52px}
+  .score .n.p1{color:var(--runner)}
+  .score .n.p2{color:var(--chaser)}
+  .score .d{font-size:24px;color:#8b887e}
+  .names{display:flex;justify-content:center;gap:18px;font-size:12px;letter-spacing:.1em;
+    text-transform:uppercase;color:#57554e}
+  .names span{width:120px;text-align:center}
 
-    .game-button:active {
-        transform: translate(2px, 2px);
-        box-shadow: 1px 1px 0 var(--ink);
-    }
+  .msg{margin-top:14px;font-size:13px;line-height:1.5;color:#43423d}
+  .msg.err{color:#b3261e;font-weight:700}
+  .tiny{margin-top:16px;font-size:11px;line-height:1.5;color:#8b887e}
 
-    #gameOverScreen ul {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0 2rem;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1rem;
-        font-weight: 700;
-    }
+  /* ---------- touch controls ---------- */
+  #touchUI{position:absolute;inset:0;display:none;pointer-events:none}
+  body.touch .hud.on #touchUI{display:block}
+  body.touch #keysHint{display:none}
+  #stickBase{position:absolute;width:124px;height:124px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.5);background:rgba(0,0,0,.28);display:none}
+  #stickNub{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;
+    border-radius:50%;background:rgba(255,255,255,.8)}
+  #btnJump{position:absolute;right:26px;bottom:104px;width:96px;height:96px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.65);background:rgba(0,0,0,.4);color:#fff;
+    font-family:Impact,"Arial Black",sans-serif;font-size:16px;letter-spacing:.14em;
+    pointer-events:auto;user-select:none;-webkit-user-select:none;touch-action:none}
+  #btnJump:active{background:rgba(255,90,31,.7)}
+  #touchHint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    font-size:11px;letter-spacing:.1em;color:rgba(233,230,223,.75);text-transform:uppercase;
+    white-space:nowrap}
 
-    #gameOverScreen li {
-        margin-bottom: 0.5rem;
-        opacity: 0.7;
-    }
+  /* countdown + result overlays */
+  #big{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    pointer-events:none;z-index:20}
+  #big.on{display:flex}
+  #bigTxt{font-family:Impact,"Arial Black",sans-serif;font-size:clamp(80px,18vw,180px);
+    color:#fff;text-transform:uppercase;letter-spacing:.02em;
+    text-shadow:0 4px 0 rgba(0,0,0,.5)}
+  #subTxt{position:fixed;top:62%;width:100%;text-align:center;display:none;z-index:20;
+    font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:#fff;
+    text-shadow:0 2px 0 rgba(0,0,0,.6)}
+  #subTxt.on{display:block}
 </style>
-
 </head>
-<body class="selection:bg-blue-300 selection:text-blue-900">
-    <div class="game-container">
-        <!-- Game Controls and Info -->
-        <div class="game-controls flex flex-col gap-4 p-4 bg-gray-700 rounded-lg shadow-inner">
-            <h1 class="text-2xl font-bold text-center text-white mb-4">Grid Racing</h1>
+<body>
+<canvas id="c"></canvas>
 
-            <!-- Player Selection (Pre-Game) -->
-            <div id="player-setup" class="flex flex-col gap-3">
-                <label for="num-players" class="text-lg text-gray-300">Number of Players (1-4):</label>
-                <input type="number" id="num-players" min="1" max="4" value="2" class="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="start-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95">
-                    Start Game
-                </button>
-            </div>
+<!-- in-game HUD -->
+<div class="hud" id="hud">
+  <div id="clockWrap">
+    <div id="clock">15.00</div>
+    <div id="clockBar"><div id="clockFill"></div></div>
+    <div id="roleTag">Runner</div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="gapMeter">GAP —.— m</div>
+  <div id="keysHint">WASD move · Space jump · Mouse look · Click to lock cursor</div>
+  <div id="touchUI">
+    <div id="stickBase"><div id="stickNub"></div></div>
+    <button id="btnJump">JUMP</button>
+    <div id="touchHint">Left thumb: move · Right thumb: look</div>
+  </div>
+</div>
 
-            <!-- Game Info (In-Game) -->
-            <div id="game-info" class="hidden flex flex-col gap-2">
-                <div class="player-info-box">
-                    <div id="current-player-color" class="player-info-dot"></div>
-                    <span id="current-player-text" class="text-lg font-semibold">Current Player: P1</span>
-                </div>
-                <p class="text-xl font-bold text-gray-200">Dice Roll: <span id="dice-roll">0</span></p>
-                <p class="text-xl font-bold text-gray-200">Actions Left: <span id="actions-left">0</span></p>
+<div id="big"><div id="bigTxt">3</div></div>
+<div id="subTxt"></div>
 
-                <button id="roll-dice-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95 mt-4">
-                    Roll Dice
-                </button>
-                <button id="end-turn-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95" disabled>
-                    End Turn
-                </button>
-                <!-- New: Action Mode Toggle -->
-                <button id="action-mode-toggle-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95 mt-4">
-                    Mode: Move
-                </button>
-                <p id="game-message" class="text-sm text-center text-gray-400 mt-2"></p>
-            </div>
-        </div>
-
-        <!-- Game Board Area -->
-        <div class="game-board-area flex-grow flex items-center justify-center">
-            <div id="game-grid" class="game-grid">
-                <!-- Grid cells will be dynamically generated here by JavaScript -->
-            </div>
-        </div>
+<!-- HOME -->
+<div class="screen on" id="scrHome">
+  <div class="card">
+    <div class="brand">GHOST<span class="g">/</span>TAG<span class="t">.</span></div>
+    <div class="sub">Asynchronous pursuit duels. Record a 15-second escape run through the course. Your friend picks up their turn whenever — and chases your ghost, which moves exactly as you did.</div>
+    <div class="rulebar">
+      <div class="r"><b>Run · 15s</b>Sprint the course. Your movement is recorded.</div>
+      <div class="c"><b>Chase · 15s</b>Hunt the ghost. Touch it before time ends.</div>
+      <div><b>Score</b>Tag = chaser point. Escape = runner point. First to 5.</div>
     </div>
+    <button class="btn ghostb" id="btnPractice">Practice — race your own ghost</button>
+    <button class="btn blue" id="btnCreate">Create a duel</button>
+    <button class="btn orange" id="btnJoin">Join with a code</button>
+    <div class="msg err" id="homeErr"></div>
+    <div class="tiny">Duels are passed back and forth with a 5-letter code — no need to be online at the same time.</div>
+  </div>
+</div>
 
-    <!-- Game Over Modal -->
-    <div id="game-over-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 class="text-3xl font-bold text-white mb-4">Game Over!</h2>
-            <p id="winner-message" class="text-2xl text-gray-200 mb-6"></p>
-            <button id="play-again-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 active:scale-95">
-                Play Again
-            </button>
-        </div>
+<!-- NAME + CREATE/JOIN -->
+<div class="screen" id="scrName">
+  <div class="card">
+    <div class="brand" id="nameTitle">Create duel</div>
+    <label for="inName">Your name</label>
+    <input type="text" id="inName" maxlength="12" placeholder="ALEX">
+    <div id="joinRow" style="display:none">
+      <label for="inCode">Duel code</label>
+      <input type="text" id="inCode" maxlength="5" placeholder="ABCDE">
     </div>
+    <div class="row">
+      <button class="btn ghostb" id="btnNameBack">Back</button>
+      <button class="btn" id="btnNameGo">Continue</button>
+    </div>
+    <div class="msg err" id="nameErr"></div>
+  </div>
+</div>
 
-    <script>
-        // Global game state variables
-        const GRID_SIZE = 10; // 10x10 grid
-        const ENV_COVERAGE_PERCENTAGE = 0.15; // Target 15% of grid cells to be environment blocks
-        const SEGMENT_LENGTH = 3; // Each environment block will try to be a segment of this length
+<!-- LOBBY / TURN STATUS -->
+<div class="screen" id="scrLobby">
+  <div class="card">
+    <div class="brand" style="font-size:30px">Duel <span class="t" id="lobbyCode">·····</span></div>
+    <div class="code" id="codeBig">·····</div>
+    <button class="btn blue" id="btnCopyLink">Copy duel link</button>
+    <div class="score"><span class="n p1" id="s1">0</span><span class="d">–</span><span class="n p2" id="s2">0</span></div>
+    <div class="names"><span id="n1">—</span><span id="n2">—</span></div>
+    <div class="msg" id="lobbyMsg">Waiting…</div>
+    <button class="btn blue" id="btnTakeTurn" style="display:none">Take my turn</button>
+    <div class="row">
+      <button class="btn ghostb" id="btnRefresh">Refresh</button>
+      <button class="btn ghostb" id="btnLeave">Exit</button>
+    </div>
+    <div class="tiny" id="lobbyTiny">Send the duel link to your friend — it drops them straight into this duel. The code works too.</div>
+  </div>
+</div>
 
-        let numPlayers = 2; // Default number of players
-        let playerPositions = []; // [{x: 0, y: 0, color: 'red'}, ...]
-        let environmentBlocks = []; // Cells permanently blocked by the environment
-        let playerBlockedCells = []; // Cells blocked by players during gameplay
-        let targetPosition = { x: -1, y: -1 }; // Will be randomized
+<!-- RESULT -->
+<div class="screen" id="scrResult">
+  <div class="card">
+    <div class="brand" id="resTitle" style="font-size:34px">Tagged!</div>
+    <div class="msg" id="resMsg"></div>
+    <button class="btn" id="btnResNext">Continue</button>
+  </div>
+</div>
 
-        let currentPlayerIndex = 0;
-        let diceRoll = 0;
-        let actionsLeft = 0;
-        let gameStarted = false;
-        let gameOver = false;
-        let currentActionMode = 'move'; // 'move' or 'block'
+<script>
+"use strict";
+/* =========================================================
+   GHOST TAG — 15-second asynchronous pursuit duels
+   - Fixed 60Hz sim, position-recorded ghosts (deterministic replay)
+   - Solo practice + async 1v1 via shared storage game codes
+   ========================================================= */
 
-        const playerColors = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981']; // Red, Blue, Amber, Emerald
+/* ---------- tiny DOM helpers ---------- */
+const $ = id => document.getElementById(id);
+const screens = ["scrHome","scrName","scrLobby","scrResult"];
+function show(id){ screens.forEach(s=>$(s).classList.toggle("on", s===id)); }
+function hideScreens(){ screens.forEach(s=>$(s).classList.remove("on")); }
 
-        // DOM Elements
-        // These are declared here and will be assigned in DOMContentLoaded
-        let numPlayersInput;
-        let startGameBtn;
-        let playerSetupDiv;
-        let gameInfoDiv;
-        let gameGridDiv;
-        let currentPlayerColorDiv;
-        let currentPlayerTextSpan;
-        let diceRollSpan;
-        let actionsLeftSpan;
-        let rollDiceBtn;
-        let endTurnBtn;
-        let gameMessageP;
-        let gameOverModal;
-        let winnerMessageP;
-        let playAgainBtn;
-        let actionModeToggleBtn;
+/* ---------- constants ---------- */
+const TICK = 1/60, TURN_SECS = 15, TURN_TICKS = TURN_SECS*60;
+const HEAD_START_TICKS = 45;          // chaser frozen 0.75s
+const TAG_GRACE_TICKS = 100;          // no tags in the first ~1.7s (prevents spawn insta-tags)
+const TAG_RADIUS = 1.35;
+const RUN_SPEED = 8.0, CHASE_SPEED = 8.65;   // slight chaser edge
+const JUMP_V = 7.9, GRAV = 22.5, EYE = 1.62;
+const P_R = 0.35, P_H = 1.7, STEP_UP = 0.56;
+const WIN_SCORE = 5;
 
+/* ---------- three.js scene ---------- */
+const canvas = $("c");
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd7dde1);
+scene.fog = new THREE.Fog(0xd7dde1, 55, 130);
+const camera = new THREE.PerspectiveCamera(78, innerWidth/innerHeight, .05, 300);
+scene.add(camera);
 
-        /**
-         * Calculates Manhattan distance between two cells.
-         * @param {Object} p1 - {x, y} of first point.
-         * @param {Object} p2 - {x, y} of second point.
-         * @returns {number} Manhattan distance.
-         */
-        function manhattanDistance(p1, p2) {
-            return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+const hemi = new THREE.HemisphereLight(0xf3f6f8, 0x8d897d, .95); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2df, .85);
+sun.position.set(30,60,20); scene.add(sun);
+
+function onResize(){
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+}
+addEventListener("resize", onResize); onResize();
+
+/* ---------- course: axis-aligned boxes ---------- */
+const colliders = [];   // {minx,miny,minz,maxx,maxy,maxz}
+const matA = new THREE.MeshLambertMaterial({color:0xc9c4b8});
+const matB = new THREE.MeshLambertMaterial({color:0x9a958a});
+const matC = new THREE.MeshLambertMaterial({color:0x7d7970});
+const matBlue = new THREE.MeshLambertMaterial({color:0x2456e6});
+const matOr  = new THREE.MeshLambertMaterial({color:0xff5a1f});
+
+function box(cx,cy,cz,sx,sy,sz,mat){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz), mat||matA);
+  m.position.set(cx,cy,cz); scene.add(m);
+  colliders.push({minx:cx-sx/2,maxx:cx+sx/2,miny:cy-sy/2,maxy:cy+sy/2,minz:cz-sz/2,maxz:cz+sz/2});
+  return m;
+}
+/* floor */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(76,76),
+  new THREE.MeshLambertMaterial({color:0xaba69a}));
+floor.rotation.x = -Math.PI/2; scene.add(floor);
+const grid = new THREE.GridHelper(76,19,0x8d887c,0x99948a);
+grid.position.y = .01; scene.add(grid);
+
+/* boundary walls */
+box(0,3,-38, 76,6,1, matC); box(0,3,38, 76,6,1, matC);
+box(-38,3,0, 1,6,76, matC); box(38,3,0, 1,6,76, matC);
+
+/* start pad (painted) */
+const pad = new THREE.Mesh(new THREE.PlaneGeometry(6,6),
+  new THREE.MeshLambertMaterial({color:0x2456e6}));
+pad.rotation.x = -Math.PI/2; pad.position.set(0,.02,32); scene.add(pad);
+
+/* --- obstacle field (hand-placed for routing choices) --- */
+/* centre spine: staggered walls forcing weaves */
+box(0,1.5,20, 12,3,1.2, matB);
+box(-7,1.5,12, 10,3,1.2, matB);
+box(7,1.5,4, 10,3,1.2, matB);
+box(0,1.5,-4, 12,3,1.2, matB);
+/* left lane: stair-steps up to a walkway (fast risky route) */
+box(-20,0.5,24, 4,1,4);
+box(-20,1.25,18.5, 4,2.5,4);
+box(-20,2.0,13, 4,4,4);
+box(-20,2.9,2, 4,5.8,18, matB);        /* elevated walkway */
+box(-20,0.5,-10, 4,1,4);               /* drop-off step */
+/* right lane: pillar slalom */
+for(let i=0;i<5;i++) box(20+(i%2?3.5:-3.5),1.75,26-8*i, 2.4,3.5,2.4, matC);
+/* mid arena clutter */
+box(-8,1,-12, 5,2,5);
+box(8,1.4,-14, 3,2.8,3, matC);
+box(0,0.75,-20, 10,1.5,3);
+box(-14,2.2,-22, 4,4.4,4, matB);
+box(14,1,-24, 6,2,2.4);
+/* tunnel block near far end (crouchless: run around or over) */
+box(0,3.6,-28, 14,1.2,6, matB);        /* roof slab */
+box(-6.4,1.5,-28, 1.2,3,6, matC);      /* tunnel walls */
+box(6.4,1.5,-28, 1.2,3,6, matC);
+/* far corner platforms */
+box(-28,1.1,-30, 6,2.2,6);
+box(28,1.6,-30, 6,3.2,6, matB);
+/* orange marker beacons at far wall (visual goal-feel) */
+box(-2,4.5,-36.4, 1,3,0.6, matOr); box(2,4.5,-36.4, 1,3,0.6, matOr);
+
+const SPAWN = {x:0, y:0, z:32, yaw:0};          // runner start, yaw 0 faces -z into the course
+const CHASER_SPAWN = {x:0, y:0, z:36.4, yaw:0}; // chaser starts ~4.5m behind the ghost
+
+/* ---------- ghost visual ---------- */
+function makeGhost(colorHex){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshLambertMaterial({color:colorHex, transparent:true, opacity:.92});
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,1.05,10), mat);
+  body.position.y = .9; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(.3,12,10), mat);
+  head.position.y = 1.62; g.add(head);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(.34,.1,.12),
+    new THREE.MeshLambertMaterial({color:0xffffff}));
+  visor.position.set(0,1.64,.24); g.add(visor);
+  g.visible = false; scene.add(g);
+  return g;
+}
+const ghostMesh = makeGhost(0x2456e6);
+/* breadcrumb trail */
+const TRAIL_N = 26;
+const trail = [];
+for(let i=0;i<TRAIL_N;i++){
+  const d = new THREE.Mesh(new THREE.SphereGeometry(.09,6,5),
+    new THREE.MeshBasicMaterial({color:0x2456e6, transparent:true, opacity:.5}));
+  d.visible=false; scene.add(d); trail.push(d);
+}
+
+/* ---------- player physics ---------- */
+const player = {x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false};
+function resetPlayer(sp){
+  sp = sp || SPAWN;
+  player.x=sp.x; player.y=sp.y; player.z=sp.z;
+  player.vx=player.vy=player.vz=0; player.yaw=sp.yaw; player.pitch=0; player.grounded=true;
+}
+const keys = {};
+addEventListener("keydown", e=>{ keys[e.code]=true; if(e.code==="Space") e.preventDefault(); });
+addEventListener("keyup",   e=>{ keys[e.code]=false; });
+
+let locked = false;
+const IS_TOUCH = ('ontouchstart' in window) || matchMedia('(pointer:coarse)').matches;
+if(IS_TOUCH) document.body.classList.add("touch");
+canvas.style.touchAction = "none";
+
+canvas.addEventListener("click", ()=>{ if(!IS_TOUCH && gameMode!=="idle") canvas.requestPointerLock(); });
+document.addEventListener("pointerlockchange", ()=>{ locked = document.pointerLockElement===canvas; });
+document.addEventListener("mousemove", e=>{
+  if(!locked) return;
+  player.yaw   -= e.movementX*0.0022;
+  player.pitch -= e.movementY*0.0022;
+  player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
+});
+
+/* ---------- touch: floating stick (left) + look drag (right) + jump ---------- */
+const touchMove = {x:0, z:0};
+let moveId = null, lookId = null;
+let moveAnchor = {x:0, y:0}, lookLast = {x:0, y:0};
+const STICK_R = 52, LOOK_SENS = 0.0046;
+const stickBase = $("stickBase"), stickNub = $("stickNub");
+
+function setNub(dx,dy){ stickNub.style.transform = "translate("+dx+"px,"+dy+"px)"; }
+canvas.addEventListener("touchstart", e=>{
+  if(gameMode==="idle") return;
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    if(moveId===null && t.clientX < innerWidth*0.45){
+      moveId = t.identifier; moveAnchor = {x:t.clientX, y:t.clientY};
+      stickBase.style.display = "block";
+      stickBase.style.left = (t.clientX-62)+"px";
+      stickBase.style.top  = (t.clientY-62)+"px";
+      setNub(0,0);
+    } else if(lookId===null){
+      lookId = t.identifier; lookLast = {x:t.clientX, y:t.clientY};
+    }
+  }
+}, {passive:false});
+canvas.addEventListener("touchmove", e=>{
+  if(gameMode==="idle") return;
+  e.preventDefault();
+  for(const t of e.changedTouches){
+    if(t.identifier===moveId){
+      let dx = t.clientX-moveAnchor.x, dy = t.clientY-moveAnchor.y;
+      const l = Math.hypot(dx,dy);
+      if(l>STICK_R){ dx = dx/l*STICK_R; dy = dy/l*STICK_R; }
+      setNub(dx,dy);
+      touchMove.x = dx/STICK_R;      /* right = +x strafe */
+      touchMove.z = dy/STICK_R;      /* drag up = forward (iz negative) */
+    } else if(t.identifier===lookId){
+      player.yaw   -= (t.clientX-lookLast.x)*LOOK_SENS;
+      player.pitch -= (t.clientY-lookLast.y)*LOOK_SENS;
+      player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
+      lookLast = {x:t.clientX, y:t.clientY};
+    }
+  }
+}, {passive:false});
+function endTouches(e){
+  for(const t of e.changedTouches){
+    if(t.identifier===moveId){ moveId=null; touchMove.x=touchMove.z=0;
+      stickBase.style.display="none"; }
+    if(t.identifier===lookId) lookId=null;
+  }
+}
+canvas.addEventListener("touchend", endTouches);
+canvas.addEventListener("touchcancel", endTouches);
+
+const jumpBtn = $("btnJump");
+jumpBtn.addEventListener("touchstart", e=>{ e.preventDefault(); keys["Space"]=true; }, {passive:false});
+jumpBtn.addEventListener("touchend",   e=>{ e.preventDefault(); keys["Space"]=false; }, {passive:false});
+jumpBtn.addEventListener("touchcancel",e=>{ keys["Space"]=false; });
+
+function overlaps(px,py,pz,b){
+  return px+P_R>b.minx && px-P_R<b.maxx &&
+         py+P_H>b.miny && py<b.maxy &&
+         pz+P_R>b.minz && pz-P_R<b.maxz;
+}
+function headroom(px,py,pz){
+  for(const b of colliders) if(overlaps(px,py,pz,b)) return false;
+  return true;
+}
+function stepPhysics(spd, inputOn){
+  /* wish direction from keys + yaw */
+  let ix=0, iz=0;
+  if(inputOn){
+    if(keys["KeyW"]) iz-=1; if(keys["KeyS"]) iz+=1;
+    if(keys["KeyA"]) ix-=1; if(keys["KeyD"]) ix+=1;
+    ix += touchMove.x; iz += touchMove.z;
+  }
+  let wx=0, wz=0;
+  if(ix||iz){
+    const l = Math.hypot(ix,iz); if(l>1){ ix/=l; iz/=l; }
+    /* forward (W) is -z rotated by yaw; matches camera.rotateY(yaw) */
+    const s = Math.sin(player.yaw), c = Math.cos(player.yaw);
+    wx = ( ix*c + iz*s )*spd;
+    wz = ( iz*c - ix*s )*spd;
+  }
+  const accel = player.grounded ? 14 : 3.2;
+  player.vx += (wx-player.vx)*Math.min(1, accel*TICK);
+  player.vz += (wz-player.vz)*Math.min(1, accel*TICK);
+  if(inputOn && keys["Space"] && player.grounded){ player.vy = JUMP_V; player.grounded=false; }
+  player.vy -= GRAV*TICK;
+
+  /* X axis */
+  let nx = player.x + player.vx*TICK;
+  for(const b of colliders){
+    if(overlaps(nx,player.y,player.z,b)){
+      const top = b.maxy - player.y;
+      if(top>0 && top<=STEP_UP && player.grounded && headroom(nx,b.maxy,player.z)){
+        player.y = b.maxy;               /* step up */
+      }else{
+        nx = player.vx>0 ? b.minx-P_R-0.001 : b.maxx+P_R+0.001;
+        player.vx = 0;
+      }
+    }
+  }
+  player.x = nx;
+  /* Z axis */
+  let nz = player.z + player.vz*TICK;
+  for(const b of colliders){
+    if(overlaps(player.x,player.y,nz,b)){
+      const top = b.maxy - player.y;
+      if(top>0 && top<=STEP_UP && player.grounded && headroom(player.x,b.maxy,nz)){
+        player.y = b.maxy;
+      }else{
+        nz = player.vz>0 ? b.minz-P_R-0.001 : b.maxz+P_R+0.001;
+        player.vz = 0;
+      }
+    }
+  }
+  player.z = nz;
+  /* Y axis */
+  let ny = player.y + player.vy*TICK;
+  player.grounded = false;
+  if(ny<=0){ ny=0; player.vy=0; player.grounded=true; }
+  for(const b of colliders){
+    if(overlaps(player.x,ny,player.z,b)){
+      if(player.vy<=0 && player.y>=b.maxy-0.3){ ny=b.maxy; player.vy=0; player.grounded=true; }
+      else if(player.vy>0){ ny=b.miny-P_H-0.001; player.vy=0; }
+    }
+  }
+  player.y = ny;
+}
+
+/* ---------- recording / replay ---------- */
+let recFrames = [];                    // [x,y,z,yaw] per tick
+let ghostFrames = null, ghostTick = 0;
+/* strip up to 2s of standing-still at the start of a run, so the
+   runner's reaction time at GO doesn't hand the chaser free ground */
+function trimLead(frames){
+  let i=0;
+  const cap = Math.min(frames.length-1, 120);
+  while(i<cap){
+    const f = frames[i];
+    if(Math.hypot(f[0]-SPAWN.x, f[2]-SPAWN.z) > 0.6 || f[1] > 0.3) break;
+    i++;
+  }
+  return frames.slice(i);
+}
+function ghostPos(t){
+  const f = ghostFrames[Math.min(t, ghostFrames.length-1)];
+  return f;
+}
+
+/* ---------- game state machine ---------- */
+/* gameMode: idle | countdown | run | chase */
+let gameMode = "idle";
+let tick = 0, acc = 0, lastT = 0;
+let phaseAfter = null;                 // callback when a phase resolves
+let countdownEnd = 0, countdownNext = null;
+let chaseResolved = false;
+
+const hud = $("hud"), clockEl = $("clock"), fillEl = $("clockFill");
+const roleEl = $("roleTag"), gapEl = $("gapMeter");
+const bigEl = $("big"), bigTxt = $("bigTxt"), subTxt = $("subTxt");
+
+function startCountdown(label, next, spawn){
+  hideScreens();
+  gameMode = "countdown";
+  countdownEnd = performance.now()+3200;
+  countdownNext = next;
+  subTxt.textContent = label; subTxt.classList.add("on");
+  bigEl.classList.add("on");
+  resetPlayer(spawn);
+  if(!IS_TOUCH) canvas.requestPointerLock();
+}
+function startRun(after){
+  startCountdown("RUN — escape for 15 seconds", ()=>{
+    gameMode="run"; tick=0; recFrames=[];
+    hud.className="hud on run"; roleEl.textContent="Runner";
+    ghostMesh.visible=false; trail.forEach(d=>d.visible=false);
+    phaseAfter = after;
+  }, SPAWN);
+}
+function startChase(frames, after){
+  ghostFrames = frames; chaseResolved=false;
+  startCountdown("CHASE — touch the ghost before it escapes", ()=>{
+    gameMode="chase"; tick=0;
+    hud.className="hud on chase"; roleEl.textContent="Chaser";
+    ghostMesh.visible=true;
+    phaseAfter = after;
+  }, CHASER_SPAWN);
+}
+function endPhase(result){             // result: {type:'runDone'|'tag'|'escape', t}
+  gameMode="idle"; hud.className="hud";
+  subTxt.classList.remove("on"); bigEl.classList.remove("on");
+  document.exitPointerLock && document.exitPointerLock();
+  const cb = phaseAfter; phaseAfter=null;
+  if(cb) cb(result);
+}
+
+/* ---------- fixed-step loop ---------- */
+function frame(t){
+  requestAnimationFrame(frame);
+  if(!lastT) lastT=t;
+  let dt=(t-lastT)/1000; lastT=t;
+  if(dt>0.25) dt=0.25;
+
+  if(gameMode==="countdown"){
+    const left = countdownEnd - performance.now();
+    if(left<=0){ bigEl.classList.remove("on"); subTxt.classList.remove("on");
+      const n=countdownNext; countdownNext=null; n(); }
+    else bigTxt.textContent = left>2200?"3":left>1200?"2":left>200?"1":"GO";
+  }
+  else if(gameMode==="run" || gameMode==="chase"){
+    acc += dt;
+    while(acc>=TICK){
+      acc-=TICK;
+      if(gameMode==="run"){
+        stepPhysics(RUN_SPEED, true);
+        recFrames.push([+player.x.toFixed(2),+player.y.toFixed(2),+player.z.toFixed(2),+player.yaw.toFixed(3)]);
+        tick++;
+        if(tick>=TURN_TICKS){ endPhase({type:"runDone"}); break; }
+      }else{
+        const inputOn = tick>=HEAD_START_TICKS;
+        stepPhysics(CHASE_SPEED, inputOn);
+        const g = ghostPos(tick);
+        const dx=player.x-g[0], dy=player.y-g[1], dz=player.z-g[2];
+        const dist = Math.sqrt(dx*dx+dy*dy+dz*dz);
+        gapEl.textContent = "GAP "+dist.toFixed(1)+" m" + (inputOn?"":"  ·  HOLD");
+        if(dist<TAG_RADIUS && inputOn && tick>=TAG_GRACE_TICKS && !chaseResolved){
+          chaseResolved=true; endPhase({type:"tag", t:tick*TICK}); break;
         }
-
-        /**
-         * Checks if a cell is an environment block.
-         * @param {number} x - X coordinate of the cell.
-         * @param {number} y - Y coordinate of the cell.
-         * @param {Array<Object>} [envBlocksToCheck=environmentBlocks] - Optional, specific env blocks to check against.
-         * @returns {boolean} True if the cell is an environment block, false otherwise.
-         */
-        function isEnvironmentBlock(x, y, envBlocksToCheck = environmentBlocks) {
-            return envBlocksToCheck.some(b => b.x === x && b.y === y);
+        tick++;
+        if(tick>=ghostFrames.length && !chaseResolved){
+          chaseResolved=true; endPhase({type:"escape"}); break;
         }
-
-        /**
-         * Checks if a cell is occupied by any player.
-         * @param {number} x - X coordinate of the cell.
-         * @param {number} y - Y coordinate of the cell.
-         * @param {Array<Object>} [playersToCheck=playerPositions] - Optional, specific player positions to check against.
-         * @returns {boolean} True if the cell is occupied by a player, false otherwise.
-         */
-        function isPlayerOccupied(x, y, playersToCheck = playerPositions) {
-            return playersToCheck.some(p => p.x === x && p.y === y);
-        }
-
-        /**
-         * Checks if a cell is the target cell.
-         * @param {number} x - X coordinate of the cell.
-         * @param {number} y - Y coordinate of the cell.
-         * @param {Object} [targetToCheck=targetPosition] - Optional, specific target position to check against.
-         * @returns {boolean} True if the cell is the target cell, false otherwise.
-         */
-        function isTargetCell(x, y, targetToCheck = targetPosition) {
-            return x === targetToCheck.x && y === targetToCheck.y;
-        }
-
-        /**
-         * Checks if the grid is fully connected (all non-environment-blocked cells are reachable from player start points and target).
-         * Uses Breadth-First Search (BFS).
-         * @param {Array<Object>} currentEnvBlocks - The list of environment blocks to check against.
-         * @param {Array<Object>} currentPlayers - The list of player start positions.
-         * @param {Object} currentTarget - The target position.
-         * @returns {boolean} True if the grid is connected and all critical points are reachable, false otherwise.
-         */
-        function checkGridConnectivity(currentEnvBlocks, currentPlayers, currentTarget) {
-            const allCriticalPoints = [...currentPlayers, currentTarget];
-
-            // Filter out any critical points that are blocked by the *proposed* environment blocks.
-            // If a critical point is itself blocked, the layout is invalid.
-            const validCriticalPoints = allCriticalPoints.filter(p => !isEnvironmentBlock(p.x, p.y, currentEnvBlocks));
-
-            if (validCriticalPoints.length !== allCriticalPoints.length) {
-                // Some critical point is directly blocked by the environment
-                return false;
-            }
-            if (validCriticalPoints.length === 0) {
-                 // Should not happen unless GRID_SIZE is tiny and everything is blocked
-                return false;
-            }
-
-            const visited = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(false));
-            const queue = [];
-
-            // Start BFS from the first valid critical point
-            queue.push(validCriticalPoints[0]);
-            visited[validCriticalPoints[0].y][validCriticalPoints[0].x] = true;
-
-            const dx = [0, 0, 1, -1]; // Directions: Up, Down, Right, Left
-            const dy = [1, -1, 0, 0];
-
-            while (queue.length > 0) {
-                const { x, y } = queue.shift();
-
-                for (let i = 0; i < 4; i++) {
-                    const nx = x + dx[i];
-                    const ny = y + dy[i];
-
-                    // Check bounds, visited, and if it's an environment block
-                    if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE &&
-                        !visited[ny][nx] &&
-                        !isEnvironmentBlock(nx, ny, currentEnvBlocks)) {
-                        visited[ny][nx] = true;
-                        queue.push({ x: nx, y: ny });
-                    }
-                }
-            }
-
-            // After BFS, verify all other valid critical points were visited
-            for (const cp of validCriticalPoints) {
-                if (!visited[cp.y][cp.x]) {
-                    return false; // A critical point is unreachable
-                }
-            }
-
-            return true; // All critical points are reachable
-        }
-
-        /**
-         * Randomly places player starting positions, ensuring they are unique and not the target.
-         * @returns {Array<Object>} An array of randomized player start positions.
-         */
-        function assignRandomPlayerStarts() {
-            const newPlayerStarts = [];
-            const allPossibleCells = [];
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    allPossibleCells.push({ x, y });
-                }
-            }
-
-            let attempts = 0;
-            const MAX_PICK_ATTEMPTS = GRID_SIZE * GRID_SIZE * 5; // Avoid infinite loop
-
-            while (newPlayerStarts.length < numPlayers && attempts < MAX_PICK_ATTEMPTS) {
-                const randomIndex = Math.floor(Math.random() * allPossibleCells.length);
-                const potentialCell = allPossibleCells[randomIndex];
-
-                // Ensure it's not already picked, and not the target position
-                const isAlreadyPicked = newPlayerStarts.some(p => p.x === potentialCell.x && p.y === potentialCell.y);
-                const isTargetCandidate = (targetPosition.x !== -1 && potentialCell.x === targetPosition.x && potentialCell.y === targetPosition.y); // If target is already set
-
-                if (!isAlreadyPicked && !isTargetCandidate) {
-                    newPlayerStarts.push({ ...potentialCell, color: playerColors[newPlayerStarts.length] });
-                }
-                attempts++;
-            }
-
-            if (newPlayerStarts.length < numPlayers) {
-                console.warn("Could not find enough unique starting positions for all players. Falling back to default positions for missing players.");
-                // Fallback to default positions if not enough unique spots are found
-                for (let i = newPlayerStarts.length; i < numPlayers; i++) {
-                    newPlayerStarts.push({ x: 0, y: i, color: playerColors[i] });
-                }
-            }
-            return newPlayerStarts;
-        }
-
-        /**
-         * Randomly assigns the target position, attempting to make it equidistant from all players.
-         * It tries to find a spot that minimizes the difference between the max and min distance to any player.
-         */
-        function assignRandomTargetPosition() {
-            let bestTargetCandidate = null;
-            let minDistanceVariance = Infinity;
-            
-            // Generate a list of all potential target cells
-            const allPossibleTargetCells = [];
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    const potentialTarget = { x, y };
-                    // Exclude cells already occupied by players
-                    if (!isPlayerOccupied(x, y, playerPositions)) {
-                        allPossibleTargetCells.push(potentialTarget);
-                    }
-                }
-            }
-
-            if (allPossibleTargetCells.length === 0) {
-                console.warn("No valid cells for target position found. Defaulting to (GRID_SIZE-1, GRID_SIZE-1).");
-                targetPosition = { x: GRID_SIZE - 1, y: GRID_SIZE - 1 };
-                return;
-            }
-
-            // Iterate through possible target cells to find the "most equidistant" one
-            for (const potentialTarget of allPossibleTargetCells) {
-                const distances = playerPositions.map(p => manhattanDistance(p, potentialTarget));
-                if (distances.length === 0) continue; // Should not happen if players exist
-
-                const maxDist = Math.max(...distances);
-                const minDist = Math.min(...distances);
-                const currentVariance = maxDist - minDist; // We want to minimize this variance
-
-                if (currentVariance < minDistanceVariance) {
-                    minDistanceVariance = currentVariance;
-                    bestTargetCandidate = potentialTarget;
-                }
-            }
-            
-            // Fallback to a random valid spot if for some edge case no best candidate was found
-            targetPosition = bestTargetCandidate || allPossibleTargetCells[Math.floor(Math.random() * allPossibleTargetCells.length)];
-        }
-
-
-        /**
-         * Generates permanent environment blocks for the grid, ensuring connectivity.
-         */
-        function generateEnvironment() {
-            environmentBlocks = [];
-            playerBlockedCells = []; // Clear player-created blocks for the new round
-
-            const TARGET_TOTAL_ENV_CELLS = Math.floor(GRID_SIZE * GRID_SIZE * ENV_COVERAGE_PERCENTAGE);
-            const NUM_SEGMENTS_TO_GENERATE = Math.floor(TARGET_TOTAL_ENV_CELLS / SEGMENT_LENGTH);
-
-            let currentSegmentsPlaced = 0;
-            let attempts = 0;
-            const MAX_SEGMENT_PLACEMENT_ATTEMPTS = NUM_SEGMENTS_TO_GENERATE * 200; // Increased attempts for robust generation
-
-            // Combine all critical points (player initial positions + target) to avoid blocking them
-            const criticalPoints = [...playerPositions, targetPosition];
-
-            while (currentSegmentsPlaced < NUM_SEGMENTS_TO_GENERATE && attempts < MAX_SEGMENT_PLACEMENT_ATTEMPTS) {
-                const start_x = Math.floor(Math.random() * GRID_SIZE);
-                const start_y = Math.floor(Math.random() * GRID_SIZE);
-                
-                // Randomly choose orientation: 0 for horizontal, 1 for vertical
-                const orientation = Math.floor(Math.random() * 2);
-
-                const potentialSegmentCells = [];
-                let isSegmentValid = true;
-
-                for (let i = 0; i < SEGMENT_LENGTH; i++) {
-                    let cell_x = start_x;
-                    let cell_y = start_y;
-                    if (orientation === 0) { // Horizontal
-                        cell_x += i;
-                    } else { // Vertical
-                        cell_y += i;
-                    }
-
-                    // Check bounds for each cell in segment
-                    if (!(cell_x >= 0 && cell_x < GRID_SIZE && cell_y >= 0 && cell_y < GRID_SIZE)) {
-                        isSegmentValid = false;
-                        break;
-                    }
-                    
-                    // Check if cell is a critical position or already an environment block
-                    if (criticalPoints.some(p => p.x === cell_x && p.y === cell_y) || 
-                        environmentBlocks.some(b => b.x === cell_x && b.y === cell_y)) {
-                        isSegmentValid = false;
-                        break;
-                    }
-                    
-                    potentialSegmentCells.push({ x: cell_x, y: cell_y });
-                }
-
-                if (!isSegmentValid) {
-                    attempts++;
-                    continue;
-                }
-
-                // Temporarily add segment cells and check connectivity
-                const tempEnvBlocks = [...environmentBlocks, ...potentialSegmentCells];
-                
-                if (!checkGridConnectivity(tempEnvBlocks, playerPositions, targetPosition)) {
-                    attempts++;
-                    continue;
-                }
-
-                // If all checks pass, commit the segment
-                environmentBlocks.push(...potentialSegmentCells);
-                currentSegmentsPlaced++;
-                // Do not increment attempts here, only for failed placements to try more
-            }
-
-            if (currentSegmentsPlaced < NUM_SEGMENTS_TO_GENERATE) {
-                console.warn(`Could not generate desired number of environment segments (${NUM_SEGMENTS_TO_GENERATE}) while maintaining connectivity. Generated: ${currentSegmentsPlaced}`);
-            }
-        }
-
-        /**
-         * Initializes the game by setting up player positions, environment blocks,
-         * and resetting game state variables.
-         */
-        function initializeGame() {
-            // First, get the number of players from input
-            numPlayers = parseInt(numPlayersInput.value);
-
-            // 1. Assign random player starting positions FIRST
-            playerPositions = assignRandomPlayerStarts();
-            
-            // 2. Then assign random target position, considering player starts
-            assignRandomTargetPosition(); 
-
-            // 3. Finally, generate environment blocks, ensuring they don't block critical points
-            generateEnvironment();
-
-            currentPlayerIndex = 0;
-            diceRoll = 0;
-            actionsLeft = 0;
-            gameOver = false;
-            currentActionMode = 'move'; // Reset mode to move for new game
-            updateActionModeButton(); // Update button text
-            gameMessageP.textContent = ''; // Clear game messages
-
-            // Ensure grid size property is set for CSS grid
-            gameGridDiv.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
-            gameGridDiv.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
-
-            renderGrid();
-            updateInfoDisplay();
-
-            // Enable roll dice button, disable end turn
-            rollDiceBtn.disabled = false;
-            endTurnBtn.disabled = true;
-        }
-
-        /**
-         * Renders the game grid based on the current game state.
-         * Clears existing grid cells and recreates them.
-         */
-        function renderGrid() {
-            gameGridDiv.innerHTML = ''; // Clear existing grid
-
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('grid-cell');
-                    cell.dataset.x = x;
-                    cell.dataset.y = y;
-
-                    // Check if cell is the target
-                    if (isTargetCell(x, y)) {
-                        cell.classList.add('target');
-                        cell.textContent = '🏁'; // Flag emoji for target
-                    }
-
-                    // Check if cell is an environment block (priority for visual styling)
-                    if (isEnvironmentBlock(x, y)) {
-                        cell.classList.add('env-blocked'); // New class for environment blocks
-                    }
-                    // Check if cell is player-blocked
-                    else if (playerBlockedCells.some(b => b.x === x && b.y === y)) {
-                        cell.classList.add('player-blocked'); // New class for player-created blocks
-                    }
-
-                    // Check if cell has a player (player takes visual precedence)
-                    const playerAtCell = playerPositions.find(p => p.x === x && p.y === y);
-                    if (playerAtCell) {
-                        cell.classList.remove('player-blocked'); // Remove block styling if player is there
-                        cell.classList.remove('env-blocked'); // Remove env-blocked styling if player is there (safety)
-                        cell.classList.add('player');
-                        cell.style.backgroundColor = playerAtCell.color; // Set player color
-                    }
-
-                    // Add click listener for actions
-                    cell.addEventListener('click', handleGridClick);
-                    gameGridDiv.appendChild(cell);
-                }
-            }
-        }
-
-        /**
-         * Updates the display for current player, dice roll, and actions left.
-         */
-        function updateInfoDisplay() {
-            const currentPlayer = playerPositions[currentPlayerIndex];
-            currentPlayerColorDiv.style.backgroundColor = currentPlayer.color;
-            currentPlayerTextSpan.textContent = `Current Player: P${currentPlayerIndex + 1}`;
-            diceRollSpan.textContent = diceRoll;
-            actionsLeftSpan.textContent = actionsLeft;
-
-            if (gameOver) {
-                rollDiceBtn.disabled = true;
-                endTurnBtn.disabled = true;
-                actionModeToggleBtn.disabled = true; // Disable toggle button on game over
-                gameMessageP.textContent = 'Game over!';
-            } else if (actionsLeft > 0) {
-                rollDiceBtn.disabled = true; // Can't roll again if actions are pending
-                endTurnBtn.disabled = false; // Player can end turn early
-                actionModeToggleBtn.disabled = false; // Enable toggle button during actions
-                gameMessageP.textContent = `P${currentPlayerIndex + 1}: ${actionsLeft} actions left. Current mode: ${currentActionMode.toUpperCase()}. Click on the grid to perform action.`;
-            } else { // actionsLeft is 0
-                if (diceRoll === 0) { // Before rolling dice, or after a new turn starts
-                    rollDiceBtn.disabled = false;
-                    endTurnBtn.disabled = true;
-                    actionModeToggleBtn.disabled = true; // Disable toggle before actions start
-                    gameMessageP.textContent = `P${currentPlayerIndex + 1}: Roll the dice to start your turn.`;
-                } else { // After actions are exhausted
-                    rollDiceBtn.disabled = true; // Cannot roll again
-                    endTurnBtn.disabled = false; // MUST end turn
-                    actionModeToggleBtn.disabled = true; // Disable toggle after actions exhausted
-                    gameMessageP.textContent = `P${currentPlayerIndex + 1}: No actions left. Please End Turn.`;
-                }
-            }
-        }
-
-        /**
-         * Rolls the dice and updates actions available for the current player.
-         */
-        function rollDice() {
-            if (gameOver || actionsLeft > 0) return; // Can't roll if game is over or actions are pending
-
-            diceRoll = Math.floor(Math.random() * 6) + 1; // Roll 1-6
-            actionsLeft = diceRoll;
-            updateInfoDisplay();
-        }
-
-        /**
-         * Handles clicks on the grid cells to perform actions (move, block, unblock).
-         * @param {Event} event - The click event object.
-         */
-        function handleGridClick(event) {
-            if (gameOver || actionsLeft === 0) {
-                gameMessageP.textContent = 'No actions left. Roll the dice or end turn.';
-                return;
-            }
-
-            const clickedX = parseInt(event.target.dataset.x);
-            const clickedY = parseInt(event.target.dataset.y);
-
-            const currentPlayer = playerPositions[currentPlayerIndex];
-            const currentPx = currentPlayer.x;
-            const currentPy = currentPlayer.y;
-
-            const isEnvBlocked = isEnvironmentBlock(clickedX, clickedY);
-            const isPlayerBlocked = playerBlockedCells.some(b => b.x === clickedX && b.y === clickedY);
-            const isPlayerOccupiedCell = isPlayerOccupied(clickedX, clickedY);
-            const isTarget = isTargetCell(clickedX, clickedY);
-
-            let actionTaken = false;
-
-            // --- Attempt to Unblock (only player-created blocks) ---
-            if (isPlayerBlocked && !isEnvBlocked) { // Can only unblock player-created blocks, not environment blocks
-                unblockCell(clickedX, clickedY);
-                gameMessageP.textContent = `Unblocked cell (${clickedX}, ${clickedY}).`;
-                actionTaken = true;
-            }
-            // --- Handle Move action ---
-            else if (currentActionMode === 'move') {
-                if (isAdjacent(currentPx, currentPy, clickedX, clickedY)) {
-                    // Allow moving to target if it's adjacent and no other player is there
-                    if (isTarget && !isPlayerOccupiedCell) {
-                        movePlayer(currentPlayerIndex, clickedX, clickedY);
-                        gameMessageP.textContent = `Moved to Finish Line!`;
-                        actionTaken = true;
-                        checkWinCondition(); // Check win immediately on target move
-                    }
-                    // Allow moving to a regular, non-blocked, unoccupied cell
-                    else if (!isEnvBlocked && !isPlayerBlocked && !isPlayerOccupiedCell && !isTarget) {
-                        movePlayer(currentPlayerIndex, clickedX, clickedY);
-                        gameMessageP.textContent = `Moved to (${clickedX}, ${clickedY}).`;
-                        actionTaken = true;
-                    } else {
-                        gameMessageP.textContent = 'Cannot move to this space (blocked, occupied, or target in an invalid way).';
-                    }
-                } else {
-                    gameMessageP.textContent = 'Cannot move to non-adjacent space.';
-                }
-            }
-            // --- Handle Block action ---
-            else if (currentActionMode === 'block') {
-                // Cannot block environment blocks, occupied cells, or target
-                if (isEnvBlocked || isPlayerOccupiedCell || isTarget) {
-                    gameMessageP.textContent = 'Invalid action. Cannot block this space (environment, occupied, or target).';
-                }
-                // Cannot block your own current position
-                else if (clickedX === currentPx && clickedY === currentPy) {
-                    gameMessageP.textContent = 'Cannot block your own current position.';
-                }
-                // Cannot block an already player-blocked cell (unblocking handles this separately)
-                else if (isPlayerBlocked) {
-                    gameMessageP.textContent = 'Space is already player-blocked. Switch to unblock if needed.';
-                }
-                else { // Valid block
-                    blockCell(clickedX, clickedY);
-                    gameMessageP.textContent = `Blocked cell (${clickedX}, ${clickedY}).`;
-                    actionTaken = true;
-                }
-            } else {
-                // General invalid action for any other unhandled cases (should be rare)
-                gameMessageP.textContent = 'Invalid action.';
-            }
-
-            if (actionTaken && !gameOver) { // Only decrement actions if action was taken and game is not over from win
-                actionsLeft--;
-                gameMessageP.textContent += ` Actions left: ${actionsLeft}.`;
-                renderGrid();
-                updateInfoDisplay();
-                // checkWinCondition is called for move to target, not needed generally here
-            }
-        }
-
-        /**
-         * Toggles the current action mode between 'move' and 'block'.
-         */
-        function toggleActionMode() {
-            if (currentActionMode === 'move') {
-                currentActionMode = 'block';
-            } else {
-                currentActionMode = 'move';
-            }
-            updateActionModeButton();
-            gameMessageP.textContent = `Action mode changed to: ${currentActionMode.toUpperCase()}.`;
-            updateInfoDisplay(); // Update message and buttons
-        }
-
-        /**
-         * Updates the text of the action mode toggle button.
-         */
-        function updateActionModeButton() {
-            actionModeToggleBtn.textContent = `Mode: ${currentActionMode.toUpperCase()}`;
-        }
-
-        /**
-         * Moves a player to a new position.
-         * @param {number} playerIdx - Index of the player to move.
-         * @param {number} newX - New X coordinate.
-         * @param {number} newY - New Y coordinate.
-         */
-        function movePlayer(playerIdx, newX, newY) {
-            playerPositions[playerIdx].x = newX;
-            playerPositions[playerIdx].y = newY;
-        }
-
-        /**
-         * Blocks a specified cell (player-created block).
-         * @param {number} x - X coordinate of the cell.
-         * @param {number} y - Y coordinate of the cell.
-         */
-        function blockCell(x, y) {
-            playerBlockedCells.push({ x, y });
-        }
-
-        /**
-         * Unblocks a specified cell (player-created block).
-         * @param {number} x - X coordinate of the cell.
-         * @param {number} y - Y coordinate of the cell.
-         */
-        function unblockCell(x, y) {
-            playerBlockedCells = playerBlockedCells.filter(b => !(b.x === x && b.y === y));
-        }
-
-        /**
-         * Checks if two positions are adjacent (horizontally or vertically).
-         * @param {number} x1 - X coordinate of first position.
-         * @param {number} y1 - Y coordinate of first position.
-         * @param {number} x2 - X coordinate of second position.
-         * @param {number} y2 - Y coordinate of second position.
-         * @returns {boolean} True if adjacent, false otherwise.
-         */
-        function isAdjacent(x1, y1, x2, y2) {
-            const dx = Math.abs(x1 - x2);
-            const dy = Math.abs(y1 - y2);
-            return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
-        }
-
-        /**
-         * Ends the current player's turn and switches to the next player.
-         */
-        function endTurn() {
-            if (gameOver) return;
-            actionsLeft = 0; // Ensure actions are reset
-            currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
-            diceRoll = 0; // Reset dice roll for next turn
-            currentActionMode = 'move'; // Reset mode to move for next player
-            updateInfoDisplay();
-            updateActionModeButton(); // Update button text for new player
-        }
-
-        /**
-         * Checks if any player has reached the target position.
-         * If a player wins, triggers the game over state.
-         */
-        function checkWinCondition() {
-            const winningPlayer = playerPositions.find(p => p.x === targetPosition.x && p.y === targetPosition.y);
-            if (winningPlayer) {
-                gameOver = true;
-                const winnerIdx = playerPositions.indexOf(winningPlayer);
-                winnerMessageP.innerHTML = `Player <span style="color: ${winningPlayer.color}; font-weight: bold;">P${winnerIdx + 1}</span> wins!`;
-                gameOverModal.classList.remove('hidden'); // Show modal
-                rollDiceBtn.disabled = true;
-                endTurnBtn.disabled = true;
-                actionModeToggleBtn.disabled = true;
-                gameMessageP.textContent = 'Game over!';
-            }
-        }
-
-        /**
-         * Resets the game and hides the game over modal.
-         */
-        function playAgain() {
-            gameOverModal.classList.add('hidden'); // Hide modal
-            startGame(); // This function will be called, which means initializeGame, and new environment
-        }
-
-        /**
-         * Starts the game, showing game info and hiding player setup.
-         */
-        function startGame() {
-            numPlayers = parseInt(numPlayersInput.value);
-            if (isNaN(numPlayers) || numPlayers < 1 || numPlayers > 4) {
-                alert('Please select between 1 and 4 players.');
-                return;
-            }
-
-            playerSetupDiv.classList.add('hidden');
-            gameInfoDiv.classList.remove('hidden');
-            gameStarted = true;
-            initializeGame();
-        }
-
-        // --- Event Listeners and Initialization ---
-        // Wrap all DOM element access and event listener assignments in DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize DOM Elements
-            numPlayersInput = document.getElementById('num-players');
-            startGameBtn = document.getElementById('start-game-btn');
-            playerSetupDiv = document.getElementById('player-setup');
-            gameInfoDiv = document.getElementById('game-info');
-            gameGridDiv = document.getElementById('game-grid');
-            currentPlayerColorDiv = document.getElementById('current-player-color');
-            currentPlayerTextSpan = document.getElementById('current-player-text');
-            diceRollSpan = document.getElementById('dice-roll');
-            actionsLeftSpan = document.getElementById('actions-left');
-            rollDiceBtn = document.getElementById('roll-dice-btn');
-            endTurnBtn = document.getElementById('end-turn-btn');
-            gameMessageP = document.getElementById('game-message');
-            gameOverModal = document.getElementById('game-over-modal');
-            winnerMessageP = document.getElementById('winner-message');
-            playAgainBtn = document.getElementById('play-again-btn');
-            actionModeToggleBtn = document.getElementById('action-mode-toggle-btn');
-            // restartGameBtn is not present in this version (as per revert)
-
-            // Add Event Listeners
-            // Reference the functions directly. They are all defined in the global scope
-            // and available when DOMContentLoaded fires.
-            startGameBtn.addEventListener('click', startGame);
-            rollDiceBtn.addEventListener('click', rollDice);
-            endTurnBtn.addEventListener('click', endTurn);
-            playAgainBtn.addEventListener('click', playAgain);
-            actionModeToggleBtn.addEventListener('click', toggleActionMode);
-        });
-    </script>
+      }
+    }
+    /* HUD clock */
+    const total = gameMode==="chase"? (ghostFrames?ghostFrames.length:TURN_TICKS) : TURN_TICKS;
+    const remain = Math.max(0,(total-tick))*TICK;
+    clockEl.textContent = remain.toFixed(2);
+    fillEl.style.width = (remain/(total*TICK)*100)+"%";
+    /* ghost render */
+    if(gameMode==="chase" && ghostFrames){
+      const g = ghostPos(tick);
+      ghostMesh.position.set(g[0],g[1],g[2]);
+      ghostMesh.rotation.y = g[3];
+      for(let i=0;i<TRAIL_N;i++){
+        const ti = tick - (i+1)*6;
+        if(ti>=0){ const f=ghostFrames[Math.min(ti,ghostFrames.length-1)];
+          trail[i].visible=true; trail[i].position.set(f[0],f[1]+.9,f[2]);
+          trail[i].material.opacity = .5*(1-i/TRAIL_N);
+        } else trail[i].visible=false;
+      }
+    }
+  }
+  camera.position.set(player.x, player.y+EYE, player.z);
+  camera.rotation.set(0,0,0);
+  camera.rotateY(player.yaw); camera.rotateX(player.pitch);
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+
+/* =========================================================
+   MODES
+   ========================================================= */
+
+/* ---------- practice: run, then chase your own ghost ---------- */
+$("btnPractice").onclick = ()=>{
+  startRun(()=>{
+    const myRun = trimLead(recFrames.slice());
+    startChase(myRun, res=>{
+      $("resTitle").textContent = res.type==="tag" ? "TAGGED!" : "ESCAPED.";
+      $("resTitle").style.color = res.type==="tag" ? "var(--chaser)" : "var(--runner)";
+      $("resMsg").textContent = res.type==="tag"
+        ? "You caught your own ghost at "+res.t.toFixed(2)+"s. Your escape run has a weakness — fix it."
+        : "Your ghost outran you. That run would score a point in a real duel.";
+      $("btnResNext").textContent = "Run again";
+      $("btnResNext").onclick = ()=>{ show("scrHome"); };
+      show("scrResult");
+    });
+  });
+};
+
+/* =========================================================
+   MULTIPLAYER via Supabase (per-game links, no server code)
+   ========================================================= */
+/* ---- CONFIG: paste your Supabase project values here ---- */
+const SUPABASE_URL = "https://rthyxtgnpytgztksdrap.supabase.co/rest/v1/";        /* e.g. https://abcd1234.supabase.co */
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0aHl4dGducHl0Z3p0a3NkcmFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNjk0NDUsImV4cCI6MjA5ODk0NTQ0NX0.1ETPdCFr9Lpc7xzs1F5jeVnNlDeR-pdK604NxZwvWvw";       /* Settings → API → anon public key */
+const CONFIGURED = !SUPABASE_URL.includes("PASTE") && !SUPABASE_ANON_KEY.includes("PASTE");
+
+const SB_HEADERS = {
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": "Bearer "+SUPABASE_ANON_KEY,
+  "Content-Type": "application/json"
+};
+const store = {
+  /* shared=true  → game state in the Supabase `games` table
+     shared=false → local identity in this browser's localStorage */
+  async get(key, shared){
+    if(!shared){
+      try{ const v = localStorage.getItem(key); return v?JSON.parse(v):null; }
+      catch(e){ return null; }
+    }
+    try{
+      const code = key.split(":").pop();
+      const r = await fetch(SUPABASE_URL+"/rest/v1/games?code=eq."+encodeURIComponent(code)+"&select=state",
+        {headers:SB_HEADERS});
+      if(!r.ok) return null;
+      const rows = await r.json();
+      return rows.length ? rows[0].state : null;
+    }catch(e){ return null; }
+  },
+  async set(key, val, shared){
+    if(!shared){
+      try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
+      catch(e){ return false; }
+    }
+    try{
+      const code = key.split(":").pop();
+      const r = await fetch(SUPABASE_URL+"/rest/v1/games",{
+        method:"POST",
+        headers:{...SB_HEADERS, "Prefer":"resolution=merge-duplicates,return=minimal"},
+        body: JSON.stringify([{code, state:val, updated_at:new Date().toISOString()}])
+      });
+      return r.ok;
+    }catch(e){ return false; }
+  },
+  available(){ return CONFIGURED; }
+};
+const GKEY = code => "ghosttag:game:"+code;
+
+let me = {id: Math.random().toString(36).slice(2,10), name:""};
+let cur = {code:null, state:null, role:null};   // role: 'p1'|'p2'
+let pollTimer = null;
+
+async function loadIdentity(){
+  const saved = await store.get("ghosttag:me", false);
+  if(saved && saved.id) me = saved;
+}
+loadIdentity();
+
+function randCode(){
+  const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
+  for(let i=0;i<5;i++) s+=A[Math.floor(Math.random()*A.length)];
+  return s;
+}
+
+/* ----- name/join screen wiring ----- */
+let nameMode = "create";
+$("btnCreate").onclick = ()=>{
+  if(!store.available()){ $("homeErr").textContent="Duels aren’t set up yet — paste your Supabase URL and anon key into the config at the top of index.html’s script. Practice mode still works."; return; }
+  nameMode="create"; $("nameTitle").textContent="Create duel";
+  $("joinRow").style.display="none"; $("nameErr").textContent="";
+  $("inName").value = me.name||""; show("scrName");
+};
+$("btnJoin").onclick = ()=>{
+  if(!store.available()){ $("homeErr").textContent="Duels aren’t set up yet — paste your Supabase URL and anon key into the config at the top of index.html’s script. Practice mode still works."; return; }
+  nameMode="join"; $("nameTitle").textContent="Join duel";
+  $("joinRow").style.display="block"; $("nameErr").textContent="";
+  $("inName").value = me.name||""; show("scrName");
+};
+$("btnNameBack").onclick = ()=>show("scrHome");
+
+$("btnNameGo").onclick = async ()=>{
+  const name = $("inName").value.trim().toUpperCase().slice(0,12);
+  if(!name){ $("nameErr").textContent="Enter a name."; return; }
+  me.name = name; await store.set("ghosttag:me", me, false);
+
+  if(nameMode==="create"){
+    const code = randCode();
+    const state = {
+      code, created:Date.now(),
+      p1:{id:me.id,name:me.name}, p2:null,
+      scores:{p1:0,p2:0},
+      turn:"p1",                 /* whose pickup it is */
+      pendingRun:null,           /* frames awaiting a chase */
+      pendingBy:null,            /* who recorded pendingRun */
+      round:1, phase:"waiting",  /* waiting | live | over */
+      winner:null
+    };
+    const ok = await store.set(GKEY(code), state, true);
+    if(!ok){ $("nameErr").textContent="Couldn’t create the duel. Try again."; return; }
+    cur = {code, state, role:"p1"};
+    openLobby();
+  }else{
+    const code = $("inCode").value.trim().toUpperCase();
+    if(code.length!==5){ $("nameErr").textContent="Codes are 5 characters."; return; }
+    const state = await store.get(GKEY(code), true);
+    if(!state){ $("nameErr").textContent="No duel found with that code."; return; }
+    let role = null;
+    if(state.p1 && state.p1.id===me.id) role="p1";
+    else if(state.p2 && state.p2.id===me.id) role="p2";
+    else if(!state.p2){ state.p2={id:me.id,name:me.name}; state.phase="live";
+      await store.set(GKEY(code), state, true); role="p2"; }
+    else { $("nameErr").textContent="That duel already has two players."; return; }
+    cur = {code, state, role};
+    openLobby();
+  }
+};
+
+/* ----- lobby ----- */
+function openLobby(){
+  show("scrLobby"); renderLobby();
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refreshState, 4000);
+}
+async function refreshState(){
+  if(!cur.code) return;
+  const s = await store.get(GKEY(cur.code), true);
+  if(s){ cur.state=s; renderLobby(); }
+}
+$("btnRefresh").onclick = refreshState;
+$("btnLeave").onclick = ()=>{ if(pollTimer) clearInterval(pollTimer); cur={code:null,state:null,role:null}; show("scrHome"); };
+
+function renderLobby(){
+  const s = cur.state; if(!s) return;
+  $("lobbyCode").textContent = s.code; $("codeBig").textContent = s.code;
+  $("s1").textContent = s.scores.p1; $("s2").textContent = s.scores.p2;
+  $("n1").textContent = s.p1 ? s.p1.name : "—";
+  $("n2").textContent = s.p2 ? s.p2.name : "waiting…";
+  const btn = $("btnTakeTurn");
+  const meTurn = s.phase==="live" && s.turn===cur.role;
+  btn.style.display = meTurn ? "block" : "none";
+
+  if(s.phase==="over"){
+    const w = s.winner==="p1"?s.p1.name:s.p2.name;
+    $("lobbyMsg").innerHTML = "<b>"+w+" wins the duel "+s.scores.p1+"–"+s.scores.p2+".</b> Create a new code for a rematch.";
+  } else if(s.phase==="waiting"){
+    $("lobbyMsg").textContent = "Share the code above. The duel starts when your friend joins — you can already take turn 1 and record the first escape run.";
+    /* host may pre-record turn 1 */
+    if(cur.role==="p1" && s.turn==="p1") btn.style.display="block";
+  } else if(meTurn){
+    const chaseFirst = s.pendingRun && s.pendingBy!==cur.role;
+    $("lobbyMsg").textContent = chaseFirst
+      ? "Your turn: chase "+(s.pendingBy==="p1"?s.p1.name:s.p2.name)+"’s ghost, then record your own escape run."
+      : "Your turn: record a 15-second escape run.";
+    btn.className = "btn " + (chaseFirst ? "orange" : "blue");
+    btn.textContent = chaseFirst ? "Take my turn — chase, then run" : "Take my turn — record my run";
+  } else {
+    const other = s.turn==="p1"?(s.p1&&s.p1.name):(s.p2&&s.p2.name);
+    $("lobbyMsg").textContent = "Waiting on "+(other||"your friend")+". Come back any time — this screen checks for updates automatically.";
+  }
+}
+
+/* ----- taking a turn ----- */
+$("btnTakeTurn").onclick = async ()=>{
+  await refreshState();
+  const s = cur.state;
+  if(!(s && (s.phase==="live"||s.phase==="waiting") && s.turn===cur.role)) { renderLobby(); return; }
+
+  const mustChase = s.pendingRun && s.pendingBy!==cur.role;
+  if(mustChase){
+    startChase(s.pendingRun, async res=>{
+      /* score the chase */
+      if(res.type==="tag") s.scores[cur.role]++;
+      else s.scores[s.pendingBy]++;
+      s.pendingRun=null; s.pendingBy=null;
+      const done = s.scores.p1>=WIN_SCORE || s.scores.p2>=WIN_SCORE;
+      if(done){ s.phase="over"; s.winner = s.scores.p1>=WIN_SCORE?"p1":"p2";
+        await store.set(GKEY(s.code), s, true);
+        showChaseResult(res, s, true); return; }
+      await store.set(GKEY(s.code), s, true);
+      showChaseResult(res, s, false);
+    });
+  }else{
+    doRecordRun(s);
+  }
+};
+function showChaseResult(res, s, gameOver){
+  $("resTitle").textContent = res.type==="tag" ? "TAGGED!" : "ESCAPED.";
+  $("resTitle").style.color = res.type==="tag" ? "var(--chaser)" : "var(--runner)";
+  $("resMsg").textContent = (res.type==="tag"
+    ? "You tagged the ghost at "+res.t.toFixed(2)+"s. Point to you."
+    : "The ghost got away. Point to the runner.")
+    + "  Score "+s.scores.p1+"–"+s.scores.p2+"."
+    + (gameOver ? "" : "  Now record your escape run.");
+  $("btnResNext").textContent = gameOver ? "Back to duel" : "Record my run";
+  $("btnResNext").onclick = ()=>{
+    if(gameOver){ show("scrLobby"); renderLobby(); }
+    else doRecordRun(cur.state);
+  };
+  show("scrResult");
+}
+function doRecordRun(s){
+  startRun(async ()=>{
+    s.pendingRun = trimLead(recFrames.slice());
+    s.pendingBy = cur.role;
+    s.turn = cur.role==="p1"?"p2":"p1";
+    s.round++;
+    if(s.phase==="waiting" && s.p2) s.phase="live";
+    const ok = await store.set(GKEY(s.code), s, true);
+    $("resTitle").textContent = "RUN SAVED.";
+    $("resTitle").style.color = "var(--runner)";
+    $("resMsg").textContent = ok
+      ? "Your ghost is armed. It’s "+(s.turn==="p1"?(s.p1&&s.p1.name):(s.p2&&s.p2.name)||"your friend")+"’s turn — they’ll be chasing this exact run."
+      : "Couldn’t save the run — check your connection and take the turn again.";
+    $("btnResNext").textContent = "Back to duel";
+    $("btnResNext").onclick = ()=>{ show("scrLobby"); renderLobby(); };
+    show("scrResult");
+  });
+}
+
+/* ---------- duel links ---------- */
+function duelLink(code){
+  return location.origin + location.pathname + "?g=" + code;
+}
+$("btnCopyLink").onclick = async ()=>{
+  if(!cur.code) return;
+  const url = duelLink(cur.code);
+  if(navigator.share){
+    try{ await navigator.share({title:"GHOST/TAG duel",
+      text:"I recorded my escape run. Chase my ghost — first to 5.", url}); return; }
+    catch(e){ /* user cancelled share sheet — fall through to copy */ }
+  }
+  try{
+    await navigator.clipboard.writeText(url);
+    $("btnCopyLink").textContent = "Link copied!";
+    setTimeout(()=>{ $("btnCopyLink").textContent = "Copy duel link"; }, 1600);
+  }catch(e){
+    prompt("Copy this link:", url);
+  }
+};
+
+/* ---------- open-from-link: ?g=CODE drops you into the join flow ---------- */
+(async ()=>{
+  const urlCode = (new URLSearchParams(location.search).get("g")||"").toUpperCase();
+  if(!urlCode || !store.available()) return;
+  await loadIdentity();
+  /* if this browser already belongs to the duel, go straight to the lobby */
+  const state = await store.get(GKEY(urlCode), true);
+  if(state && ((state.p1&&state.p1.id===me.id)||(state.p2&&state.p2.id===me.id))){
+    cur = {code:urlCode, state, role: state.p1.id===me.id?"p1":"p2"};
+    openLobby(); return;
+  }
+  /* otherwise: one-tap join — name prefilled if known, code locked in */
+  nameMode = "join";
+  $("nameTitle").textContent = "Join duel "+urlCode;
+  $("joinRow").style.display = "block";
+  $("inCode").value = urlCode;
+  $("inName").value = me.name||"";
+  $("btnNameGo").textContent = "Join the duel";
+  show("scrName");
+})();
+</script>
 </body>
 </html>
