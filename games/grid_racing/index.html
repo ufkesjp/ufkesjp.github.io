@@ -367,17 +367,28 @@ for(const k in SKINS){
   const top  = new THREE.MeshLambertMaterial({color:SKINS[k].top});
   MATS[k] = [side, side, top, side, side, side];   /* +x,-x,+y,-y,+z,-z */
 }
+function vhash(x,y,z,s){
+  /* deterministic pseudo-random from position: duplicated seam vertices hash
+     to the SAME offset, so faces stay welded */
+  const n = Math.sin(x*127.1 + y*311.7 + z*74.7 + s)*43758.5453;
+  return (n - Math.floor(n)) - .5;
+}
 function box(cx,cy,cz,sx,sy,sz,kind){
   /* colliders stay perfect AABBs; only the visible mesh is hand-hewn */
   const geo = new THREE.BoxGeometry(sx,sy,sz,2,2,2);
   const jp = geo.attributes.position;
   const j = Math.min(.09, sx*.05, sy*.05, sz*.05);
-  const topY = sy/2 - 1e-4;
+  const topY = sy/2 - 1e-4, botY = -sy/2 + 1e-4;
+  const seed = Math.random()*997;
+  /* WELDED jitter: BoxGeometry duplicates vertices along edges (one copy per
+     face). Hashing offsets from the vertex position moves every duplicate
+     identically, so surfaces meet perfectly at every edge — no cracks. */
   for(let i=0;i<jp.count;i++){
-    const vy = jp.getY(i);
-    jp.setX(i, jp.getX(i) + (Math.random()-.5)*2*j);
-    jp.setZ(i, jp.getZ(i) + (Math.random()-.5)*2*j);
-    if(vy < topY) jp.setY(i, vy + (Math.random()-.5)*2*j);   /* standing surfaces stay flat */
+    const vx = jp.getX(i), vy = jp.getY(i), vz = jp.getZ(i);
+    jp.setX(i, vx + vhash(vx,vy,vz,seed)*2*j);
+    jp.setZ(i, vz + vhash(vx,vy,vz,seed+31)*2*j);
+    if(vy < topY && vy > botY) jp.setY(i, vy + vhash(vx,vy,vz,seed+67)*2*j);
+    /* tops stay flat to stand on; bottoms stay flat to sit flush on tiers below */
   }
   const ni = geo.toNonIndexed();
   ni.clearGroups();
@@ -820,14 +831,21 @@ function makePaw(sx){
 const pawL = makePaw(-1), pawR = makePaw(1);
 paws.visible = false;
 camera.add(paws);
-/* breadcrumb trail */
-const TRAIL_N = 26;
+/* luminous breadcrumb trail: additive comet dots + a glowing thread */
+const TRAIL_N = 34;
 const trail = [];
 for(let i=0;i<TRAIL_N;i++){
-  const d = new THREE.Mesh(new THREE.SphereGeometry(.09,6,5),
-    new THREE.MeshBasicMaterial({color:0x5b8cff, transparent:true, opacity:.5}));
+  const d = new THREE.Mesh(new THREE.SphereGeometry(.14,6,5),
+    new THREE.MeshBasicMaterial({color:0x8fb3ff, transparent:true, opacity:.9,
+      blending:THREE.AdditiveBlending, depthWrite:false}));
   d.visible=false; scene.add(d); trail.push(d);
 }
+const threadGeo = new THREE.BufferGeometry();
+threadGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(TRAIL_N*3),3));
+const thread = new THREE.Line(threadGeo,
+  new THREE.LineBasicMaterial({color:0x8fb3ff, transparent:true, opacity:.55,
+    blending:THREE.AdditiveBlending, depthWrite:false}));
+thread.visible = false; thread.frustumCulled = false; scene.add(thread);
 
 /* ---------- player physics ---------- */
 const player = {x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,grounded:false,flow:0,sinceLand:999};
@@ -1044,7 +1062,7 @@ function startRun(after){
   startCountdown("RUN — escape for 15 seconds", ()=>{
     gameMode="run"; tick=0; recFrames=[];
     hud.className="hud on run"; roleEl.textContent="Runner";
-    ghostMesh.visible=false; trail.forEach(d=>d.visible=false);
+    ghostMesh.visible=false; trail.forEach(d=>d.visible=false); thread.visible=false;
     phaseAfter = after;
   }, SPAWN);
 }
@@ -1136,13 +1154,24 @@ function frame(t){
       const gSpeed = Math.hypot(g[0]-gp[0], g[2]-gp[2])*60;
       const gAir = Math.abs(g[1]-gp[1])*60 > 1.2;
       animateRaccoon(ghostMesh, t*.001, gSpeed, gAir);
+      const tp = thread.geometry.attributes.position;
+      let visN = 0;
       for(let i=0;i<TRAIL_N;i++){
-        const ti = tick - (i+1)*6;
-        if(ti>=0){ const f=ghostFrames[Math.min(ti,ghostFrames.length-1)];
-          trail[i].visible=true; trail[i].position.set(f[0],f[1]+.7,f[2]);
-          trail[i].material.opacity = .5*(1-i/TRAIL_N);
-        } else trail[i].visible=false;
+        const ti = tick - (i+1)*5;
+        if(ti>=0){
+          const f = ghostFrames[Math.min(ti,ghostFrames.length-1)];
+          trail[i].visible = true; trail[i].position.set(f[0],f[1]+.75,f[2]);
+          trail[i].material.opacity = .9*(1-i/TRAIL_N);
+          trail[i].scale.setScalar(1-(i/TRAIL_N)*.6);
+          tp.setXYZ(i, f[0], f[1]+.75, f[2]); visN = i+1;
+        }else{
+          trail[i].visible = false;
+          if(visN>0) tp.setXYZ(i, tp.getX(visN-1), tp.getY(visN-1), tp.getZ(visN-1));
+          else tp.setXYZ(i, ghostMesh.position.x, ghostMesh.position.y+.75, ghostMesh.position.z);
+        }
       }
+      tp.needsUpdate = true;
+      thread.visible = visN>1;
     }
   }
   /* ambient life: clouds drift, birds glide */
