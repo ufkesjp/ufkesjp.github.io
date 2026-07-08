@@ -156,6 +156,19 @@
   .tiny{margin-top:16px;font-family:ui-monospace,Menlo,monospace;font-size:10px;
     line-height:1.6;letter-spacing:.06em;color:rgba(157,176,198,.6)}
 
+  /* character picker */
+  .charRow{display:flex;gap:10px;margin-top:6px}
+  .charBtn{flex:1;padding:12px 10px;border-radius:12px;cursor:pointer;
+    font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.16em;
+    font-weight:700;text-transform:uppercase;color:var(--dim);
+    background:#0a101d;border:1px solid var(--line)}
+  .charBtn .em{display:block;font-size:26px;margin-bottom:6px;filter:grayscale(.7);opacity:.75}
+  .charBtn:hover{border-color:var(--amber);color:var(--amber)}
+  .charBtn.sel{border-color:var(--amber);color:var(--amber);background:#1a2338;
+    box-shadow:0 0 0 1px var(--amber) inset}
+  .charBtn.sel .em{filter:none;opacity:1}
+  .charBtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
   /* countdown + result overlays */
   #big{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
     pointer-events:none;z-index:20}
@@ -214,6 +227,11 @@
       <div class="r"><b>Run · 15s</b>Sprint the course. Your movement is recorded.</div>
       <div class="c"><b>Chase · 15s</b>Hunt the ghost. Touch it before time ends.</div>
       <div><b>Score</b>Tag = chaser point. Escape = runner point. First to 5.</div>
+    </div>
+    <label style="margin-top:20px">Play as</label>
+    <div class="charRow">
+      <button class="charBtn sel" id="chRaccoon"><span class="em">🦝</span>Raccoon</button>
+      <button class="charBtn" id="chUnicorn"><span class="em">🦄</span>Unicorn</button>
     </div>
     <button class="btn ghostb" id="btnPractice">Practice — race your own ghost</button>
     <button class="btn ghostb" id="btnFree">Free play — explore the course</button>
@@ -623,7 +641,7 @@ function triggerNight(){
 function resetKonami(){ konamiIdx = 0; konamiDone = false; }
 function resetNight(){
   nightTarget = 0; nightMix = 0; applyNight(0);
-  ghostMesh.userData.beams.forEach(b=> b.intensity = 0);
+  for(const k in critters) critters[k].userData.beams.forEach(b=> b.intensity = 0);
   playerHeadlights.forEach(h=> h.intensity = 0);
 }
 
@@ -1056,30 +1074,34 @@ function makeRaccoon(accent){
   return g;
 }
 function animateRaccoon(rc, sec, speed, airborne){
+  /* shared critter gallop: works for the raccoon and the unicorn — every
+     critter exposes the same userData rig (torso/head/tail/legsF/legsR)
+     plus baseY, its resting torso height */
   const u = rc.userData;
+  const by = (u.baseY!==undefined) ? u.baseY : .52;
   const run = Math.min(1, speed/7);
   const f = sec*(4 + 9*run)*2.2;          /* stride beat */
   const beat = Math.sin(f);
   if(airborne){
     /* full stretch mid-leap */
-    u.torso.position.y = .56; u.torso.rotation.x = -.12; u.torso.scale.z = 1.06;
+    u.torso.position.y = by+.04; u.torso.rotation.x = -.12; u.torso.scale.z = 1.06;
     u.legsF.forEach((l,i)=>{ l.rotation.x = -1.15 + i*.06; });
     u.legsR.forEach((l,i)=>{ l.rotation.x =  .95 - i*.06; });
     u.tail.rotation.x = .35;
     u.head.rotation.x = .1;
   }else if(run < .05){
     /* idle: breathing, tail sway */
-    u.torso.position.y = .52 + Math.sin(sec*1.8)*.008;
+    u.torso.position.y = by + Math.sin(sec*1.8)*.008;
     u.torso.rotation.x = 0; u.torso.scale.z = 1;
     u.legsF.concat(u.legsR).forEach(l=>{ l.rotation.x *= .8; });
     u.tail.rotation.x = -.05 + Math.sin(sec*1.3)*.06;
     u.tail.rotation.z = Math.sin(sec*.9)*.08;
     u.head.rotation.x = 0;
   }else{
-    /* THE RACCOON GALLOP: a rolling bound. The whole body hops; the rear
+    /* THE GALLOP: a rolling bound. The whole body hops; the rear
        rolls up and over; the spine gathers and extends each cycle. */
     const hop = Math.max(0, beat);
-    u.torso.position.y = .52 + hop*.11*run;            /* the bounce itself */
+    u.torso.position.y = by + hop*.11*run;             /* the bounce itself */
     u.torso.rotation.x = Math.sin(f-.7)*.17*run;       /* rocking-horse pitch */
     u.torso.scale.z = 1 - hop*.08*run;                 /* gather / extend */
     u.legsF.forEach((l,i)=>{ l.rotation.x = Math.sin(f+.9+i*.18)*1.05*run; });  /* front pair together */
@@ -1089,7 +1111,120 @@ function animateRaccoon(rc, sec, speed, airborne){
     u.head.rotation.x = -u.torso.rotation.x*.7;        /* head steadies the gaze */
   }
 }
-const ghostMesh = makeRaccoon(0x5b8cff);
+/* low-poly unicorn: faces -z, feet at y=0. Same userData rig contract as the
+   raccoon (torso/head/tail/legsF/legsR/eyes/eyeMat/beams + baseY) so the
+   shared gallop and the night easter egg drive it unchanged.
+   Silhouette rules: taller and leggier than the raccoon, arched neck,
+   golden spiral horn, pastel mane cascading down the neck, streamer tail. */
+const UC = { coat:0xf2eef7, coatD:0xd9d3e8, hoof:0x5a5470, horn:0xffd98a };
+const MANE_COLS = [0xff9db8, 0xffd166, 0x8fd3ff, 0xc9a2ff];
+function makeUnicorn(accent){
+  const g = new THREE.Group();
+  const coat = rcMat(UC.coat), coatD = rcMat(UC.coatD), hoofM = rcMat(UC.hoof);
+  const hornM = new THREE.MeshBasicMaterial({color:UC.horn});   /* always reads glowy */
+  const u = g.userData;
+  u.baseY = .78;
+
+  /* torso: level barrel, deeper chest */
+  const torso = new THREE.Group(); torso.position.y = .78; g.add(torso); u.torso = torso;
+  const barrel = new THREE.Mesh(new THREE.SphereGeometry(.36,7,6), coat);
+  barrel.scale.set(.95,.9,1.5); barrel.position.set(0,.06,.06); torso.add(barrel);
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(.28,7,6), coat);
+  chest.scale.set(.9,.95,1); chest.position.set(0,.02,-.4); torso.add(chest);
+  const haunch = new THREE.Mesh(new THREE.SphereGeometry(.3,7,6), coatD);
+  haunch.scale.set(.95,.9,1); haunch.position.set(0,.08,.42); torso.add(haunch);
+
+  /* arched neck rising from the chest toward -z */
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(.13,.19,.62,6), coat);
+  neck.rotation.x = -.65; neck.position.set(0,.36,-.5); torso.add(neck);
+
+  /* head at the top of the neck */
+  const head = new THREE.Group(); head.position.set(0,.62,-.68); torso.add(head); u.head = head;
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(.17,7,6), coat);
+  skull.scale.set(.95,.9,1.1); head.add(skull);
+  const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(.08,.115,.26,6), coatD);
+  muzzle.rotation.x = Math.PI/2 - .18; muzzle.position.set(0,-.05,-.2); head.add(muzzle);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(.045,5,4), rcMat(0x8d84a3,1));
+  nose.position.set(0,-.08,-.32); head.add(nose);
+  /* golden spiral horn: stacked tapering cones */
+  const horn = new THREE.Group(); horn.position.set(0,.16,-.06); horn.rotation.x = -.45; head.add(horn);
+  for(let i=0;i<3;i++){
+    const seg = new THREE.Mesh(new THREE.ConeGeometry(.055-.014*i,.14,5), hornM);
+    seg.position.y = .05 + i*.1; seg.rotation.y = i*.6; horn.add(seg);
+  }
+  [-1,1].forEach(sx=>{                                   /* pointed ears */
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(.05,.14,5), coat);
+    ear.position.set(.11*sx,.17,.04); ear.rotation.z = -.25*sx; head.add(ear);
+  });
+  /* dark eyes + night beams from the brow (same contract as the raccoon) */
+  u.eyes = []; u.eyeMat = rcMat(0x2a2f3a,1); u.beams = [];
+  const beamAim = new THREE.Object3D(); beamAim.position.set(0,-.3,-4); head.add(beamAim);
+  [-1,1].forEach(sx=>{
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(.032,5,4), u.eyeMat);
+    eye.position.set(.115*sx,.03,-.12); head.add(eye);
+    u.eyes.push(eye);
+    const beam = new THREE.SpotLight(0xfff3cf, 0, 16, Math.PI/7, .55, 1.3);
+    beam.position.set(.115*sx,.03,-.12); beam.castShadow = false;
+    beam.target = beamAim; head.add(beam); u.beams.push(beam);
+  });
+  /* pastel mane: puffs cascading down the crest of the neck */
+  for(let i=0;i<6;i++){
+    const puff = new THREE.Mesh(new THREE.SphereGeometry(.085-.006*i,5,4),
+      rcMat(MANE_COLS[i%MANE_COLS.length],1));
+    puff.position.set(0, .62-.1*i, -.62+.1*i);
+    puff.position.y += .1; puff.position.z += .12;   /* ride the crest, behind the head line */
+    torso.add(puff);
+  }
+  const forelock = new THREE.Mesh(new THREE.SphereGeometry(.07,5,4), rcMat(MANE_COLS[0],1));
+  forelock.position.set(0,.15,.05); head.add(forelock);
+
+  /* role bandana at the base of the neck */
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(.16,.2,.12,6),
+    new THREE.MeshLambertMaterial({color:accent}));
+  band.rotation.x = -.55; band.position.set(0,.2,-.44); torso.add(band);
+
+  /* streamer tail: pastel segments trailing off the haunch */
+  const tail = new THREE.Group(); tail.position.set(0,.18,.6); torso.add(tail); u.tail = tail;
+  for(let i=0;i<5;i++){
+    const seg = new THREE.Mesh(new THREE.SphereGeometry(.09-.01*i,5,4),
+      rcMat(MANE_COLS[(i+1)%MANE_COLS.length],1));
+    seg.position.set(0, -.02*i - .04*Math.max(0,i-1), .08+i*.13);
+    tail.add(seg);
+  }
+
+  /* four long legs with dark hooves, pivot at the hip, feet at y=0 */
+  u.legsF = []; u.legsR = [];
+  const legGeo = new THREE.CylinderGeometry(.05,.06,.56,5); legGeo.translate(0,-.28,0);
+  const hoofGeo = new THREE.CylinderGeometry(.062,.07,.09,5); hoofGeo.translate(0,-.585,0);
+  function leg(lx,lz,arr){
+    const L = new THREE.Group();
+    L.add(new THREE.Mesh(legGeo, coat));
+    L.add(new THREE.Mesh(hoofGeo, hoofM));
+    L.position.set(lx,.63,lz); g.add(L); arr.push(L);
+  }
+  leg(-.15,-.36,u.legsF); leg(.15,-.36,u.legsF);
+  leg(-.16,.44,u.legsR);  leg(.16,.44,u.legsR);
+
+  g.traverse(o=>{ if(o.isMesh) o.castShadow = true; });
+  g.visible = false; scene.add(g);
+  return g;
+}
+
+/* the ghost can wear either critter; only one is visible at a time */
+const critters = {
+  raccoon: makeRaccoon(0x5b8cff),
+  unicorn: makeUnicorn(0x5b8cff)
+};
+let ghostMesh = critters.raccoon;
+let playerChar = "raccoon";           /* what YOU play as (ghost + first-person) */
+function setGhostCharacter(kind){
+  const next = critters[kind] || critters.raccoon;
+  if(next === ghostMesh) return;
+  const wasVisible = ghostMesh.visible;
+  ghostMesh.visible = false;
+  ghostMesh = next;
+  ghostMesh.visible = wasVisible;
+}
 
 /* first-person raccoon paws (attached to the camera) */
 const paws = new THREE.Group();
@@ -1109,6 +1244,24 @@ function makePaw(sx){
 const pawL = makePaw(-1), pawR = makePaw(1);
 paws.visible = false;
 camera.add(paws);
+/* first-person unicorn hooves (same camera slot; swapped by character) */
+const hooves = new THREE.Group();
+const HOOF_BAND = new THREE.MeshLambertMaterial({color:0x5b8cff});
+function makeHoof(sx){
+  const p = new THREE.Group();
+  const fetlock = new THREE.Mesh(new THREE.SphereGeometry(.085,6,5), rcMat(UC.coat,1));
+  fetlock.scale.set(1,.8,1.25); p.add(fetlock);
+  const tip = new THREE.Mesh(new THREE.CylinderGeometry(.075,.085,.1,6), rcMat(UC.hoof,1));
+  tip.rotation.x = Math.PI/2; tip.position.z = -.11; p.add(tip);
+  const cuff = new THREE.Mesh(new THREE.CylinderGeometry(.07,.085,.1,6), HOOF_BAND);
+  cuff.rotation.x = Math.PI/2; cuff.position.z = .12; p.add(cuff);
+  p.position.set(.22*sx,-.26,-.55);
+  hooves.add(p);
+  return p;
+}
+const hoofL = makeHoof(-1), hoofR = makeHoof(1);
+hooves.visible = false;
+camera.add(hooves);
 /* chaser's eyes as headlights: two forward beams parented to the camera,
    dark by day (intensity 0), ramped up by nightMix while in play */
 const playerHeadlights = [];
@@ -1575,33 +1728,38 @@ function frame(t){
     }
   }
 
-  /* first-person: the gallop lives in the camera. Paws gather and reach
-     together while the view itself hops and rocks — bouncy, not punchy. */
+  /* first-person: the gallop lives in the camera. Paws (or hooves) gather
+     and reach together while the view itself hops and rocks. */
   const inPlay = (gameMode==="run" || gameMode==="chase" || gameMode==="free");
-  paws.visible = inPlay;
+  paws.visible = inPlay && playerChar!=="unicorn";
+  hooves.visible = inPlay && playerChar==="unicorn";
   /* eye headlights: ghost beams only when the ghost is on screen; chaser (FP)
      beams whenever in play. Both scale with how far into night we are. */
   ghostMesh.userData.beams.forEach(b=> b.intensity = ghostMesh.visible ? nightMix*2.0 : 0);
   playerHeadlights.forEach(h=> h.intensity = inPlay ? nightMix*2.8 : 0);
   let camBob = 0, camRoll = 0;
   if(inPlay){
+    const fpL = playerChar==="unicorn" ? hoofL : pawL;
+    const fpR = playerChar==="unicorn" ? hoofR : pawR;
     const pRun = Math.min(1, Math.hypot(player.vx, player.vz)/7);
     const pf = t*.001*(4 + 9*pRun)*2.2;
     if(!player.grounded){
-      pawL.position.set(-.26,-.14,-.5); pawR.position.set(.26,-.14,-.5);
-      pawL.rotation.x = pawR.rotation.x = -.7;
+      fpL.position.set(-.26,-.14,-.5); fpR.position.set(.26,-.14,-.5);
+      fpL.rotation.x = fpR.rotation.x = -.7;
     }else{
-      const gather = Math.max(0, Math.sin(pf));      /* body rises, paws lift + reach */
+      const gather = Math.max(0, Math.sin(pf));      /* body rises, limbs lift + reach */
       const lagR   = Math.max(0, Math.sin(pf-.35));  /* gallop stagger */
       const glide  = Math.cos(pf);
-      pawL.position.set(-.22, -.3 + gather*.1*pRun, -.5 - gather*.09*pRun + glide*.03*pRun);
-      pawR.position.set( .22, -.3 + lagR*.1*pRun,   -.5 - lagR*.09*pRun   + glide*.03*pRun);
-      pawL.rotation.x = -gather*.8*pRun;
-      pawR.rotation.x = -lagR*.8*pRun;
+      fpL.position.set(-.22, -.3 + gather*.1*pRun, -.5 - gather*.09*pRun + glide*.03*pRun);
+      fpR.position.set( .22, -.3 + lagR*.1*pRun,   -.5 - lagR*.09*pRun   + glide*.03*pRun);
+      fpL.rotation.x = -gather*.8*pRun;
+      fpR.rotation.x = -lagR*.8*pRun;
       camBob  = gather*.075*pRun;                    /* the hop, in your own eyes */
       camRoll = Math.sin(pf*.5)*.02*pRun;            /* soft side-to-side rock */
     }
-    PAW_BAND.color.setHex(gameMode==="chase" ? 0xff9d47 : 0x5b8cff);
+    const bandHex = gameMode==="chase" ? 0xff9d47 : 0x5b8cff;
+    PAW_BAND.color.setHex(bandHex);
+    HOOF_BAND.color.setHex(bandHex);
   }
   /* game-feel camera: FOV widens with speed + flow; landings thud */
   const spdN = Math.min(1, Math.hypot(player.vx,player.vz)/10);
@@ -1629,6 +1787,7 @@ requestAnimationFrame(frame);
 $("btnPractice").onclick = ()=>{
   startRun(()=>{
     const myRun = trimLead(recFrames.slice());
+    setGhostCharacter(playerChar);   /* your ghost is you */
     startChase(myRun, res=>{
       $("resTitle").textContent = res.type==="tag" ? "TAGGED!" : "ESCAPED.";
       $("resTitle").style.color = res.type==="tag" ? "var(--chaser)" : "var(--runner)";
@@ -1695,9 +1854,24 @@ let me = {id: Math.random().toString(36).slice(2,10), name:""};
 let cur = {code:null, state:null, role:null};   // role: 'p1'|'p2'
 let pollTimer = null;
 
+/* ----- character picker (home screen) ----- */
+function setChar(k, save){
+  playerChar = (k==="unicorn") ? "unicorn" : "raccoon";
+  $("chRaccoon").classList.toggle("sel", playerChar==="raccoon");
+  $("chUnicorn").classList.toggle("sel", playerChar==="unicorn");
+  if(save!==false){
+    me.char = playerChar;
+    store.set("ghosttag:me", me, false);
+  }
+}
+$("chRaccoon").onclick = ()=>{ setChar("raccoon"); tone(340,.07,"triangle",.05); };
+$("chUnicorn").onclick = ()=>{ setChar("unicorn"); tone(520,.07,"triangle",.05); tone(660,.08,"triangle",.04,.05); };
+setChar("raccoon", false);
+
 async function loadIdentity(){
   const saved = await store.get("ghosttag:me", false);
   if(saved && saved.id) me = saved;
+  setChar(me.char||"raccoon", false);
 }
 loadIdentity();
 
@@ -1812,11 +1986,12 @@ $("btnTakeTurn").onclick = async ()=>{
 
   const mustChase = s.pendingRun && s.pendingBy!==cur.role;
   if(mustChase){
+    setGhostCharacter(s.pendingChar||"raccoon");   /* the ghost wears the runner's critter */
     startChase(s.pendingRun, async res=>{
       /* score the chase */
       if(res.type==="tag") s.scores[cur.role]++;
       else s.scores[s.pendingBy]++;
-      s.pendingRun=null; s.pendingBy=null;
+      s.pendingRun=null; s.pendingBy=null; s.pendingChar=null;
       const done = s.scores.p1>=WIN_SCORE || s.scores.p2>=WIN_SCORE;
       if(done){ s.phase="over"; s.winner = s.scores.p1>=WIN_SCORE?"p1":"p2";
         await store.set(GKEY(s.code), s, true);
@@ -1847,6 +2022,7 @@ function doRecordRun(s){
   startRun(async ()=>{
     s.pendingRun = trimLead(recFrames.slice());
     s.pendingBy = cur.role;
+    s.pendingChar = playerChar;
     s.turn = cur.role==="p1"?"p2":"p1";
     s.round++;
     if(s.phase==="waiting" && s.p2) s.phase="live";
