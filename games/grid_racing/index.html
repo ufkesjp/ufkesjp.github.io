@@ -346,7 +346,7 @@ const camera = new THREE.PerspectiveCamera(78, innerWidth/innerHeight, .05, 300)
 scene.add(camera);
 
 const hemi = new THREE.HemisphereLight(0xcfae94, 0x2c3826, 1.0); scene.add(hemi);
-scene.add(new THREE.AmbientLight(0x2c3a63, .4));   /* cool fill: blue shadows vs warm sun */
+const amb = new THREE.AmbientLight(0x2c3a63, .4); scene.add(amb);   /* cool fill: blue shadows vs warm sun */
 const sun = new THREE.DirectionalLight(0xffc287, 1.35);
 sun.position.set(-55,16,30); scene.add(sun);   /* low western sun: long twilight shadows */
 sun.castShadow = true;
@@ -355,6 +355,48 @@ sun.shadow.camera.left = -60; sun.shadow.camera.right = 60;
 sun.shadow.camera.top = 60;   sun.shadow.camera.bottom = -60;
 sun.shadow.camera.near = 5;   sun.shadow.camera.far = 250;
 sun.shadow.bias = -0.0005;
+
+/* ---------- day → night easter egg (the runner's diversion) ----------
+   nightMix 0 = the normal sunset; 1 = full moonlit night. applyNight() lerps
+   every light, the sky dome, fog and exposure between the two, and lights the
+   ghost's glowing eyes. Eye beams + chaser headlights are driven in the loop. */
+const EYE_GLOW = new THREE.MeshBasicMaterial({color:0xfff4c8});
+const _cSunDay=new THREE.Color(0xffc287),  _cSunNight=new THREE.Color(0x9fb8e8);
+const _cHemiDay=new THREE.Color(0xcfae94), _cHemiNight=new THREE.Color(0x2b3d63);
+const _cHemiGDay=new THREE.Color(0x2c3826),_cHemiGNight=new THREE.Color(0x0e141d);
+const _cAmbDay=new THREE.Color(0x2c3a63),  _cAmbNight=new THREE.Color(0x141d33);
+const _cHorDay=new THREE.Color(0xf29a5c),  _cHorNight=new THREE.Color(0x16203a);
+const _cTopDay=new THREE.Color(0x3c4577),  _cTopNight=new THREE.Color(0x070b1a);
+const _cSunCDay=new THREE.Color(0xffc98a), _cSunCNight=new THREE.Color(0xcfe0ff);
+const _cFogDay=new THREE.Color(HORIZON),   _cFogNight=new THREE.Color(0x0e1526);
+const _cBgDay=new THREE.Color(0x2b3358),   _cBgNight=new THREE.Color(0x060a14);
+const _sunDirDay=new THREE.Vector3(-0.84,0.22,0.46).normalize();
+const _sunDirNight=new THREE.Vector3(-0.70,0.05,0.40).normalize();
+let nightMix=0, nightTarget=0;
+function applyNight(m){
+  sun.intensity = 1.35 + (0.22-1.35)*m;
+  sun.color.copy(_cSunDay).lerp(_cSunNight,m);
+  sun.position.y = 16 + (3-16)*m;                 /* the sun sinks */
+  hemi.intensity = 1.0 + (0.30-1.0)*m;
+  hemi.color.copy(_cHemiDay).lerp(_cHemiNight,m);
+  hemi.groundColor.copy(_cHemiGDay).lerp(_cHemiGNight,m);
+  amb.intensity = 0.40 + (0.28-0.40)*m;
+  amb.color.copy(_cAmbDay).lerp(_cAmbNight,m);
+  skyMat.uniforms.hor.value.copy(_cHorDay).lerp(_cHorNight,m);
+  skyMat.uniforms.top.value.copy(_cTopDay).lerp(_cTopNight,m);
+  skyMat.uniforms.sunC.value.copy(_cSunCDay).lerp(_cSunCNight,m);   /* sun disc → moon */
+  skyMat.uniforms.sunDir.value.copy(_sunDirDay).lerp(_sunDirNight,m).normalize();
+  scene.fog.color.copy(_cFogDay).lerp(_cFogNight,m);
+  scene.background.copy(_cBgDay).lerp(_cBgNight,m);
+  renderer.toneMappingExposure = 1.25 + (1.05-1.25)*m;
+  if(typeof ghostMesh!=="undefined" && ghostMesh.userData.eyes){
+    const glow = m>0.35;
+    for(const e of ghostMesh.userData.eyes){
+      e.material = glow ? EYE_GLOW : ghostMesh.userData.eyeMat;
+      e.scale.setScalar(1 + m*2.2);
+    }
+  }
+}
 
 function onResize(){
   renderer.setSize(innerWidth, innerHeight);
@@ -438,7 +480,7 @@ function box(cx,cy,cz,sx,sy,sz,kind){
   }
   g.setAttribute("color", new THREE.BufferAttribute(cols,3));
   g.computeVertexNormals();
-  const floor = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true, flatShading:true}));
+  const floor = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true}));
   floor.receiveShadow = true;
   floor.rotation.x = -Math.PI/2; scene.add(floor);
 })();
@@ -540,6 +582,51 @@ box(24,0.55,-23, 4.5,1.1,5,"boulder");   /* chains into the far corner boulder *
 box(-28,0.55,-30, 6,1.1,6,"boulder");
 box(28,0.55,-30, 6,1.1,6,"boulder");
 
+/* ===== KONAMI CHAIN =====
+   Land on these four sky-route blocks in order (near → far) AS THE RUNNER to
+   trigger nightfall. The chaser can't do it — only the runner (live, or their
+   replayed ghost during a chase) is checked, so it works as a laid diversion. */
+const konamiTargets = [
+  {minx:24-2.25, maxx:24+2.25, minz:-7-2.5,  maxz:-7+2.5,  top:1.1},
+  {minx:27-2.25, maxx:27+2.25, minz:-15-2.5, maxz:-15+2.5, top:1.1},
+  {minx:24-2.25, maxx:24+2.25, minz:-23-2.5, maxz:-23+2.5, top:1.1},
+  {minx:28-3,    maxx:28+3,    minz:-30-3,   maxz:-30+3,   top:1.1}
+];
+let konamiIdx = 0, konamiDone = false;
+function onKonamiBlock(x,y,z){
+  for(let i=0;i<konamiTargets.length;i++){
+    const t = konamiTargets[i];
+    if(x>t.minx && x<t.maxx && z>t.minz && z<t.maxz && Math.abs(y-t.top)<0.35) return i;
+  }
+  return -1;
+}
+/* forgiving, in-order: standing on the next needed block advances the chain;
+   wrong or repeat landings do nothing (no reset), so a clean hop-chain arms it */
+function konamiStep(x,y,z){
+  if(konamiDone) return;
+  if(onKonamiBlock(x,y,z) === konamiIdx){
+    konamiIdx++;
+    tone(560 + konamiIdx*130, .08, "triangle", .05);
+    if(konamiIdx >= konamiTargets.length) triggerNight();
+  }
+}
+function triggerNight(){
+  if(konamiDone) return;
+  konamiDone = true;
+  nightTarget = 1;
+  flashEl.style.background = "radial-gradient(circle, rgba(120,150,255,.5), rgba(30,40,90,.15))";
+  flashEl.style.opacity = ".5"; setTimeout(()=>{ flashEl.style.opacity = "0"; }, 90);
+  subTxt.textContent = "NIGHTFALL"; subTxt.classList.add("on");
+  setTimeout(()=>{ if(gameMode!=="countdown") subTxt.classList.remove("on"); }, 1700);
+  tone(180,.5,"sine",.09); tone(270,.7,"sine",.06,.06); tone(90,.9,"sine",.07,.03);
+}
+function resetKonami(){ konamiIdx = 0; konamiDone = false; }
+function resetNight(){
+  nightTarget = 0; nightMix = 0; applyNight(0);
+  ghostMesh.userData.beams.forEach(b=> b.intensity = 0);
+  playerHeadlights.forEach(h=> h.intensity = 0);
+}
+
 /* trailhead lanterns at the far cliff */
 box(-2,1.2,-36.4, .5,2.4,.5,"timber"); box(2,1.2,-36.4, .5,2.4,.5,"timber");
 lantern(-2,2.7,-36.2,true); lantern(2,2.7,-36.2,false);
@@ -571,7 +658,7 @@ function hillH(d){ return d>42 ? Math.min(8, (d-42)*0.12) : 0; }
   }
   g.setAttribute("color", new THREE.BufferAttribute(hcols,3));
   g.computeVertexNormals();
-  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true, flatShading:true}));
+  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true}));
   m.receiveShadow = true;
   m.rotation.x = -Math.PI/2; m.position.y = -0.06; scene.add(m);
 })();
@@ -628,7 +715,7 @@ function makeRidge(N, fn){
   }
   g.setAttribute("color", new THREE.BufferAttribute(cols,3));
   g.computeVertexNormals();
-  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true, flatShading:true}));
+  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true}));
   scene.add(m);
   return m;
 }
@@ -655,10 +742,10 @@ const TREE_GREENS = [0x33684a, 0x2c5c40, 0x3f7355];
 function pine(x,z,s){
   const g = new THREE.Group();
   const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.22*s,.34*s,1.6*s,6),
-    new THREE.MeshLambertMaterial({color:0x5a4327, flatShading:true}));
+    new THREE.MeshLambertMaterial({color:0x5a4327}));
   trunk.castShadow = true; trunk.position.y = .7*s; g.add(trunk);
   const leaf = new THREE.MeshLambertMaterial({
-    color:TREE_GREENS[Math.floor(Math.random()*TREE_GREENS.length)], flatShading:true});
+    color:TREE_GREENS[Math.floor(Math.random()*TREE_GREENS.length)]});
   for(let i=0;i<3;i++){
     const c = new THREE.Mesh(new THREE.ConeGeometry((1.9-i*.5)*s, 1.7*s, 7), leaf);
     c.castShadow = true; c.position.y = (1.6 + i*1.0)*s; g.add(c);
@@ -688,8 +775,8 @@ arenaPine(-6,24,1.5); arenaPine(12,14,1.3); arenaPine(-25,-4,1.4);
 arenaPine(20,-30,1.2); arenaPine(-32,10,1.6);
 
 /* ---------- knockable trash cans (the raccoon mandate) ---------- */
-const CAN_BODY = new THREE.MeshLambertMaterial({color:0x9aa0ab, flatShading:true});
-const CAN_DARK = new THREE.MeshLambertMaterial({color:0x565c68, flatShading:true});
+const CAN_BODY = new THREE.MeshLambertMaterial({color:0x9aa0ab});
+const CAN_DARK = new THREE.MeshLambertMaterial({color:0x565c68});
 const cans = [];
 const _tip = new THREE.Vector3();
 function trashCan(x,z,ry){
@@ -712,9 +799,9 @@ trashCan(-10.5,-7.2,.2);  /* mid meadow near the creek berm */
 /* spilled-trash debris pool */
 const debris = [];
 const DEB_MATS = [
-  new THREE.MeshLambertMaterial({color:0xd8d2c2, flatShading:true}),
-  new THREE.MeshLambertMaterial({color:0x8fae63, flatShading:true}),
-  new THREE.MeshLambertMaterial({color:0xc46a4a, flatShading:true})
+  new THREE.MeshLambertMaterial({color:0xd8d2c2}),
+  new THREE.MeshLambertMaterial({color:0x8fae63}),
+  new THREE.MeshLambertMaterial({color:0xc46a4a})
 ];
 for(let i=0;i<24;i++){
   let mesh;
@@ -757,7 +844,7 @@ function knockCan(c, px, pz){
   spillTrash(c.x, c.z, px, pz);
 }
 /* boulders on the slopes */
-const ROCK_MAT = new THREE.MeshLambertMaterial({color:0x767a88, flatShading:true});
+const ROCK_MAT = new THREE.MeshLambertMaterial({color:0x767a88});
 for(let i=0;i<8;i++){
   const a = rnd(0, Math.PI*2), d = rnd(44, 62), s = rnd(1.1, 2.8);
   const r = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 0), ROCK_MAT);
@@ -774,7 +861,7 @@ for(let i=0;i<18;i++){
   scene.add(f);
 }
 /* drifting low-poly clouds (squashed icosahedra) */
-const CLOUD_MAT = new THREE.MeshLambertMaterial({color:0xffd9c2, flatShading:true, transparent:true, opacity:.9});
+const CLOUD_MAT = new THREE.MeshLambertMaterial({color:0xffd9c2, transparent:true, opacity:.9});
 const cloudArr = [];
 for(let i=0;i<9;i++){
   const c = new THREE.Group();
@@ -885,7 +972,7 @@ const CHASER_SPAWN = {x:0, y:0, z:36.4, yaw:0}; // chaser starts ~4.5m behind th
    broad head with cheek ruffs, small ROUND ears, thick low ringed tail. */
 const RC = { fur:0x8a8f9d, furD:0x6e7382, dark:0x2a2f3a, lite:0xdfe4ec };
 function rcMat(hex, op){
-  return new THREE.MeshLambertMaterial({color:hex, flatShading:true, transparent:true, opacity:(op===undefined?.95:op)});
+  return new THREE.MeshLambertMaterial({color:hex, transparent:true, opacity:(op===undefined?.95:op)});
 }
 function makeRaccoon(accent){
   const g = new THREE.Group();
@@ -913,12 +1000,18 @@ function makeRaccoon(accent){
   });
   const brow = new THREE.Mesh(new THREE.SphereGeometry(.24,7,5), lite);
   brow.scale.set(1.05,.5,.85); brow.position.set(0,.12,-.08); head.add(brow);
+  u.eyes = []; u.eyeMat = lite; u.beams = [];
+  const beamAim = new THREE.Object3D(); beamAim.position.set(0,-.1,-4); head.add(beamAim);
   [-1,1].forEach(sx=>{                                   /* dark eye patches + eye glints */
     const patch = new THREE.Mesh(new THREE.SphereGeometry(.105,6,5), dark);
     patch.scale.set(1.25,.75,.6); patch.position.set(.12*sx,.02,-.2);
     patch.rotation.z = -.35*sx; head.add(patch);
     const eye = new THREE.Mesh(new THREE.SphereGeometry(.028,5,4), lite);
     eye.position.set(.11*sx,.03,-.26); head.add(eye);
+    u.eyes.push(eye);
+    const beam = new THREE.SpotLight(0xfff3cf, 0, 16, Math.PI/7, .55, 1.3);  /* headlight cone, off by day */
+    beam.position.set(.11*sx,.03,-.26); beam.castShadow = false;
+    beam.target = beamAim; head.add(beam); u.beams.push(beam);
   });
   const snout = new THREE.Mesh(new THREE.ConeGeometry(.13,.28,6), lite);
   snout.rotation.x = -Math.PI/2; snout.position.set(0,-.05,-.3); head.add(snout);
@@ -935,7 +1028,7 @@ function makeRaccoon(accent){
 
   /* role bandana at the neck */
   const band = new THREE.Mesh(new THREE.CylinderGeometry(.2,.26,.12,6),
-    new THREE.MeshLambertMaterial({color:accent, flatShading:true}));
+    new THREE.MeshLambertMaterial({color:accent}));
   band.rotation.x = .25; band.position.set(0,.02,-.4); torso.add(band);
 
   /* thick ringed tail, held LOW and back (never curled up like a cat's) */
@@ -1000,7 +1093,7 @@ const ghostMesh = makeRaccoon(0x5b8cff);
 
 /* first-person raccoon paws (attached to the camera) */
 const paws = new THREE.Group();
-const PAW_BAND = new THREE.MeshLambertMaterial({color:0x5b8cff, flatShading:true});
+const PAW_BAND = new THREE.MeshLambertMaterial({color:0x5b8cff});
 function makePaw(sx){
   const p = new THREE.Group();
   const mitt = new THREE.Mesh(new THREE.SphereGeometry(.09,6,5), rcMat(RC.fur,1));
@@ -1016,6 +1109,17 @@ function makePaw(sx){
 const pawL = makePaw(-1), pawR = makePaw(1);
 paws.visible = false;
 camera.add(paws);
+/* chaser's eyes as headlights: two forward beams parented to the camera,
+   dark by day (intensity 0), ramped up by nightMix while in play */
+const playerHeadlights = [];
+const _hlGroup = new THREE.Group();
+[-1,1].forEach(sx=>{
+  const hl = new THREE.SpotLight(0xeaf1ff, 0, 30, Math.PI/6.5, .6, 1.15);
+  hl.position.set(.16*sx,-.02,-.1); hl.castShadow = false;
+  const aim = new THREE.Object3D(); aim.position.set(.16*sx,-.6,-8); _hlGroup.add(aim);
+  hl.target = aim; _hlGroup.add(hl); playerHeadlights.push(hl);
+});
+camera.add(_hlGroup);
 /* luminous breadcrumb trail: additive comet dots + a glowing thread */
 const TRAIL_N = 34;
 const trail = [];
@@ -1215,7 +1319,7 @@ function stepPhysics(spd, inputOn){
 
 /* ---------- recording / replay ---------- */
 let recFrames = [];                    // [x,y,z,yaw] per tick
-let ghostFrames = null, ghostTick = 0;
+let ghostFrames = null;
 /* strip up to 2s of standing-still at the start of a run, so the
    runner's reaction time at GO doesn't hand the chaser free ground */
 function trimLead(frames){
@@ -1255,6 +1359,7 @@ function startCountdown(label, next, spawn){
   bigEl.classList.add("on");
   resetPlayer(spawn);
   resetTrash();
+  resetKonami(); resetNight();
   if(!IS_TOUCH) canvas.requestPointerLock();
 }
 function startRun(after){
@@ -1297,6 +1402,7 @@ function startFree(){
   gameMode="free"; tick=0; acc=0;
   resetPlayer(SPAWN);
   resetTrash();
+  resetKonami(); resetNight();
   ghostMesh.visible=false; trail.forEach(d=>d.visible=false); thread.visible=false;
   hud.className="hud on free";
   $("keysHint").textContent = IS_TOUCH ? "" : "WASD move · Space jump · Mouse look · Esc or Exit to leave";
@@ -1318,6 +1424,13 @@ function frame(t){
   let dt=(t-lastT)/1000; lastT=t;
   if(dt>0.25) dt=0.25;
 
+  /* advance the day→night transition (~2s) and repaint the environment */
+  if(nightMix!==nightTarget){
+    nightMix += (nightTarget>nightMix?1:-1)*dt*0.5;
+    nightMix = Math.max(0, Math.min(1, nightMix));
+    applyNight(nightMix);
+  }
+
   if(gameMode==="countdown"){
     const left = countdownEnd - performance.now();
     if(left<=0){ bigEl.classList.remove("on"); subTxt.classList.remove("on");
@@ -1338,8 +1451,10 @@ function frame(t){
       acc-=TICK;
       if(gameMode==="free"){
         stepPhysics(RUN_SPEED, true);
+        konamiStep(player.x,player.y,player.z);
       }else if(gameMode==="run"){
         stepPhysics(RUN_SPEED, true);
+        konamiStep(player.x,player.y,player.z);
         recFrames.push([+player.x.toFixed(2),+player.y.toFixed(2),+player.z.toFixed(2),+player.yaw.toFixed(3)]);
         tick++;
         if(tick>=TURN_TICKS){ endPhase({type:"runDone"}); break; }
@@ -1347,6 +1462,7 @@ function frame(t){
         const inputOn = tick>=HEAD_START_TICKS;
         stepPhysics(CHASE_SPEED, inputOn);
         const g = ghostPos(tick);
+        konamiStep(g[0],g[1],g[2]);   /* only the ghost (runner's replay) arms nightfall */
         /* ghost topples cans along its replayed path (chaser knocks them in
            stepPhysics; this lets the ghost knock them too) */
         for(const c of cans){
@@ -1463,6 +1579,10 @@ function frame(t){
      together while the view itself hops and rocks — bouncy, not punchy. */
   const inPlay = (gameMode==="run" || gameMode==="chase" || gameMode==="free");
   paws.visible = inPlay;
+  /* eye headlights: ghost beams only when the ghost is on screen; chaser (FP)
+     beams whenever in play. Both scale with how far into night we are. */
+  ghostMesh.userData.beams.forEach(b=> b.intensity = ghostMesh.visible ? nightMix*2.0 : 0);
+  playerHeadlights.forEach(h=> h.intensity = inPlay ? nightMix*2.8 : 0);
   let camBob = 0, camRoll = 0;
   if(inPlay){
     const pRun = Math.min(1, Math.hypot(player.vx, player.vz)/7);
