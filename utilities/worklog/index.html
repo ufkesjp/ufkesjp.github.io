@@ -12,367 +12,529 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    border-radius: 0 !important;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  :root {
-    --bg: #f4ede0;
-    --ink: #0a0a0a;
-    --paper: #ffffff;
-    --accent: #ffd60a;
-    --danger: #ff3b30;
-    --safe: #2d7a3d;
-    --safe-soft: #c8e6cf;
-    --bord: 3px solid #0a0a0a;
-    --shadow: 6px 6px 0 #0a0a0a;
-    --shadow-sm: 4px 4px 0 #0a0a0a;
-  }
-
-  html, body {
-    min-height: 100vh;
-    background: var(--bg);
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    color: var(--ink);
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(10,10,10,0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(10,10,10,0.06) 1px, transparent 1px);
-    background-size: 32px 32px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  #app {
-    position: relative;
-    z-index: 1;
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-  }
-
-  .wordmark {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 24px;
-    letter-spacing: -0.02em;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 11px;
-    padding: 4px 10px;
-    border: 2px solid var(--ink);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .tag.accent { background: var(--accent); }
-  .tag.safe { background: var(--safe); color: #fff; border-color: var(--safe); }
-
-  .panel {
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-
-  .panel-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: var(--bord);
-  }
-
-  .prompt {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: -0.01em;
-    margin-bottom: 16px;
-  }
-
-  textarea {
-    width: 100%;
-    padding: 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    background: var(--paper);
-    border: var(--bord);
-    color: var(--ink);
-    outline: none;
-    resize: none;
-    height: 100px;
-    margin-bottom: 12px;
-    -webkit-appearance: none;
-    appearance: none;
-    line-height: 1.5;
-  }
-
-  textarea:focus {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px;
-  }
-
-  textarea::placeholder {
-    opacity: 0.35;
-    font-style: italic;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: var(--paper);
-    border: var(--bord);
-    color: var(--ink);
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.08s, box-shadow 0.08s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--ink);
-  }
-
-  .btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--ink);
-  }
-
-  .btn.primary { background: var(--accent); }
-  .btn.warn { background: var(--danger); color: #fff; }
-  .btn.success { background: var(--safe); color: #fff; }
-
-  .btn-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .err {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--danger);
-    margin-top: 10px;
-    display: none;
-  }
-
-  /* ── Timer screen ── */
-  .working-on-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.5;
-    margin-bottom: 6px;
-  }
-
-  .working-on-task {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 1.3;
-    word-break: break-word;
-  }
-
-  .big-time {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: clamp(42px, 12vw, 64px);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    padding: 24px 20px;
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow);
-    text-align: center;
-    margin-bottom: 16px;
-  }
-
-  .big-time.paused {
-    color: rgba(10,10,10,0.3);
-  }
-
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .status-dot {
-    width: 10px;
-    height: 10px;
-    background: var(--safe);
-    border: 2px solid var(--ink);
-    flex-shrink: 0;
-  }
-
-  .status-dot.paused {
-    background: var(--accent);
-  }
-
-  .status-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* ── Summary screen ── */
-  .summary-time {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: clamp(32px, 9vw, 52px);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    padding: 20px;
-    background: var(--safe);
-    color: #fff;
-    border: var(--bord);
-    box-shadow: var(--shadow);
-    text-align: center;
-    margin-bottom: 16px;
-  }
-
-  .summary-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.5;
-    margin-bottom: 6px;
-  }
-
-  .summary-task {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 1.3;
-    word-break: break-word;
-  }
-
-  .summary-meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .meta-box {
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow-sm);
-    padding: 12px 14px;
-  }
-
-  .meta-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    margin-bottom: 4px;
-  }
-
-  .meta-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 14px;
-    line-height: 1.3;
-    word-break: break-word;
-  }
-
-  /* ── Log history ── */
-  .log-entry {
-    background: var(--paper);
-    border: var(--bord);
-    box-shadow: var(--shadow-sm);
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .log-task {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    flex: 1;
-    word-break: break-word;
-  }
-
-  .log-duration {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 13px;
-    flex-shrink: 0;
-    background: var(--accent);
-    padding: 3px 8px;
-    border: 2px solid var(--ink);
-  }
-
-  .log-time {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    opacity: 0.45;
-    margin-top: 3px;
-  }
-
-  .section-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.55;
-    margin-bottom: 10px;
-  }
-
-  .no-log {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    opacity: 0.4;
-    text-align: center;
-    padding: 20px;
-    border: 2px dashed rgba(10,10,10,0.2);
-  }
-
-  #view-setup, #view-timer, #view-summary { display: none; }
-  #view-setup { display: block; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+:root {
+  --bg: #f4ede0;
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --accent: #ffd60a;
+  --danger: #ff3b30;
+  --safe: #2d7a3d;
+  --new: #2f6fed;
+  --exist: #b45cd6;
+  --bord: 3px solid #0a0a0a;
+  --shadow: 6px 6px 0 #0a0a0a;
+  --shadow-sm: 4px 4px 0 #0a0a0a;
+}
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  color: var(--ink);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(10,10,10,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,10,10,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+.wordmark {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tag.accent { background: var(--accent); }
+.tag.new { background: var(--new); color: #fff; }
+.tag.exist { background: var(--exist); color: #fff; }
+.tag.unset { background: transparent; opacity: 0.5; }
+.tag.mini { font-size: 9px; padding: 2px 6px; border-width: 2px; }
+.panel {
+  background: var(--paper);
+  border: var(--bord);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.prompt {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 8px;
+}
+textarea, input {
+  width: 100%;
+  padding: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  background: var(--paper);
+  border: var(--bord);
+  color: var(--ink);
+  outline: none;
+  resize: none;
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.4;
+}
+textarea { height: 100px; margin-bottom: 16px; }
+textarea:focus, input:focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+textarea::placeholder { opacity: 0.35; font-style: italic; }
+input[type="datetime-local"], input[type="number"] {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 10px;
+  border-width: 2px;
+}
+.type-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.type-btn {
+  padding: 12px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  background: var(--paper);
+  border: var(--bord);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.type-btn[aria-pressed="true"] {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+  color: #fff;
+}
+.type-btn[data-type="new"][aria-pressed="true"] { background: var(--new); }
+.type-btn[data-type="existing"][aria-pressed="true"] { background: var(--exist); }
+.btn {
+  width: 100%;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--paper);
+  border: var(--bord);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s, box-shadow 0.08s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.primary { background: var(--accent); }
+.btn.warn { background: var(--danger); color: #fff; }
+.btn.success { background: var(--safe); color: #fff; }
+.btn.sm { padding: 8px 10px; font-size: 10px; box-shadow: 3px 3px 0 var(--ink); border-width: 2px; }
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.err {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--danger);
+  margin-top: 10px;
+  display: none;
+}
+/* ── Timer ── */
+.working-on-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+.working-on-task {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.3;
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+.big-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: clamp(42px, 12vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  padding: 24px 20px;
+  background: var(--paper);
+  border: var(--bord);
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.this-session {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--safe);
+  border: 2px solid var(--ink);
+  flex-shrink: 0;
+}
+.status-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+/* ── Summary ── */
+.summary-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: clamp(32px, 9vw, 52px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  padding: 20px;
+  background: var(--safe);
+  color: #fff;
+  border: var(--bord);
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.summary-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+.summary-task {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.3;
+  word-break: break-word;
+  margin-bottom: 10px;
+}
+/* ── Session rows ── */
+.session-row {
+  border: 2px solid var(--ink);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: var(--paper);
+}
+.session-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.session-idx {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+.session-span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+.session-dur {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 12px;
+  background: var(--accent);
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  flex-shrink: 0;
+}
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.edit-cell-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 4px;
+}
+/* ── Log ── */
+.log-entry {
+  background: var(--paper);
+  border: var(--bord);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.log-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.log-task {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  word-break: break-word;
+}
+.log-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+  background: var(--accent);
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+}
+.log-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  opacity: 0.5;
+  margin: 6px 0 10px;
+}
+.log-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 10px;
+}
+.totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.total-box {
+  border: 2px solid var(--ink);
+  padding: 8px 10px;
+  background: var(--paper);
+}
+.total-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 3px;
+}
+.total-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 15px;
+}
+.resume-banner {
+  background: var(--accent);
+  border: var(--bord);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  opacity: 0.5;
+  margin-bottom: 12px;
+}
+/* ── Timeline ── */
+.tl-nav {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+.tl-day {
+  background: var(--paper);
+  border: var(--bord);
+  box-shadow: var(--shadow-sm);
+  padding: 10px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tl-day span {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+  margin-top: 3px;
+}
+.tl-span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  margin-bottom: 14px;
+}
+.tl-wrap { display: flex; gap: 8px; }
+.tl-gutter { width: 50px; position: relative; flex-shrink: 0; }
+.tl-hour {
+  position: absolute;
+  right: 0;
+  transform: translateY(-6px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.5;
+}
+.tl-lane {
+  position: relative;
+  flex: 1;
+  border: 2px solid var(--ink);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(10,10,10,0.035) 0 6px,
+    transparent 6px 12px
+  );
+  overflow: hidden;
+}
+.tl-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(10,10,10,0.18);
+}
+.tl-block {
+  position: absolute;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 2px solid var(--ink);
+  padding: 3px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.tl-block.new { background: var(--new); color: #fff; }
+.tl-block.exist { background: var(--exist); color: #fff; }
+.tl-block.unset { background: var(--paper); color: var(--ink); }
+.tl-block.live { border-style: dashed; }
+.tl-block-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.tl-block-time {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+.tl-gap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+.tl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+#view-setup, #view-timer, #view-summary, #view-edit, #view-timeline { display: none; }
 </style>
 </head>
 <body>
@@ -380,20 +542,30 @@
 
   <div class="wordmark">
     WORK LOG
-    <span class="tag accent">v1.0</span>
+    <span class="tag accent">v2.0</span>
   </div>
 
   <!-- ── Setup ── -->
   <div id="view-setup">
+    <div id="orphan-banner"></div>
+
     <div class="panel">
       <div class="prompt">What are you working on?</div>
-      <textarea id="task-input" placeholder="e.g. Writing the Q3 report..." maxlength="200"></textarea>
+      <textarea id="task-input" placeholder="e.g. Rebuild the ingest transform..." maxlength="200"></textarea>
+      <div class="field-label">Work type</div>
+      <div class="type-row">
+        <button class="type-btn" data-type="new" aria-pressed="false" onclick="pickType('new')">New<br>functionality</button>
+        <button class="type-btn" data-type="existing" aria-pressed="false" onclick="pickType('existing')">Existing<br>functionality</button>
+      </div>
       <button class="btn primary" onclick="startTask()">▶ Start</button>
-      <div class="err" id="err-msg">Please describe what you're working on.</div>
+      <div class="err" id="err-msg">Name the task and pick a work type.</div>
     </div>
 
+    <button class="btn" style="margin-bottom:16px;" onclick="openTimeline()">▤ Day timeline</button>
+
     <div id="log-section" style="display:none;">
-      <div class="section-title">Session log</div>
+      <div class="section-title">Task log</div>
+      <div class="totals" id="totals"></div>
       <div id="log-list"></div>
       <button class="btn warn" style="margin-top:4px;" onclick="clearLog()">✕ Clear log</button>
     </div>
@@ -404,213 +576,686 @@
     <div class="panel" style="margin-bottom:16px;">
       <div class="working-on-label">Currently working on</div>
       <div class="working-on-task" id="timer-task">—</div>
+      <span class="tag mini" id="timer-type">—</span>
+      <span class="tag mini" id="timer-sessions">—</span>
     </div>
 
     <div class="big-time" id="timer-display">00:00:00</div>
+    <div class="this-session" id="this-session">This session 00:00:00</div>
 
     <div class="status-row">
       <div class="status-dot" id="status-dot"></div>
       <div class="status-text" id="status-text">Running</div>
     </div>
 
-    <div class="btn-row" style="margin-bottom:10px;">
-      <button class="btn primary" id="pause-btn" onclick="togglePause()">⏸ Pause</button>
-      <button class="btn warn" onclick="endTask()">■ End task</button>
-    </div>
+    <button class="btn warn" style="margin-bottom:10px;" onclick="endTask()">■ Stop task</button>
+    <button class="btn" onclick="goSetup()">↺ Back to log</button>
   </div>
 
   <!-- ── Summary ── -->
   <div id="view-summary">
     <div class="panel" style="margin-bottom:16px;">
-      <div class="summary-label">You spent</div>
-      <div class="summary-time" id="summary-time">—</div>
-      <div class="summary-label" style="margin-top:14px;">on</div>
+      <div class="summary-label">Total time on</div>
       <div class="summary-task" id="summary-task">—</div>
+      <span class="tag mini" id="summary-type">—</span>
     </div>
 
-    <div class="summary-meta" id="summary-meta"></div>
+    <div class="summary-time" id="summary-time">—</div>
 
-    <div class="btn-row">
-      <button class="btn primary" onclick="newTask()">▶ New task</button>
-      <button class="btn" onclick="showSetup()">↺ Back</button>
+    <div class="panel">
+      <div class="section-title">Working sessions</div>
+      <div id="summary-sessions"></div>
     </div>
+
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn success" id="summary-resume">▶ Resume task</button>
+      <button class="btn" id="summary-edit">✎ Edit times</button>
+    </div>
+    <button class="btn primary" onclick="backToLog()">↺ Back to log</button>
+  </div>
+
+  <!-- ── Edit ── -->
+  <div id="view-edit">
+    <div class="panel">
+      <div class="prompt">Edit task</div>
+      <div class="field-label">Task</div>
+      <textarea id="edit-name" maxlength="200" style="height:76px;"></textarea>
+      <div class="field-label">Work type</div>
+      <div class="type-row">
+        <button class="type-btn" data-etype="new" aria-pressed="false" onclick="pickEditType('new')">New<br>functionality</button>
+        <button class="type-btn" data-etype="existing" aria-pressed="false" onclick="pickEditType('existing')">Existing<br>functionality</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Working sessions</div>
+      <div class="hint">Change a start or end time and the duration follows. Change the duration and the end time follows.</div>
+      <div id="edit-sessions"></div>
+      <button class="btn sm" style="margin-top:2px;" onclick="addSession()">＋ Add a session</button>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn success" onclick="saveEdit()">✓ Save changes</button>
+      <button class="btn" onclick="cancelEdit()">✕ Cancel</button>
+    </div>
+    <button class="btn warn" onclick="deleteTask()">🗑 Delete this task</button>
+  </div>
+
+  <!-- ── Timeline ── -->
+  <div id="view-timeline">
+    <div class="tl-nav">
+      <button class="btn" style="padding:10px 0;" onclick="shiftDay(-1)">‹</button>
+      <div class="tl-day" id="tl-day">—</div>
+      <button class="btn" style="padding:10px 0;" onclick="shiftDay(1)">›</button>
+    </div>
+
+    <div class="totals" id="tl-totals"></div>
+    <div class="tl-span" id="tl-span"></div>
+
+    <div class="panel" id="tl-panel">
+      <div id="tl-body"></div>
+    </div>
+
+    <button class="btn primary" onclick="goSetup()">↺ Back to log</button>
   </div>
 
 </div>
 <script>
 'use strict';
 
-const LOG_KEY = 'worklog-v1';
-let taskName = '';
-let startTime = null;
-let elapsed = 0;
-let pausedAt = null;
-let isPaused = false;
+const KEY = 'worklog-v2';
+const OLD_KEY = 'worklog-v1';
+
+let tasks = [];
+let currentId = null;   // task being timed
+let editId = null;      // task being edited
+let editDraft = null;   // { name, type, sessions: [{s, e}] }
+let editFrom = 'summary';  // where Save/Cancel returns to
+let pendingType = '';
 let ticker = null;
 
-function getLog() {
-  try { return JSON.parse(localStorage.getItem(LOG_KEY)) || []; }
-  catch(e) { return []; }
+/* ── storage ── */
+function load() {
+  try { tasks = JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch (e) { tasks = []; }
+  if (!tasks.length) migrateV1();
 }
-
-function saveLog(log) {
-  try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch(e) {}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch (e) {}
 }
-
-function addToLog(task, ms, start) {
-  const log = getLog();
-  log.unshift({ task, ms, start: start.toISOString() });
-  if (log.length > 50) log.pop();
-  saveLog(log);
+function migrateV1() {
+  let old = [];
+  try { old = JSON.parse(localStorage.getItem(OLD_KEY)) || []; } catch (e) { return; }
+  if (!old.length) return;
+  tasks = old.map(function (o) {
+    const s = new Date(o.start);
+    return {
+      id: uid(),
+      name: o.task,
+      type: '',
+      sessions: [{ s: s.toISOString(), e: new Date(s.getTime() + (o.ms || 0)).toISOString() }],
+      done: true
+    };
+  });
+  save();
 }
-
-function clearLog() {
-  if (!confirm('Clear all log entries?')) return;
-  localStorage.removeItem(LOG_KEY);
-  renderLog();
+function uid() {
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
+function byId(id) { return tasks.find(function (t) { return t.id === id; }); }
 
+/* ── time helpers ── */
 function pad(n) { return String(n).padStart(2, '0'); }
-
 function fmtHMS(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sc = s % 60;
-  return pad(h) + ':' + pad(m) + ':' + pad(sc);
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor((s % 3600) / 60)) + ':' + pad(s % 60);
 }
-
 function fmtDuration(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sc = s % 60;
-  if (h > 0) return h + 'h ' + pad(m) + 'm ' + pad(sc) + 's';
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sc = s % 60;
+  if (h > 0) return h + 'h ' + pad(m) + 'm';
   if (m > 0) return m + 'm ' + pad(sc) + 's';
   return sc + 's';
 }
-
 function fmtTime(iso) {
   return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
+function fmtClock(iso) {
+  return new Date(iso).toLocaleString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+function toInput(iso) {
+  const d = new Date(iso);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+         'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fromInput(v) {
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+function sessionMs(sess) {
+  const end = sess.e ? new Date(sess.e).getTime() : Date.now();
+  return Math.max(0, end - new Date(sess.s).getTime());
+}
+function totalMs(task) {
+  return task.sessions.reduce(function (sum, s) { return sum + sessionMs(s); }, 0);
+}
+function openSession(task) {
+  return task.sessions.find(function (s) { return !s.e; }) || null;
+}
+function typeLabel(t) { return t === 'new' ? 'New functionality' : t === 'existing' ? 'Existing functionality' : 'Type unset'; }
+function typeClass(t) { return t === 'new' ? 'new' : t === 'existing' ? 'exist' : 'unset'; }
+function escHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
+/* ── views ── */
 function show(id) {
-  ['view-setup', 'view-timer', 'view-summary'].forEach(v => {
+  ['view-setup', 'view-timer', 'view-summary', 'view-edit', 'view-timeline'].forEach(function (v) {
     document.getElementById(v).style.display = v === id ? 'block' : 'none';
   });
+  window.scrollTo(0, 0);
+}
+function goSetup() {
+  stopTicker();
+  show('view-setup');
+  renderLog();
+  renderOrphan();
 }
 
+/* ── new task ── */
+function pickType(t) {
+  pendingType = t;
+  document.querySelectorAll('[data-type]').forEach(function (b) {
+    b.setAttribute('aria-pressed', String(b.dataset.type === t));
+  });
+}
 function startTask() {
   const val = document.getElementById('task-input').value.trim();
-  if (!val) { document.getElementById('err-msg').style.display = 'block'; return; }
+  if (!val || !pendingType) {
+    document.getElementById('err-msg').style.display = 'block';
+    return;
+  }
   document.getElementById('err-msg').style.display = 'none';
-  taskName = val;
-  startTime = new Date();
-  elapsed = 0;
-  isPaused = false;
-  pausedAt = null;
-
-  document.getElementById('timer-task').textContent = taskName;
-  document.getElementById('timer-display').textContent = '00:00:00';
-  document.getElementById('timer-display').classList.remove('paused');
-  document.getElementById('status-dot').className = 'status-dot';
-  document.getElementById('status-text').textContent = 'Running';
-  document.getElementById('pause-btn').textContent = '⏸ Pause';
-
-  show('view-timer');
-  if (ticker) clearInterval(ticker);
-  ticker = setInterval(tick, 1000);
+  const task = { id: uid(), name: val, type: pendingType, sessions: [], done: false };
+  tasks.unshift(task);
+  task.sessions.push({ s: new Date().toISOString(), e: null });
+  save();
+  currentId = task.id;
+  openTimer();
 }
-
-function tick() {
-  if (!isPaused) {
-    elapsed = Date.now() - startTime.getTime();
-    document.getElementById('timer-display').textContent = fmtHMS(elapsed);
-  }
-}
-
-function togglePause() {
-  if (isPaused) {
-    startTime = new Date(Date.now() - elapsed);
-    isPaused = false;
-    document.getElementById('status-dot').className = 'status-dot';
-    document.getElementById('status-text').textContent = 'Running';
-    document.getElementById('pause-btn').textContent = '⏸ Pause';
-    document.getElementById('timer-display').classList.remove('paused');
-  } else {
-    isPaused = true;
-    document.getElementById('status-dot').className = 'status-dot paused';
-    document.getElementById('status-text').textContent = 'Paused';
-    document.getElementById('pause-btn').textContent = '▶ Resume';
-    document.getElementById('timer-display').classList.add('paused');
-  }
-}
-
-function endTask() {
-  clearInterval(ticker);
-  if (!isPaused) elapsed = Date.now() - startTime.getTime();
-  addToLog(taskName, elapsed, startTime);
-
-  document.getElementById('summary-time').textContent = fmtDuration(elapsed);
-  document.getElementById('summary-task').textContent = taskName;
-
-  const meta = document.getElementById('summary-meta');
-  meta.innerHTML = '';
-  meta.appendChild(metaBox('Started', fmtTime(startTime.toISOString())));
-  meta.appendChild(metaBox('Ended', fmtTime(new Date().toISOString())));
-
-  show('view-summary');
-  renderLog();
-}
-
-function metaBox(label, val) {
-  const box = document.createElement('div');
-  box.className = 'meta-box';
-  box.innerHTML = '<div class="meta-label">' + label + '</div><div class="meta-val">' + val + '</div>';
-  return box;
-}
-
-function newTask() {
+function backToLog() {
   document.getElementById('task-input').value = '';
-  show('view-setup');
-  renderLog();
+  pickType('');
+  pendingType = '';
+  goSetup();
 }
 
-function showSetup() {
-  show('view-setup');
-  renderLog();
+/* ── timer ── */
+function openTimer() {
+  const task = byId(currentId);
+  if (!task) return goSetup();
+  document.getElementById('timer-task').textContent = task.name;
+  const tt = document.getElementById('timer-type');
+  tt.textContent = typeLabel(task.type);
+  tt.className = 'tag mini ' + typeClass(task.type);
+  show('view-timer');
+  paintTimer();
+  startTicker();
+}
+function startTicker() {
+  stopTicker();
+  ticker = setInterval(paintTimer, 1000);
+}
+function stopTicker() {
+  if (ticker) clearInterval(ticker);
+  ticker = null;
+}
+function paintTimer() {
+  const task = byId(currentId);
+  if (!task) return;
+  const open = openSession(task);
+  if (!open) { stopTicker(); return openSummary(task.id); }
+  document.getElementById('timer-display').textContent = fmtHMS(totalMs(task));
+  document.getElementById('timer-sessions').textContent =
+    task.sessions.length + (task.sessions.length === 1 ? ' session' : ' sessions');
+  document.getElementById('this-session').textContent = 'This session ' + fmtHMS(sessionMs(open));
+  document.getElementById('status-text').textContent = 'Running since ' + fmtClock(open.s);
+}
+function endTask() {
+  const task = byId(currentId);
+  if (!task) return goSetup();
+  const open = openSession(task);
+  if (open) open.e = new Date().toISOString();
+  task.done = true;
+  save();
+  stopTicker();
+  openSummary(task.id);
 }
 
+/* ── resume ── */
+function resumeTask(id) {
+  const task = byId(id);
+  if (!task) return;
+  if (!openSession(task)) task.sessions.push({ s: new Date().toISOString(), e: null });
+  task.done = false;
+  // bring to top of the log
+  tasks = tasks.filter(function (t) { return t.id !== id; });
+  tasks.unshift(task);
+  save();
+  currentId = id;
+  openTimer();
+}
+
+/* ── summary ── */
+function openSummary(id) {
+  const task = byId(id);
+  if (!task) return goSetup();
+  document.getElementById('summary-task').textContent = task.name;
+  const st = document.getElementById('summary-type');
+  st.textContent = typeLabel(task.type);
+  st.className = 'tag mini ' + typeClass(task.type);
+  document.getElementById('summary-time').textContent = fmtDuration(totalMs(task));
+  document.getElementById('summary-sessions').innerHTML = task.sessions.map(function (s, i) {
+    return '<div class="session-row">' +
+      '<div class="session-head">' +
+        '<span class="session-idx">Session ' + (i + 1) + '</span>' +
+        '<span class="session-dur">' + fmtDuration(sessionMs(s)) + '</span>' +
+      '</div>' +
+      '<div class="session-span">' + fmtTime(s.s) + ' → ' + (s.e ? fmtTime(s.e) : 'running') + '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('summary-resume').onclick = function () { resumeTask(id); };
+  document.getElementById('summary-edit').onclick = function () { openEdit(id); };
+  show('view-summary');
+}
+
+/* ── edit ── */
+function openEdit(id, from) {
+  const task = byId(id);
+  if (!task) return;
+  stopTicker();
+  editFrom = from || 'summary';
+  editId = id;
+  editDraft = {
+    name: task.name,
+    type: task.type,
+    sessions: task.sessions.map(function (s) { return { s: s.s, e: s.e }; })
+  };
+  document.getElementById('edit-name').value = editDraft.name;
+  pickEditType(editDraft.type);
+  renderEditSessions();
+  show('view-edit');
+}
+function pickEditType(t) {
+  if (editDraft) editDraft.type = t;
+  document.querySelectorAll('[data-etype]').forEach(function (b) {
+    b.setAttribute('aria-pressed', String(b.dataset.etype === t));
+  });
+}
+function renderEditSessions() {
+  const wrap = document.getElementById('edit-sessions');
+  if (!editDraft.sessions.length) {
+    wrap.innerHTML = '<div class="hint">No sessions yet. Add one to log time by hand.</div>';
+    return;
+  }
+  wrap.innerHTML = editDraft.sessions.map(function (s, i) {
+    const mins = Math.round(sessionMs(s) / 60000);
+    return '<div class="session-row" data-i="' + i + '">' +
+      '<div class="session-head">' +
+        '<span class="session-idx">Session ' + (i + 1) + (s.e ? '' : ' · running') + '</span>' +
+        '<span class="session-dur" data-dur="' + i + '">' + fmtDuration(sessionMs(s)) + '</span>' +
+      '</div>' +
+      '<div class="edit-grid">' +
+        '<div><div class="edit-cell-label">Start</div>' +
+          '<input type="datetime-local" data-field="s" data-i="' + i + '" value="' + toInput(s.s) + '"></div>' +
+        '<div><div class="edit-cell-label">End</div>' +
+          '<input type="datetime-local" data-field="e" data-i="' + i + '" value="' + (s.e ? toInput(s.e) : toInput(new Date().toISOString())) + '"></div>' +
+      '</div>' +
+      '<div class="edit-grid">' +
+        '<div><div class="edit-cell-label">Minutes</div>' +
+          '<input type="number" min="0" step="1" data-field="m" data-i="' + i + '" value="' + mins + '"></div>' +
+        '<div><div class="edit-cell-label">Remove</div>' +
+          '<button class="btn sm warn" onclick="removeSession(' + i + ')">🗑 Delete session</button></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  wrap.querySelectorAll('input').forEach(function (inp) {
+    inp.addEventListener('change', onSessionFieldChange);
+  });
+}
+function onSessionFieldChange(ev) {
+  const inp = ev.target;
+  const i = Number(inp.dataset.i);
+  const sess = editDraft.sessions[i];
+  if (!sess) return;
+
+  if (inp.dataset.field === 's') {
+    const iso = fromInput(inp.value);
+    if (!iso) return;
+    const dur = sessionMs(sess);
+    sess.s = iso;
+    sess.e = new Date(new Date(iso).getTime() + dur).toISOString();
+  } else if (inp.dataset.field === 'e') {
+    const iso = fromInput(inp.value);
+    if (!iso) return;
+    if (new Date(iso).getTime() < new Date(sess.s).getTime()) {
+      alert('End time cannot be before the start time.');
+    } else {
+      sess.e = iso;
+    }
+  } else if (inp.dataset.field === 'm') {
+    const mins = Math.max(0, Number(inp.value) || 0);
+    sess.e = new Date(new Date(sess.s).getTime() + mins * 60000).toISOString();
+  }
+  renderEditSessions();
+}
+function addSession() {
+  const now = Date.now();
+  editDraft.sessions.push({
+    s: new Date(now - 30 * 60000).toISOString(),
+    e: new Date(now).toISOString()
+  });
+  renderEditSessions();
+}
+function removeSession(i) {
+  editDraft.sessions.splice(i, 1);
+  renderEditSessions();
+}
+function saveEdit() {
+  const task = byId(editId);
+  if (!task) return goSetup();
+  const name = document.getElementById('edit-name').value.trim();
+  if (!name) { alert('Give the task a name.'); return; }
+  task.name = name;
+  task.type = editDraft.type;
+  task.sessions = editDraft.sessions
+    .slice()
+    .sort(function (a, b) { return new Date(a.s) - new Date(b.s); });
+  if (!openSession(task) && currentId === task.id) {
+    stopTicker();
+    currentId = null;
+  }
+  save();
+  const id = editId;
+  editId = null;
+  editDraft = null;
+  leaveEdit(id);
+}
+function cancelEdit() {
+  const id = editId;
+  editId = null;
+  editDraft = null;
+  leaveEdit(id);
+}
+function leaveEdit(id) {
+  if (editFrom === 'timeline') {
+    show('view-timeline');
+    renderTimeline();
+    startTlTicker();
+    return;
+  }
+  if (currentId === id && byId(id) && openSession(byId(id))) openTimer();
+  else openSummary(id);
+}
+function deleteTask() {
+  if (!confirm('Delete this task and all of its sessions?')) return;
+  tasks = tasks.filter(function (t) { return t.id !== editId; });
+  if (currentId === editId) currentId = null;
+  editId = null;
+  editDraft = null;
+  save();
+  goSetup();
+}
+
+/* ── log ── */
 function renderLog() {
-  const log = getLog();
   const section = document.getElementById('log-section');
   const list = document.getElementById('log-list');
-  list.innerHTML = '';
+  if (!tasks.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
 
-  if (log.length === 0) {
-    section.style.display = 'none';
+  let newMs = 0, existMs = 0;
+  tasks.forEach(function (t) {
+    const ms = totalMs(t);
+    if (t.type === 'new') newMs += ms;
+    else if (t.type === 'existing') existMs += ms;
+  });
+  document.getElementById('totals').innerHTML =
+    totalBox('New functionality', fmtDuration(newMs)) +
+    totalBox('Existing functionality', fmtDuration(existMs));
+
+  list.innerHTML = tasks.map(function (t) {
+    const running = !!openSession(t);
+    const first = t.sessions.length ? fmtTime(t.sessions[0].s) : 'no sessions';
+    return '<div class="log-entry">' +
+      '<div class="log-top">' +
+        '<div><div class="log-task">' + escHtml(t.name) + '</div></div>' +
+        '<div class="log-duration">' + fmtDuration(totalMs(t)) + '</div>' +
+      '</div>' +
+      '<div style="margin-top:8px;"><span class="tag mini ' + typeClass(t.type) + '">' + typeLabel(t.type) + '</span></div>' +
+      '<div class="log-meta">' + first + ' · ' + t.sessions.length +
+        (t.sessions.length === 1 ? ' session' : ' sessions') + (running ? ' · running' : '') + '</div>' +
+      '<div class="log-actions">' +
+        '<button class="btn sm success" onclick="resumeTask(\'' + t.id + '\')">▶ Resume</button>' +
+        '<button class="btn sm" onclick="openEdit(\'' + t.id + '\')">✎ Edit</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function totalBox(label, val) {
+  return '<div class="total-box"><div class="total-label">' + label + '</div><div class="total-val">' + val + '</div></div>';
+}
+function clearLog() {
+  if (!confirm('Clear every task and session?')) return;
+  tasks = [];
+  currentId = null;
+  localStorage.removeItem(KEY);
+  save();
+  goSetup();
+}
+
+/* ── left-running recovery ── */
+function renderOrphan() {
+  const banner = document.getElementById('orphan-banner');
+  const task = tasks.find(function (t) { return openSession(t); });
+  if (!task) { banner.innerHTML = ''; return; }
+  const open = openSession(task);
+  banner.innerHTML =
+    '<div class="resume-banner">' +
+      '<div class="field-label">Still running</div>' +
+      '<div class="log-task" style="margin-bottom:6px;">' + escHtml(task.name) + '</div>' +
+      '<div class="log-meta" style="opacity:0.7;">Started ' + fmtTime(open.s) + ' · ' + fmtDuration(sessionMs(open)) + ' so far</div>' +
+      '<div class="log-actions">' +
+        '<button class="btn sm success" onclick="resumeTask(\'' + task.id + '\')">▶ Continue</button>' +
+        '<button class="btn sm warn" onclick="stopOrphan(\'' + task.id + '\')">■ Stop now</button>' +
+      '</div>' +
+    '</div>';
+}
+function stopOrphan(id) {
+  const task = byId(id);
+  if (!task) return;
+  const open = openSession(task);
+  if (open) open.e = new Date().toISOString();
+  task.done = true;
+  save();
+  openSummary(id);
+}
+
+/* ── timeline ── */
+const TL_PPM = 1.25;          // pixels per minute
+const TL_MIN_SPAN_H = 4;      // never draw a lane shorter than this
+let tlDay = startOfDay(new Date());
+let tlTicker = null;
+
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function openTimeline() {
+  stopTicker();
+  tlDay = startOfDay(new Date());
+  show('view-timeline');
+  renderTimeline();
+  startTlTicker();
+}
+function startTlTicker() {
+  if (tlTicker) clearInterval(tlTicker);
+  tlTicker = setInterval(function () {
+    if (document.getElementById('view-timeline').style.display === 'block') renderTimeline();
+    else { clearInterval(tlTicker); tlTicker = null; }
+  }, 30000);
+}
+function shiftDay(n) {
+  const d = new Date(tlDay.getTime());
+  d.setDate(d.getDate() + n);
+  tlDay = startOfDay(d);
+  renderTimeline();
+}
+function daySegments() {
+  const dayStart = tlDay.getTime();
+  const dayEnd = dayStart + 24 * 3600000;
+  const segs = [];
+  tasks.forEach(function (t) {
+    t.sessions.forEach(function (s) {
+      const a = new Date(s.s).getTime();
+      const b = s.e ? new Date(s.e).getTime() : Date.now();
+      const st = Math.max(a, dayStart);
+      const en = Math.min(b, dayEnd);
+      if (en > st) segs.push({ id: t.id, name: t.name, type: t.type, start: st, end: en, live: !s.e });
+    });
+  });
+  segs.sort(function (x, y) { return x.start - y.start || x.end - y.end; });
+  return segs;
+}
+function packColumns(segs) {
+  const colEnds = [];
+  segs.forEach(function (seg) {
+    let col = colEnds.findIndex(function (end) { return end <= seg.start; });
+    if (col === -1) { col = colEnds.length; colEnds.push(0); }
+    colEnds[col] = seg.end;
+    seg.col = col;
+  });
+  return colEnds.length || 1;
+}
+function renderTimeline() {
+  const today = startOfDay(new Date()).getTime();
+  const isToday = tlDay.getTime() === today;
+  const isYesterday = tlDay.getTime() === today - 86400000;
+  document.getElementById('tl-day').innerHTML =
+    (isToday ? 'Today' : isYesterday ? 'Yesterday' :
+      tlDay.toLocaleDateString(undefined, { weekday: 'long' })) +
+    '<span>' + tlDay.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>';
+
+  const segs = daySegments();
+  const body = document.getElementById('tl-body');
+  const totals = document.getElementById('tl-totals');
+  const spanEl = document.getElementById('tl-span');
+
+  let trackedMs = 0, newMs = 0, existMs = 0;
+  segs.forEach(function (s) {
+    const ms = s.end - s.start;
+    trackedMs += ms;
+    if (s.type === 'new') newMs += ms;
+    else if (s.type === 'existing') existMs += ms;
+  });
+
+  totals.innerHTML =
+    totalBox('Tracked', fmtDuration(trackedMs)) +
+    totalBox('Sessions', String(segs.length)) +
+    totalBox('New functionality', fmtDuration(newMs)) +
+    totalBox('Existing functionality', fmtDuration(existMs));
+
+  if (!segs.length) {
+    spanEl.textContent = '';
+    body.innerHTML = '<div class="no-log">Nothing tracked on this day.</div>';
     return;
   }
 
-  section.style.display = 'block';
-  log.forEach(entry => {
-    const el = document.createElement('div');
-    el.className = 'log-entry';
-    el.innerHTML =
-      '<div>' +
-        '<div class="log-task">' + escHtml(entry.task) + '</div>' +
-        '<div class="log-time">' + fmtTime(entry.start) + '</div>' +
-      '</div>' +
-      '<div class="log-duration">' + fmtDuration(entry.ms) + '</div>';
-    list.appendChild(el);
+  const firstStart = segs[0].start;
+  const lastEnd = segs.reduce(function (m, s) { return Math.max(m, s.end); }, 0);
+  spanEl.textContent = fmtClock(new Date(firstStart).toISOString()) + ' → ' +
+    fmtClock(new Date(lastEnd).toISOString()) + ' · ' +
+    fmtDuration(lastEnd - firstStart - trackedMs) + ' untracked in between';
+
+  // lane range: whole hours around the day's work
+  let rangeStart = new Date(firstStart);
+  rangeStart.setMinutes(0, 0, 0);
+  let rangeEnd = new Date(lastEnd);
+  rangeEnd.setMinutes(0, 0, 0);
+  rangeEnd = new Date(rangeEnd.getTime() + 3600000);
+  if (rangeEnd - rangeStart < TL_MIN_SPAN_H * 3600000) {
+    rangeEnd = new Date(rangeStart.getTime() + TL_MIN_SPAN_H * 3600000);
+  }
+  const rs = rangeStart.getTime();
+  const laneH = ((rangeEnd.getTime() - rs) / 60000) * TL_PPM;
+  const y = function (t) { return ((t - rs) / 60000) * TL_PPM; };
+
+  let hours = '', lines = '';
+  for (let t = rs; t <= rangeEnd.getTime(); t += 3600000) {
+    const top = y(t);
+    hours += '<div class="tl-hour" style="top:' + top + 'px;">' +
+      new Date(t).toLocaleTimeString(undefined, { hour: 'numeric' }).replace(' ', '') + '</div>';
+    if (t > rs) lines += '<div class="tl-line" style="top:' + top + 'px;"></div>';
+  }
+
+  const cols = packColumns(segs);
+  const blocks = segs.map(function (s) {
+    const top = y(s.start);
+    const h = Math.max(20, y(s.end) - top);
+    const w = 100 / cols;
+    const tall = h >= 42;
+    return '<button class="tl-block ' + typeClass(s.type) + (s.live ? ' live' : '') + '" ' +
+      'style="top:' + top + 'px;height:' + h + 'px;left:' + (s.col * w) + '%;width:calc(' + w + '% - 4px);" ' +
+      'onclick="openEdit(\'' + s.id + '\', \'timeline\')" ' +
+      'title="' + escHtml(s.name) + '">' +
+      '<div class="tl-block-name">' + escHtml(s.name) + '</div>' +
+      (tall ? '<div class="tl-block-time">' +
+        fmtClock(new Date(s.start).toISOString()) + '–' +
+        (s.live ? 'now' : fmtClock(new Date(s.end).toISOString())) +
+        ' · ' + fmtDuration(s.end - s.start) + '</div>' : '') +
+    '</button>';
+  }).join('');
+
+  // gaps between merged blocks of work
+  const merged = [];
+  segs.forEach(function (s) {
+    const last = merged[merged.length - 1];
+    if (last && s.start <= last.end) last.end = Math.max(last.end, s.end);
+    else merged.push({ start: s.start, end: s.end });
   });
+  let gaps = '';
+  for (let i = 1; i < merged.length; i++) {
+    const gs = merged[i - 1].end, ge = merged[i].start;
+    if (ge - gs < 10 * 60000) continue;
+    const top = y(gs), h = y(ge) - top;
+    gaps += '<div class="tl-gap" style="top:' + top + 'px;height:' + h + 'px;">' +
+      fmtDuration(ge - gs) + ' gap</div>';
+  }
+
+  body.innerHTML =
+    '<div class="tl-wrap">' +
+      '<div class="tl-gutter" style="height:' + laneH + 'px;">' + hours + '</div>' +
+      '<div class="tl-lane" style="height:' + laneH + 'px;">' + lines + gaps + blocks + '</div>' +
+    '</div>' +
+    '<div class="tl-legend">' +
+      '<span class="tag mini new">New functionality</span>' +
+      '<span class="tag mini exist">Existing functionality</span>' +
+      '<span class="tag mini unset">Type unset</span>' +
+    '</div>';
 }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+/* ── boot ── */
+load();
+const running = tasks.find(function (t) { return openSession(t); });
+show('view-setup');
 renderLog();
+renderOrphan();
+if (running) {
+  currentId = running.id;
+  openTimer();
+}
 </script>
 </body>
 </html>
