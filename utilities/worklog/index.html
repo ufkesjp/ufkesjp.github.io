@@ -567,7 +567,8 @@ input[type="datetime-local"], input[type="number"] {
       <div class="section-title">Task log</div>
       <div class="totals" id="totals"></div>
       <div id="log-list"></div>
-      <button class="btn warn" style="margin-top:4px;" onclick="clearLog()">✕ Clear log</button>
+      <button class="btn success" style="margin-top:4px; margin-bottom:10px;" onclick="exportAllCsv()">⤓ Export all sessions (CSV)</button>
+      <button class="btn warn" onclick="clearLog()">✕ Clear log</button>
     </div>
   </div>
 
@@ -656,7 +657,10 @@ input[type="datetime-local"], input[type="number"] {
       <div id="tl-body"></div>
     </div>
 
-    <button class="btn primary" onclick="goSetup()">↺ Back to log</button>
+    <div class="btn-row">
+      <button class="btn success" onclick="exportDayCsv()">⤓ Export day</button>
+      <button class="btn primary" onclick="goSetup()">↺ Back to log</button>
+    </div>
   </div>
 
 </div>
@@ -1244,6 +1248,90 @@ function renderTimeline() {
       '<span class="tag mini exist">Existing functionality</span>' +
       '<span class="tag mini unset">Type unset</span>' +
     '</div>';
+}
+
+/* ── CSV export ── */
+const CSV_HEAD = ['Date', 'Task', 'Type', 'Start', 'End', 'Duration', 'Minutes', 'Hours', 'Status'];
+
+function fmtHM(ms) {
+  const m = Math.round(ms / 60000);
+  return Math.floor(m / 60) + ':' + pad(m % 60);
+}
+function csvCell(v) {
+  return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+}
+function localStamp(ms) {
+  const d = new Date(ms);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+         ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function localDate(ms) {
+  const d = new Date(ms);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function csvRow(seg) {
+  const ms = seg.end - seg.start;
+  return [
+    localDate(seg.start),
+    seg.name,
+    typeLabel(seg.type),
+    localStamp(seg.start),
+    seg.live ? '' : localStamp(seg.end),
+    fmtHM(ms),
+    Math.round(ms / 60000),
+    (ms / 3600000).toFixed(2),
+    seg.live ? 'running' : 'complete'
+  ].map(csvCell).join(',');
+}
+function buildCsv(segs) {
+  const lines = [CSV_HEAD.map(csvCell).join(',')];
+  segs.forEach(function (seg) { lines.push(csvRow(seg)); });
+  const total = segs.reduce(function (sum, s) { return sum + (s.end - s.start); }, 0);
+  lines.push([''].map(csvCell).join(','));
+  lines.push(['', 'TOTAL', '', '', '', fmtHM(total), Math.round(total / 60000),
+    (total / 3600000).toFixed(2), ''].map(csvCell).join(','));
+  return lines.join('\r\n');
+}
+function downloadCsv(csv, filename) {
+  try {
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  } catch (e) {
+    window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csv), '_blank');
+  }
+}
+function exportDayCsv() {
+  const segs = daySegments();
+  if (!segs.length) { alert('Nothing tracked on this day.'); return; }
+  downloadCsv(buildCsv(segs), 'worklog-' + localDate(tlDay.getTime()) + '.csv');
+}
+function allSegments() {
+  const segs = [];
+  tasks.forEach(function (t) {
+    t.sessions.forEach(function (s) {
+      segs.push({
+        name: t.name,
+        type: t.type,
+        start: new Date(s.s).getTime(),
+        end: s.e ? new Date(s.e).getTime() : Date.now(),
+        live: !s.e
+      });
+    });
+  });
+  segs.sort(function (a, b) { return a.start - b.start; });
+  return segs;
+}
+function exportAllCsv() {
+  const segs = allSegments();
+  if (!segs.length) { alert('No sessions to export yet.'); return; }
+  downloadCsv(buildCsv(segs), 'worklog-all-' + localDate(Date.now()) + '.csv');
 }
 
 /* ── boot ── */
