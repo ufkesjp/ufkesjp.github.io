@@ -56,6 +56,22 @@ body::before {
   margin: 0 auto;
   padding: 24px 16px 48px;
 }
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border: 2px solid var(--ink);
+  padding: 4px 10px;
+  box-shadow: 2px 2px 0 var(--ink);
+  align-self: center;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.back-link:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink); }
+.back-link:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
 .wordmark {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 800;
@@ -541,6 +557,7 @@ input[type="datetime-local"], input[type="number"] {
 <div id="app">
 
   <div class="wordmark">
+    <a class="back-link" href="../">&larr; Utilities</a>
     WORK LOG
     <span class="tag accent">v2.0</span>
   </div>
