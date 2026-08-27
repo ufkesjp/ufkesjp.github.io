@@ -35,6 +35,28 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Site escape hatch (not part of the demo/game UI) ── */
+.site-back {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10000;
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 6px 12px;
+  color: #E8E0CC;
+  background: #2A2720;
+  border: 2px solid #C8824A;
+  opacity: 0.75;
+  transition: opacity 0.12s;
+}
+.site-back:hover { opacity: 1; }
+@media print { .site-back { display: none; } }
+
 html { font-size: 14px; }
 
 body {
@@ -609,6 +631,7 @@ canvas { width: 100% !important; height: 100% !important; }
 </style>
 </head>
 <body>
+<a class="site-back" href="../">← Themes</a>
 <div class="app">
 
   <!-- TOPBAR -->
