@@ -74,6 +74,39 @@ header p {
     margin: 0;
 }
 
+/* ── Header nav button (Home / Back) ── */
+.home-button {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 5px 12px;
+    box-shadow: var(--shadow-xs);
+    transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.home-button + .home-button {
+    margin-left: 8px;
+}
+
+.home-button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ink);
+    background: var(--accent);
+}
+
+.home-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--ink);
+}
+
 /* ── Footer ── */
 footer {
     text-align: center;
@@ -124,6 +157,27 @@ footer {
 .project-card:active {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ── Unpublished cards: visible on the roadmap, but not clickable ── */
+.project-card[data-pending] {
+    cursor: default;
+    opacity: 0.45;
+    box-shadow: var(--shadow-sm);
+}
+
+.project-card[data-pending]:hover,
+.project-card[data-pending]:active {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.project-card[data-pending] .card-title-banner {
+    background: var(--bg);
+}
+
+.project-card[data-pending] .card-title-banner::after {
+    content: "\2013";
 }
 
 /* ── Card Image ── */
