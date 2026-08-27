@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found &mdash; Jacob Ufkes' Portfolio</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+      .notfound {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 5% 60px;
+      }
+      .notfound-code {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: clamp(64px, 18vw, 140px);
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+        margin-bottom: 8px;
+      }
+      .notfound-code span { background: var(--accent); padding: 0 10px; }
+      .notfound p {
+        max-width: 520px;
+        opacity: 0.7;
+        margin-bottom: 28px;
+      }
+      .notfound-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .notfound-links a {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--paper);
+        border: var(--bord);
+        box-shadow: var(--shadow-sm);
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.08s, box-shadow 0.08s;
+      }
+      .notfound-links a::after { content: "\203A"; font-size: 1.4em; }
+      .notfound-links a:hover {
+        transform: translate(-3px, -3px);
+        box-shadow: 7px 7px 0 var(--ink);
+        background: var(--accent);
+      }
+      .notfound-links a:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Page Not Found</h1>
+        <p>That address doesn't point at anything &mdash; the page may have moved, or it may not be published yet.</p>
+        <a href="/" class="home-button">Home</a>
+    </header>
+
+    <main class="notfound">
+        <div class="notfound-code"><span>404</span></div>
+        <p>Here's everything on the site, so you don't have to guess:</p>
+        <nav class="notfound-links">
+            <a href="/">Portfolio Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="/projects/">Projects</a>
+            <a href="/games/">Games Built With AI</a>
+            <a href="/utilities/">Utilities</a>
+            <a href="/utilities/themes/">CSS Themes</a>
+        </nav>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Jacob Ufkes - Built with AI assistance</p>
+    </footer>
+</body>
+</html>
