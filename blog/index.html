@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jacob Ufkes' Blog</title>
+    <title>Blog | Jacob Ufkes</title>
+    <meta name="description" content="Blog posts by Jacob Ufkes on data, feedback, and problem solving, including 'Not Taking It Personally Is Not Helping You.'">
+    <link rel="canonical" href="https://ufkesjp.github.io/blog/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Blog | Jacob Ufkes">
+    <meta property="og:description" content="Blog posts by Jacob Ufkes on data, feedback, and problem solving, including 'Not Taking It Personally Is Not Helping You.'">
+    <meta property="og:url" content="https://ufkesjp.github.io/blog/">
+    <meta property="og:image" content="https://ufkesjp.github.io/images/personally_thumbnail.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Blog | Jacob Ufkes">
+    <meta name="twitter:description" content="Blog posts by Jacob Ufkes on data, feedback, and problem solving, including 'Not Taking It Personally Is Not Helping You.'">
+    <meta name="twitter:image" content="https://ufkesjp.github.io/images/personally_thumbnail.jpg">
     <link rel="stylesheet" href="https://ufkesjp.github.io/css/style.css">
 </head>
 <body>
@@ -14,62 +25,21 @@
     </header>
 
     <main class="project-grid">
-        <div class="project-card" data-project-url="take_it_personally/">
+        <a class="project-card" href="take_it_personally/">
             <div class="card-image-container">
                 <img src="https://ufkesjp.github.io/images/personally_thumbnail.jpg" alt="Thumbnail for 'Not Taking It Personally Is Not Helping You'", title="Original Photo by Roma Kaiuk🇺🇦">
             </div>
             <div class="card-title-banner">
                 <h3>Not Taking It Personally Is Not Helping You</h3>
             </div>
-        </div>
+        </a>
 
-        <div class="project-card" data-pending>
-            <div class="card-image-container">
-                <!-- thumbnail pending -->
-            </div>
-            <div class="card-title-banner">
-                <h3>Placeholder for next post</h3>
-            </div>
-        </div>
-<!-- 
-        <div class="project-card" data-project-url="project3/">
-            <div class="card-image-container">
-                <img src="images/project3_thumb.jpg" alt="Thumbnail for Project 3">
-            </div>
-            <div class="card-title-banner">
-                <h3>What Items on What Truck? - Pending Upload</h3>
-            </div>
-        </div>
-
-                <div class="project-card" data-project-url="project4/">
-            <div class="card-image-container">
-                <img src="images/project4_thumb.jpg" alt="Thumbnail for Project 4">
-            </div>
-            <div class="card-title-banner">
-                <h3>Trending in Game Analytics - Pending Upload</h3>
-            </div>
-        </div>
- -->
         </main>
 
     <footer>
-        <p>&copy; 2025 Jacob Ufkes - Built with AI assistance</p>
-<!--         <p>Connect with me on <a href="YOUR_LINKEDIN_PROFILE_URL" target="_blank">LinkedIn</a> | <a href="YOUR_GITHUB_PROFILE_URL" target="_blank">GitHub</a></p> -->
+        <p>&copy; 2026 Jacob Ufkes</p>
+        <p>Connect with me on <a href="https://www.linkedin.com/in/jacob-ufkes-75592bba/" target="_blank">LinkedIn</a> | <a href="https://github.com/ufkesjp" target="_blank">GitHub</a></p>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const projectCards = document.querySelectorAll('.project-card');
-
-            projectCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const projectUrl = card.dataset.projectUrl;
-                    if (projectUrl) {
-                        window.location.href = projectUrl;
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>
