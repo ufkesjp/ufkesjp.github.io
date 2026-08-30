@@ -58,7 +58,7 @@ header {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 760px;
+    max-width: 1440px;
 }
 
 header h1 {
@@ -129,7 +129,7 @@ footer {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 760px;
+    max-width: 1440px;
 }
 
 /* ── Project Grid ── */
@@ -258,7 +258,7 @@ footer {
 /* ── Case Study Content (long-form write-ups, e.g. eval_boards) ── */
 .case-study {
     width: 100%;
-    max-width: 760px;
+    max-width: 1440px;
     margin: 0 auto;
     padding: 0 5% 60px;
     position: relative;
