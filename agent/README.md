@@ -6,9 +6,11 @@ project managed with `uv`, unrelated to how the rest of the site is served.
 
 ## Status
 
-Run 1 (foundation) and Run 2 (agent) done. No eval harness or public page
-yet — see `EVAL_BOARDS_KICKOFF.md` at the repo root for the full three-run
-plan.
+Run 1 (foundation), Run 2 (agent), and Run 3 (eval harness + public page)
+done — see `EVAL_BOARDS_KICKOFF.md` at the repo root for the full
+three-run plan. No GitHub Action for the evals (skipped for v1, per the
+plan); run `uv run pytest evals` locally and commit the regenerated
+scorecard.
 
 ## Layout
 
@@ -47,6 +49,29 @@ plan.
 - `tests/` — pytest suite covering ontology validation, the compiler, the
   tools, and the guard/loop (against a fake Anthropic client — the test
   suite makes no real API calls).
+- `evals/questions.yml` — 30 golden questions (15 answerable, 6 out of
+  scope, 4 ambiguous, 5 degraded-path), with a 5-question `smoke` subset.
+- `evals/test_evals.py`, `evals/conftest.py` — the eval harness. Unlike
+  `tests/`, this makes real Anthropic API calls and writes
+  `eval_boards/data/scorecard.json`:
+
+  ```bash
+  uv run pytest evals --subset smoke   # 5 questions, run this first
+  uv run pytest evals --subset full    # all 30, only once smoke is green
+  ```
+
+## The public page
+
+`eval_boards/index.html` (site root, not under `agent/`) is a static page
+using the site's existing neubrutalist design system — the flagship trace,
+the scorecard, and the other five traces are fetched client-side from
+`eval_boards/data/*.json` and rendered with vanilla JS, no framework or
+CDN. That `fetch()` fails over `file://`, so local testing needs a server:
+
+```bash
+python3 -m http.server 8000   # from the repo root
+# then open http://localhost:8000/eval_boards/
+```
 
 ## Setup
 

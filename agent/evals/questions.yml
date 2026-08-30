@@ -101,7 +101,11 @@ answerable:
   - id: a12
     question: "What deck does warranty claim WC00001 concern, and what batch was it produced from?"
     expected_metrics: []
-    expected_links: [concerns, produced_by]
+    # Only `concerns` is required: traverse_link("concerns", ...) returns the
+    # full Deck row, and batch_id is a property on that row — a well-reasoned
+    # agent reads it from there rather than making a second, redundant
+    # produced_by hop for information it already has.
+    expected_links: [concerns]
     key_facts: ["D000002", "B0240"]
 
   - id: a13

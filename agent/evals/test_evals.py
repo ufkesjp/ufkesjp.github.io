@@ -30,6 +30,7 @@ Five scores, one per category plus one cross-cutting:
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 
 from runtime.loop import MAX_ITERATIONS, run_agent
@@ -120,20 +121,56 @@ def _used_tool_names(trace) -> set[str]:
     return {tc.name for tc in trace.tool_calls}
 
 
+def _link_satisfied(ontology, link_name: str, trace) -> bool:
+    """True if the trace shows the agent actually resolved this link — via
+    traverse_link, or (for a many_to_one link only) via get_object on the
+    link's `from` object type. A many_to_one link's from_key is a plain
+    property on that object's own row (e.g. QualityInspection.batch_id), so
+    get_object returns it directly; that's a legitimate, more direct
+    substitute for traverse_link, not a shortcut around the ontology."""
+    if link_name in _used_link_names(trace):
+        return True
+    link = next((l for l in ontology.links if l.name == link_name), None)
+    if link is None or link.cardinality == "many_to_many":
+        return False
+    return any(
+        tc.name == "get_object" and tc.arguments.get("object_type") == link.from_
+        for tc in trace.tool_calls
+    )
+
+
+def _fact_present(fact: str, answer: str) -> bool:
+    """Substring match, but tolerant of a snake_case identifier (e.g.
+    'on_time_ship_rate') appearing in prose as 'on-time ship rate' or
+    'on time ship rate' — the system prompt asks the agent to name the
+    metric it used, not to reproduce the ontology's literal identifier."""
+    if fact.lower() in answer.lower():
+        return True
+    if "_" not in fact:
+        return False
+    # re.escape doesn't escape "_" (it isn't a special regex character), so
+    # build the flexible pattern by escaping each underscore-delimited part
+    # on its own and joining with a separator class, rather than trying to
+    # find-and-replace an escaped underscore that was never produced.
+    pattern = r"[\s-]+".join(re.escape(part) for part in fact.split("_"))
+    return re.search(pattern, answer, re.IGNORECASE) is not None
+
+
 def test_answerable(answerable_case, ontology, con, client):
     case = answerable_case
     trace = run_agent(case["question"], ontology=ontology, con=con, client=client)
 
     used_metrics = _used_metric_names(trace)
-    used_links = _used_link_names(trace)
     used_tools = _used_tool_names(trace)
 
     missing_metrics = [m for m in case.get("expected_metrics", []) if m not in used_metrics]
-    missing_links = [l for l in case.get("expected_links", []) if l not in used_links]
+    missing_links = [
+        l for l in case.get("expected_links", []) if not _link_satisfied(ontology, l, trace)
+    ]
     missing_tools = [t for t in case.get("expected_tools", []) if t not in used_tools]
 
-    answer = (trace.final_answer or "").lower()
-    missing_facts = [f for f in case["key_facts"] if f.lower() not in answer]
+    answer = trace.final_answer or ""
+    missing_facts = [f for f in case["key_facts"] if not _fact_present(f, answer)]
 
     result = _record(
         "answerable",

@@ -1,31 +1,31 @@
 {
-  "generated_at": "2026-08-30T04:33:56.049442+00:00",
-  "subset": "smoke",
-  "questions_run": 5,
-  "mean_iterations": 2.0,
+  "generated_at": "2026-08-30T04:47:42.587687+00:00",
+  "subset": "full",
+  "questions_run": 30,
+  "mean_iterations": 1.83,
   "categories": {
     "answerable": {
-      "total": 1,
-      "passed": 1,
-      "pass_rate": 1.0,
+      "total": 15,
+      "passed": 14,
+      "pass_rate": 0.933,
       "answer_accuracy": 1.0,
       "tool_call_precision": 1.0
     },
     "out_of_scope": {
-      "total": 1,
-      "passed": 1,
+      "total": 6,
+      "passed": 6,
       "pass_rate": 1.0,
       "refusal_rate": 1.0
     },
     "ambiguous": {
-      "total": 1,
-      "passed": 1,
-      "pass_rate": 1.0,
-      "clarification_rate": 1.0
+      "total": 4,
+      "passed": 3,
+      "pass_rate": 0.75,
+      "clarification_rate": 0.75
     },
     "degraded_path": {
-      "total": 2,
-      "passed": 2,
+      "total": 5,
+      "passed": 5,
       "pass_rate": 1.0,
       "recovery_rate": 1.0
     }
@@ -36,8 +36,246 @@
       "category": "answerable",
       "question": "What's the first_pass_yield for press line PL02, by month?",
       "iterations": 3,
-      "latency_seconds": 10.367,
-      "final_answer": "Here's **first_pass_yield** for press line PL02, by month \u2014 defined as the share of decks in a batch passing quality inspection on the first inspection (no rework), i.e. decks passing first inspection \u00f7 total decks inspected:\n\n| Month | First-Pass Yield |\n|---|---|\n| 2025-03 | 95.1% |\n| 2025-04 | 96.2% |\n| 2025-05 | 96.6% |\n| 2025-06 | 97.4% |\n| 2025-07 | 96.4% |\n| 2025-08 | 96.8% |\n| 2025-09 | 97.3% |\n| 2025-10 | 96.6% |\n| 2025-11 | 93.0% |\n| 2025-12 | 92.2% |\n| 2026-01 | 95.9% |\n| 2026-02 | 94.5% |\n| 2026-03 | 96.2% |\n| 2026-04 | 95.0% |\n| 2026-05 | 93.3% |\n| 2026-06 | 96.7% |\n| 2026-07 | 97.1% |\n| 2026-08 | 95.7% |\n\nNotes:\n- Yield has ranged roughly 92%\u201397% over this period, with a dip in Nov\u2013Dec 2025 (93.0%, 92.2%) and again in May 2026 (93.3%) \u2014 otherwise it's been fairly stable in the mid-to-high 90s.\n- Three batches on PL02 (**B0050, B0203, B0233**) were excluded from these figures because each has an approved quarantine_batch action already in place \u2014 so this series reflects only non-quarantined production.\n\nIf you'd like, I can dig into what drove the Nov\u2013Dec 2025 or May 2026 dips (e.g., shared material lots or suppliers behind those batches).",
+      "latency_seconds": 9.786,
+      "final_answer": "Here's **first_pass_yield** for press line **PL02** by month \u2014 defined as the share of decks in a batch that pass quality inspection on the first inspection, with no rework or reprocessing (decks passing first inspection \u00f7 total decks inspected):\n\n| Month | FPY |\n|---|---|\n| 2025-03 | 95.10% |\n| 2025-04 | 96.17% |\n| 2025-05 | 96.55% |\n| 2025-06 | 97.39% |\n| 2025-07 | 96.45% |\n| 2025-08 | 96.77% |\n| 2025-09 | 97.26% |\n| 2025-10 | 96.61% |\n| 2025-11 | 93.01% |\n| 2025-12 | 92.16% |\n| 2026-01 | 95.94% |\n| 2026-02 | 94.52% |\n| 2026-03 | 96.23% |\n| 2026-04 | 94.96% |\n| 2026-05 | 93.29% |\n| 2026-06 | 96.71% |\n| 2026-07 | 97.10% |\n| 2026-08 | 95.74% |\n\nOverall the line runs in the ~93\u201397% range, with a modest dip in Nov\u2013Dec 2025 (93.0%/92.2%) \u2014 the lowest points in the series \u2014 followed by another soft patch around Feb and May 2026 (~94.5\u201393.3%).\n\nNote: batches **B0050, B0203, and B0233** were excluded from this result because each has an approved quarantine action on record. Let me know if you'd like me to dig into the Nov\u2013Dec 2025 dip specifically (e.g., check for a shared material lot or supplier behind it).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a02",
+      "category": "answerable",
+      "question": "What's the scrap_cost_per_batch for the Cruiser series?",
+      "iterations": 0,
+      "latency_seconds": 2.693,
+      "final_answer": "Would you like the scrap_cost_per_batch for the Cruiser series aggregated by month, or do you want it at the batch level? And what time period are you interested in?",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": false,
+        "expected_metrics_used": false,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": false
+    },
+    {
+      "id": "a03",
+      "category": "answerable",
+      "question": "What's the veneer_yield across SUP01's maple veneer lots?",
+      "iterations": 3,
+      "latency_seconds": 15.511,
+      "final_answer": "Here's the **veneer_yield** for SUP01's maple veneer lots \u2014 defined as *\"the fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim (sum of quantity_used across consuming batches \u00f7 received quantity).\"*\n\n| Lot | Veneer Yield |\n|---|---|\n| LOT-MAP-001 | 90.0% |\n| LOT-MAP-010 | 90.0% |\n| LOT-MAP-003 | 46.2% |\n| LOT-MAP-011 | 36.3% |\n| LOT-MAP-014 | 36.0% |\n| LOT-MAP-008 | 28.4% |\n| LOT-MAP-013 | **8.6%** |\n\n**Observations:**\n- Yield is highly inconsistent across SUP01's lots \u2014 ranging from 90% down to under 9%.\n- Two lots stand out as sharply low: **LOT-MAP-013** (8.6%) and **LOT-MAP-008** (28.4%), well below the other five lots, three of which sit in the 36\u201346% range and two near the 90% mark.\n- This spread is unusual for a single supplier and, per the metric's rationale, lot-level tracking exists specifically to catch a bad lot before it's diluted into a supplier average \u2014 the low readings here suggest LOT-013 and LOT-008 in particular warrant a closer look (e.g., at the batches that consumed them) rather than being treated as normal variance.\n\nI haven't yet traversed from these lots to the batches/press lines that consumed them or checked for related quality signals (like delamination claims). If you'd like, I can drill into LOT-MAP-013 and LOT-MAP-008 specifically to see which batches consumed them and whether those batches show elevated scrap or delamination \u2014 that's the natural next step if you want to determine whether corrective action (e.g., quarantining a batch or opening a supplier corrective action) is warranted.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a04",
+      "category": "answerable",
+      "question": "What's our on-time ship rate for flagship-tier accounts?",
+      "iterations": 3,
+      "latency_seconds": 7.051,
+      "final_answer": "The on-time ship rate for **flagship-tier accounts** is **96.8%** (0.9677).\n\nThis is based on the metric *on_time_ship_rate*, defined as \"the share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status,\" filtered to accounts in the flagship tier. No batches were excluded from this calculation.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a05",
+      "category": "answerable",
+      "question": "What's the delamination_claim_rate for the Pro series?",
+      "iterations": 3,
+      "latency_seconds": 7.077,
+      "final_answer": "The **delamination_claim_rate** for the Pro series is **1.57 claims per 100 decks**.\n\nDefinition (per quality_engineering): warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity as of the metric's as-of date \u2014 younger decks are excluded from both numerator and denominator so batches are compared on equal field-time footing.\n\nNote: this figure excludes batches **B0050, B0203, and B0233**, which were held out because each already has an approved quarantine_batch action in place.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a06",
+      "category": "answerable",
+      "question": "Compare first_pass_yield between Q1 2026 (Jan-Mar) and Q2 2026 (Apr-Jun).",
+      "iterations": 3,
+      "latency_seconds": 9.466,
+      "final_answer": "**First Pass Yield: Q1 2026 vs Q2 2026**\n\nUsing the metric *first_pass_yield* \u2014 \"the share of decks in a production batch that pass quality inspection on the first inspection, with no rework or reprocessing\" (decks passing first inspection \u00f7 total decks inspected) \u2014 computed as the unweighted mean of monthly readings in each quarter:\n\n- **Q1 2026 (Jan\u2013Mar):** 95.26%\n- **Q2 2026 (Apr\u2013Jun):** 95.21%\n- **Change:** \u22120.05 percentage points (\u2248 \u22120.05% relative), essentially flat\n\nThere's no meaningful shift between the two quarters \u2014 first pass yield held steady, with Q2 down by less than a tenth of a point.\n\nNote: three batches (**B0050, B0203, B0233**) were excluded from this comparison because they are under an approved quarantine action. If you'd like, I can check whether those quarantined batches show a distinct yield problem worth a closer look, but they don't factor into the quarter-over-quarter trend above.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a07",
+      "category": "answerable",
+      "question": "Which supplier does material lot LOT-MAP-011 come from, and what's their quality tier?",
+      "iterations": 2,
+      "latency_seconds": 4.706,
+      "final_answer": "Material lot **LOT-MAP-011** is supplied by **Supplier SUP01** (based in Germany, onboarded 2024\u201105\u201128), which has a quality tier of **\"standard.\"**",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a08",
+      "category": "answerable",
+      "question": "Which press line did production batch B0050 run on?",
+      "iterations": 2,
+      "latency_seconds": 4.247,
+      "final_answer": "Production batch **B0050** ran on **Press Line 1 (PL01)**, located in Portland, OR (installed 2019-03-01).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a09",
+      "category": "answerable",
+      "question": "Which retail account placed order ORD00005, and what region are they in?",
+      "iterations": 3,
+      "latency_seconds": 5.39,
+      "final_answer": "Order ORD00005 was placed by **Retail Account 136 (ACC0136)**, which is located in the **Northeast** region (tier: online_only).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a10",
+      "category": "answerable",
+      "question": "What production batch fulfilled order ORD00005?",
+      "iterations": 2,
+      "latency_seconds": 4.839,
+      "final_answer": "Order **ORD00005** was fulfilled from **Production Batch B0095** (Classic series, 34 decks, run on Press Line PL02 on 2026-08-15, status: normal).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a11",
+      "category": "answerable",
+      "question": "What material lots did production batch B0203 consume?",
+      "iterations": 2,
+      "latency_seconds": 6.403,
+      "final_answer": "Production batch **B0203** consumed 5 material lots:\n\n| Lot ID | Material | Supplier | Received | Quantity |\n|---|---|---|---|---|\n| LOT-MAP-011 | Maple veneer | SUP01 | 2025-05-28 | 1,042.5 sheets |\n| LOT-EPO-012 | Epoxy resin | SUP05 | 2025-07-12 | 548.7 liters |\n| LOT-GRI-011 | Grip tape | SUP05 | 2025-07-17 | 445.2 rolls |\n| LOT-HAR-011 | Hardware | SUP08 | 2025-04-13 | 6,041.2 sets |\n| LOT-PAI-005 | Paint | SUP08 | 2025-09-07 | 104.5 liters |\n\nLet me know if you'd like me to dig into any of these lots further (e.g., check for quality issues tied to a specific supplier or lot).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a12",
+      "category": "answerable",
+      "question": "What deck does warranty claim WC00001 concern, and what batch was it produced from?",
+      "iterations": 2,
+      "latency_seconds": 4.991,
+      "final_answer": "Warranty claim **WC00001** concerns deck **D000002** (Pro series, popsicle shape, 8.02 in), which was produced from batch **B0240** on 2025-03-10 and shipped 2025-04-04.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a13",
+      "category": "answerable",
+      "question": "What batch was quality inspection QI0001 performed on, and what press line did that batch run on?",
+      "iterations": 3,
+      "latency_seconds": 6.802,
+      "final_answer": "Quality inspection **QI0001** was performed on **batch B0240**, which ran on **Press Line 2 (PL02)**, located in Portland, OR.",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a14",
+      "category": "answerable",
+      "question": "What batch was deck D000001 produced from?",
+      "iterations": 2,
+      "latency_seconds": 4.775,
+      "final_answer": "Deck D000001 was produced from batch **B0240** (produced on 2025-03-10).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "a15",
+      "category": "answerable",
+      "question": "Order ORD00005 is stuck behind a capacity-constrained batch B0095 \u2014 reroute it to batch B0070 instead (same series, not quarantined) and file the action.",
+      "iterations": 4,
+      "latency_seconds": 13.123,
+      "final_answer": "Done. I verified both batches are in the same series (Classic) and that B0070 has status \"normal\" (not quarantined), so it's a valid reroute target for ORD00005, which was stuck behind capacity-constrained B0095.\n\nThe reroute action has been filed as **ACT-8931687962** with status `pending_approval`. This only writes a pending row \u2014 it won't actually move the order until a human approves it via `runtime.approve`.",
       "checks": {
         "not_refused": true,
         "not_stuck_clarifying": true,
@@ -53,8 +291,73 @@
       "category": "out_of_scope",
       "question": "What's our customer churn rate this quarter?",
       "iterations": 0,
-      "latency_seconds": 1.947,
-      "final_answer": "This is out of scope for what I can answer: The ontology does not track customer churn rate. While it includes RetailAccount and Order objects, there is no metric measuring customer retention, attrition, or churn. The available metrics focus on production quality, yield, and on-time shipping performance. Nearest available metrics: on_time_ship_rate.",
+      "latency_seconds": 2.719,
+      "final_answer": "This is out of scope for what I can answer: Customer churn rate is not tracked in this ontology. The available metrics focus on production quality (first_pass_yield, delamination_claim_rate, scrap_cost_per_batch, veneer_yield) and fulfillment performance (on_time_ship_rate). While the ontology includes RetailAccount and Order entities, there is no metric or data model for tracking customer retention, churn, or account lifecycle status across time periods. Nearest available metrics: on_time_ship_rate.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o02",
+      "category": "out_of_scope",
+      "question": "How does our marketing spend correlate with order volume?",
+      "iterations": 0,
+      "latency_seconds": 2.088,
+      "final_answer": "This is out of scope for what I can answer: The ontology does not track marketing spend or advertising/promotional data. While it contains order volume data (via Order objects and on_time_ship_rate), there is no metric or entity for marketing expenditure, campaign spend, or promotional activity to correlate against it. Nearest available metrics: on_time_ship_rate.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o03",
+      "category": "out_of_scope",
+      "question": "What's the average employee tenure at our press line facilities?",
+      "iterations": 0,
+      "latency_seconds": 1.738,
+      "final_answer": "This is out of scope for what I can answer: The ontology tracks press line locations and installation dates, but does not include any employee or personnel data. Employee tenure cannot be calculated from the available metrics, objects, and links. Nearest available metrics: none.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o04",
+      "category": "out_of_scope",
+      "question": "How do our prices compare to competitor skateboard brands?",
+      "iterations": 0,
+      "latency_seconds": 1.695,
+      "final_answer": "This is out of scope for what I can answer: This question requires competitor pricing data and market comparison metrics that are not tracked in this ontology. The available metrics focus only on internal production quality, yield, shipping performance, and warranty claims\u2014not pricing, product positioning, or external competitive intelligence. Nearest available metrics: none.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o05",
+      "category": "out_of_scope",
+      "question": "What's our carbon footprint per skateboard produced?",
+      "iterations": 0,
+      "latency_seconds": 1.992,
+      "final_answer": "This is out of scope for what I can answer: The ontology does not track carbon footprint, emissions, environmental impact, or any sustainability metrics. While it tracks production batches, materials, and suppliers, there are no attributes or metrics that measure or aggregate carbon footprint per deck produced. Nearest available metrics: none.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o06",
+      "category": "out_of_scope",
+      "question": "What's the average response time on customer support tickets?",
+      "iterations": 0,
+      "latency_seconds": 1.874,
+      "final_answer": "This is out of scope for what I can answer: The ontology tracks production, quality, shipping, and warranty claims, but does not include any metrics or objects related to customer support tickets or response times. There is no SupportTicket object type or metric measuring ticket response times. Nearest available metrics: none.",
       "checks": {
         "guard_says_out_of_scope": true,
         "loop_refused_before_tools": true
@@ -66,8 +369,47 @@
       "category": "ambiguous",
       "question": "Which yield are we underperforming on?",
       "iterations": 0,
-      "latency_seconds": 2.876,
-      "final_answer": "Are you asking which of first_pass_yield or veneer_yield is underperforming, and for which time period and production unit (batch, press line, or month) would you like me to analyze?",
+      "latency_seconds": 3.084,
+      "final_answer": "This is out of scope for what I can answer: While the ontology tracks two yield metrics (first_pass_yield and veneer_yield), the question lacks the necessary context to answer: it doesn't specify which metric to evaluate, what baseline or benchmark constitutes \"underperforming,\" or what time period/filter to examine. Nearest available metrics: first_pass_yield, veneer_yield.",
+      "checks": {
+        "guard_says_ambiguous": false,
+        "loop_asked_instead_of_assuming": false
+      },
+      "passed": false
+    },
+    {
+      "id": "m02",
+      "category": "ambiguous",
+      "question": "Is the veneer yield or the first-pass yield the bigger problem right now?",
+      "iterations": 0,
+      "latency_seconds": 3.016,
+      "final_answer": "Which time period and which grouping should I compare \u2014 for example, current month vs. previous month, or current month overall, or by specific supplier/press line/batch?",
+      "checks": {
+        "guard_says_ambiguous": true,
+        "loop_asked_instead_of_assuming": true
+      },
+      "passed": true
+    },
+    {
+      "id": "m03",
+      "category": "ambiguous",
+      "question": "Is our scrap_cost_per_batch or our first_pass_yield the bigger quality problem right now?",
+      "iterations": 0,
+      "latency_seconds": 3.374,
+      "final_answer": "Should I compare scrap_cost_per_batch and first_pass_yield at a specific time window (e.g., most recent month, last quarter) and/or for a specific press line, batch, or series, or should I investigate current performance across all dimensions to identify where the bigger problem lies?",
+      "checks": {
+        "guard_says_ambiguous": true,
+        "loop_asked_instead_of_assuming": true
+      },
+      "passed": true
+    },
+    {
+      "id": "m04",
+      "category": "ambiguous",
+      "question": "Is our on_time_ship_rate or our delamination_claim_rate the bigger problem right now?",
+      "iterations": 0,
+      "latency_seconds": 3.314,
+      "final_answer": "What time period should I compare \u2014 e.g., most recent month, last quarter, or year-to-date? And should I look at the metrics overall, or broken down by a specific dimension like region, press line, or batch?",
       "checks": {
         "guard_says_ambiguous": true,
         "loop_asked_instead_of_assuming": true
@@ -79,8 +421,8 @@
       "category": "degraded_path",
       "question": "What's the first_pass_yield for batch B0050?",
       "iterations": 4,
-      "latency_seconds": 9.611,
-      "final_answer": "Batch **B0050** doesn't have a first_pass_yield reading available \u2014 it's currently excluded from this metric because it has an **approved quarantine_batch action** against it (along with batches B0203 and B0233). Since quarantined batches are held out of normal metric aggregation, no yield figure is being reported for it here.\n\nIf you'd like, I can look up the batch's own record and its quality inspection history directly (via `get_object`/`traverse_link`) to see what triggered the quarantine and what its inspection results were.",
+      "latency_seconds": 9.272,
+      "final_answer": "Batch **B0050** is currently excluded from first_pass_yield reporting because it has an **approved quarantine_batch action** in place \u2014 along with batches B0203 and B0233. Since it's quarantined, no first-pass yield figure is being computed/reported for it in the standard metric output.\n\nIf you need the metric that was in place *before* the quarantine, or details on why B0050 was quarantined, I can look up the batch object and its linked quality inspections/lots directly \u2014 let me know if you'd like that.",
       "checks": {
         "triggered_genuine_error": true,
         "gave_real_answer": true,
@@ -92,9 +434,51 @@
       "id": "d02",
       "category": "degraded_path",
       "question": "What's the delamination_claim_rate for batch B0203?",
+      "iterations": 4,
+      "latency_seconds": 9.226,
+      "final_answer": "Batch **B0203** currently has no delamination_claim_rate reading available \u2014 it's excluded from this metric because it has an **approved quarantine_batch action** already in place (along with batches B0050 and B0233). \n\nSince B0203 is quarantined, it's held out of the standard delamination_claim_rate calculation (defined as warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity). If you'd like, I can pull the batch's details directly (via get_object) to see the quarantine reason and any linked warranty claims that led to that action.",
+      "checks": {
+        "triggered_genuine_error": true,
+        "gave_real_answer": true,
+        "did_not_hit_iteration_limit": true
+      },
+      "passed": true
+    },
+    {
+      "id": "d03",
+      "category": "degraded_path",
+      "question": "What's the scrap_cost_per_batch for batch B0233?",
       "iterations": 3,
-      "latency_seconds": 7.341,
-      "final_answer": "Batch **B0203** doesn't have a computable delamination_claim_rate \u2014 it's currently **excluded from this metric because it has an approved quarantine_batch action** on it, along with batches B0050 and B0233.\n\nSince a human has already approved quarantining B0203 (presumably due to a prior identified quality issue), the metric pipeline holds it out to avoid skewing fleet-wide/aggregate comparisons. If you'd like, I can pull up the batch's record directly (`get_object`) to see its status, associated lots, and any linked warranty claims for more context on why it was quarantined.",
+      "latency_seconds": 7.47,
+      "final_answer": "Batch **B0233** currently has no computable value for **scrap_cost_per_batch** \u2014 the metric (defined as \"total material and labor cost attributed to decks scrapped during production for a batch, divided by the batch's planned deck count\") excludes it from results.\n\nThe reason: B0233, along with B0050 and B0203, has an **approved quarantine_batch action** already in place, so these batches are held out of this metric's normal reporting. If you need the underlying scrap cost figures for a quarantined batch, I'd have to pull it via a different path (e.g., the batch object directly) rather than this metric \u2014 let me know if you'd like me to do that.",
+      "checks": {
+        "triggered_genuine_error": true,
+        "gave_real_answer": true,
+        "did_not_hit_iteration_limit": true
+      },
+      "passed": true
+    },
+    {
+      "id": "d04",
+      "category": "degraded_path",
+      "question": "What's the on_time_ship_rate for account ACC0136?",
+      "iterations": 3,
+      "latency_seconds": 6.434,
+      "final_answer": "The **on_time_ship_rate** for account **ACC0136** is **95.3%** (0.9535).\n\nThis metric is defined as: \"The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.\" No batches were excluded from this calculation.",
+      "checks": {
+        "triggered_genuine_error": true,
+        "gave_real_answer": true,
+        "did_not_hit_iteration_limit": true
+      },
+      "passed": true
+    },
+    {
+      "id": "d05",
+      "category": "degraded_path",
+      "question": "What's the veneer_yield for lot LOT-MAP-011?",
+      "iterations": 4,
+      "latency_seconds": 10.413,
+      "final_answer": "The **veneer_yield** for lot **LOT-MAP-011** is **0.363** (\u224836.3%).\n\nPer the metric's definition: *\"the fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim, computed as the sum of quantity_used across every batch that consumes the lot, divided by the lot's received quantity.\"*\n\nFor context, this lot comes from supplier SUP01, whose other lots range widely \u2014 from ~0.086 (LOT-MAP-013) up to ~0.90 (LOT-MAP-001, LOT-MAP-010). LOT-MAP-011's yield of 0.363 is well below the supplier's best-performing lots, though not the single worst (that's LOT-MAP-013, and LOT-MAP-008 is also lower at 0.284). Let me know if you'd like me to dig into whether this pattern is tied to specific batches or a broader supplier issue.",
       "checks": {
         "triggered_genuine_error": true,
         "gave_real_answer": true,

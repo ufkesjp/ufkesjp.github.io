@@ -246,3 +246,213 @@ footer {
         font-size: 0.95em;
     }
 }
+
+/* ── Case Study Content (long-form write-ups, e.g. eval_boards) ── */
+.case-study {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 5% 60px;
+    position: relative;
+    z-index: 1;
+}
+
+.case-study section {
+    margin-bottom: 48px;
+}
+
+.case-study h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 1.3em;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    border-bottom: var(--bord);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.case-study h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1em;
+    letter-spacing: 0.02em;
+    margin: 20px 0 10px;
+}
+
+.case-study p {
+    margin-bottom: 16px;
+}
+
+.case-study p:last-child {
+    margin-bottom: 0;
+}
+
+.case-study ul,
+.case-study ol {
+    margin: 0 0 16px 1.3em;
+}
+
+.case-study li {
+    margin-bottom: 6px;
+}
+
+.case-study a {
+    color: var(--ink);
+}
+
+/* Stat tiles (scorecard summary) */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-tile {
+    background: var(--paper);
+    border: var(--bord);
+    box-shadow: var(--shadow-sm);
+    padding: 16px;
+}
+
+.stat-tile .stat-value {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 1.8em;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.stat-tile .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.6;
+}
+
+/* Tables (e.g. per-category scorecard breakdown) */
+.case-study table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.92em;
+}
+
+.case-study th,
+.case-study td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--ink);
+}
+
+.case-study th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Trace steps (details/summary) */
+.trace-step {
+    background: var(--paper);
+    border: var(--bord);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+}
+
+.trace-step summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85em;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.trace-step summary::-webkit-details-marker {
+    display: none;
+}
+
+.trace-step summary::before {
+    content: "\25B8";
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.1s;
+}
+
+.trace-step[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.trace-step summary:hover {
+    background: var(--accent);
+}
+
+.trace-step .trace-step-body {
+    padding: 14px 16px 16px;
+    border-top: var(--bord);
+}
+
+.trace-step .trace-step-body > :last-child {
+    margin-bottom: 0;
+}
+
+/* Nested trace steps (tool calls inside a trace) sit flush, no outer shadow */
+.trace-step .trace-step-body .trace-step {
+    box-shadow: none;
+}
+
+/* Code / JSON blocks */
+.case-study pre,
+.case-study code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8em;
+}
+
+.case-study pre {
+    background: var(--bg);
+    border: var(--bord);
+    padding: 12px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.case-study code {
+    background: var(--bg);
+    padding: 2px 5px;
+}
+
+/* A raw tool result can be a few hundred rows; cap it instead of letting
+   one expanded step push the rest of the page far down the screen. */
+.trace-step-body pre {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+/* Tags (tool name / status / category labels) */
+.tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--accent);
+    border: 2px solid var(--ink);
+    padding: 2px 8px;
+    margin: 0 6px 6px 0;
+}
+
+.tag.tag-muted {
+    background: var(--paper);
+}
+
+@media (max-width: 600px) {
+    .case-study {
+        padding: 0 20px 40px;
+    }
+}
