@@ -251,6 +251,7 @@ footer {
 
 /* ── Case Study Content (long-form write-ups, e.g. eval_boards) ── */
 .case-study {
+    width: 100%;
     max-width: 760px;
     margin: 0 auto;
     padding: 0 5% 60px;
