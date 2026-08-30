@@ -53,9 +53,12 @@ header {
     padding: 24px 5%;
     text-align: left;
     margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
     position: relative;
     z-index: 1;
     width: 100%;
+    max-width: 760px;
 }
 
 header h1 {
@@ -113,6 +116,8 @@ footer {
     text-align: center;
     padding: 1.5em 5%;
     margin-top: auto;
+    margin-left: auto;
+    margin-right: auto;
     background-color: var(--paper);
     border-top: var(--bord);
     font-family: 'JetBrains Mono', monospace;
@@ -124,6 +129,7 @@ footer {
     position: relative;
     z-index: 1;
     width: 100%;
+    max-width: 760px;
 }
 
 /* ── Project Grid ── */
