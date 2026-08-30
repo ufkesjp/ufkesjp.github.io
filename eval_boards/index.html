@@ -70,11 +70,18 @@ quarantining the affected batches for a human to approve.</p>
             <div id="scorecard-content">
                 <div class="stat-grid">
                     <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Refusal rate</span></div>
-                    <div class="stat-tile"><span class="stat-value">94%</span><span class="stat-label">Answer accuracy</span></div>
+                    <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Answer accuracy</span></div>
                     <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Handled correctly rate</span></div>
                     <div class="stat-tile"><span class="stat-value">75%</span><span class="stat-label">Asked instead of assumed</span></div>
                     <div class="stat-tile"><span class="stat-value">1.83</span><span class="stat-label">Mean iterations</span></div>
                 </div>
+                <p>
+                    <em>Answer accuracy checks only that the key facts show up in the
+                    final answer; the pass rate below is stricter — it also requires
+                    the agent to have called the right tool rather than asking an
+                    unnecessary clarifying question, which is why "answerable" reads
+                    94% even though accuracy reads 100%.</em>
+                </p>
                 <table>
                     <thead><tr><th>Category</th><th>Questions</th><th>Passed</th><th>Rate</th></tr></thead>
                     <tbody>
@@ -468,6 +475,17 @@ quarantining the affected batches for a human to approve.</p>
                 if (amb) stats.appendChild(statTile("Asked instead of assumed", Math.round(amb.clarification_rate * 100) + "%"));
                 stats.appendChild(statTile("Mean iterations", card.mean_iterations));
                 host.appendChild(stats);
+
+                if (ans && ans.answer_accuracy !== ans.pass_rate) {
+                    host.appendChild(el("p", { html:
+                        "<em>Answer accuracy checks only that the key facts show up in the " +
+                        "final answer; the pass rate below is stricter — it also requires " +
+                        "the agent to have called the right tool rather than asking an " +
+                        "unnecessary clarifying question, which is why “answerable” reads " +
+                        Math.round(ans.pass_rate * 100) + "% even though accuracy reads " +
+                        Math.round(ans.answer_accuracy * 100) + "%.</em>"
+                    }));
+                }
 
                 var table = document.createElement("table");
                 table.innerHTML =
