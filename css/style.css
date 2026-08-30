@@ -55,6 +55,7 @@ header {
     margin-bottom: 40px;
     position: relative;
     z-index: 1;
+    width: 100%;
 }
 
 header h1 {
@@ -122,6 +123,7 @@ footer {
     opacity: 0.5;
     position: relative;
     z-index: 1;
+    width: 100%;
 }
 
 /* ── Project Grid ── */
