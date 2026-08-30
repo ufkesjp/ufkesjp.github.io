@@ -1,0 +1,462 @@
+{
+  "links": [
+    {
+      "source": "ProductionBatch",
+      "name": "consumes",
+      "target": "MaterialLot",
+      "cardinality": "many_to_many",
+      "description": "Which material lots physically went into a production batch \u2014 the link a bad lot has to be traced through to find every batch it touched."
+    },
+    {
+      "source": "MaterialLot",
+      "name": "supplied_by",
+      "target": "Supplier",
+      "cardinality": "many_to_one",
+      "description": "Which supplier shipped a given material lot."
+    },
+    {
+      "source": "Deck",
+      "name": "produced_by",
+      "target": "ProductionBatch",
+      "cardinality": "many_to_one",
+      "description": "Which production batch a finished deck came from."
+    },
+    {
+      "source": "ProductionBatch",
+      "name": "ran_on",
+      "target": "PressLine",
+      "cardinality": "many_to_one",
+      "description": "Which physical press line ran a production batch."
+    },
+    {
+      "source": "WarrantyClaim",
+      "name": "concerns",
+      "target": "Deck",
+      "cardinality": "many_to_one",
+      "description": "Which specific deck a warranty claim was filed against."
+    },
+    {
+      "source": "Order",
+      "name": "placed_by",
+      "target": "RetailAccount",
+      "cardinality": "many_to_one",
+      "description": "Which retail account placed an order."
+    },
+    {
+      "source": "Order",
+      "name": "fulfilled_from",
+      "target": "ProductionBatch",
+      "cardinality": "many_to_one",
+      "description": "Which production batch an order's decks were fulfilled from."
+    },
+    {
+      "source": "QualityInspection",
+      "name": "inspected_by",
+      "target": "ProductionBatch",
+      "cardinality": "many_to_one",
+      "description": "Which production batch a quality inspection was performed on."
+    }
+  ],
+  "object_types": [
+    {
+      "name": "Deck",
+      "description": "A single finished skateboard deck, the physical unit that ships to a customer and can be the subject of a warranty claim.",
+      "row_count": 11915,
+      "columns": [
+        {
+          "name": "deck_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "series",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "shape",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "length_in",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "produced_at",
+          "type": "DATE"
+        },
+        {
+          "name": "ship_date",
+          "type": "DATE"
+        }
+      ]
+    },
+    {
+      "name": "ProductionBatch",
+      "description": "One press run of decks made together from the same materials on the same line, on the same day. Decks, quality inspections, and material consumption are all tracked at this grain.",
+      "row_count": 400,
+      "columns": [
+        {
+          "name": "batch_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "press_line_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "run_date",
+          "type": "DATE"
+        },
+        {
+          "name": "series",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "deck_count",
+          "type": "INTEGER"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "MaterialLot",
+      "description": "A single delivered batch of raw material \u2014 veneer, resin, grip tape, hardware, or paint \u2014 from one supplier, received on one date. Multiple production batches can draw from the same lot.",
+      "row_count": 60,
+      "columns": [
+        {
+          "name": "lot_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "supplier_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "material_type",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "received_date",
+          "type": "DATE"
+        },
+        {
+          "name": "quantity",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "unit",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "Supplier",
+      "description": "A vendor that ships raw material lots. Ranked into a quality tier that can be downgraded to probation after a corrective action is opened.",
+      "row_count": 8,
+      "columns": [
+        {
+          "name": "supplier_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "country",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "onboarded_date",
+          "type": "DATE"
+        },
+        {
+          "name": "quality_tier",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "QualityInspection",
+      "description": "A quality-control check of a sample of decks from one production batch, recording how many passed and, for the failures, the dominant defect found.",
+      "row_count": 400,
+      "columns": [
+        {
+          "name": "inspection_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "inspector",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "inspection_date",
+          "type": "DATE"
+        },
+        {
+          "name": "decks_inspected",
+          "type": "INTEGER"
+        },
+        {
+          "name": "decks_passed",
+          "type": "INTEGER"
+        },
+        {
+          "name": "defect_type",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "WarrantyClaim",
+      "description": "A customer's claim that one specific deck they own is defective, filed after it has already shipped and been in use.",
+      "row_count": 545,
+      "columns": [
+        {
+          "name": "claim_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "deck_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "claim_date",
+          "type": "DATE"
+        },
+        {
+          "name": "defect_type",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "resolution",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "warranty_cost",
+          "type": "DOUBLE"
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "description": "A retail account's request for a quantity of decks, fulfilled from one production batch and tracked from placement through shipment.",
+      "row_count": 9000,
+      "columns": [
+        {
+          "name": "order_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "account_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "batch_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "order_date",
+          "type": "DATE"
+        },
+        {
+          "name": "ship_date",
+          "type": "DATE"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "deck_count",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "name": "RetailAccount",
+      "description": "A retailer that places orders for decks, ranked into a tier from flagship storefronts down to online-only accounts.",
+      "row_count": 150,
+      "columns": [
+        {
+          "name": "account_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "region",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "tier",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "PressLine",
+      "description": "One physical production line in the factory. Every production batch runs on exactly one press line.",
+      "row_count": 3,
+      "columns": [
+        {
+          "name": "press_line_id",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "location",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "install_date",
+          "type": "DATE"
+        }
+      ]
+    }
+  ],
+  "samples": {
+    "MaterialLot": [
+      {
+        "lot_id": "LOT-EPO-001",
+        "supplier_id": "SUP05",
+        "material_type": "epoxy_resin",
+        "received_date": "2026-06-03",
+        "quantity": 314.8,
+        "unit": "liters"
+      },
+      {
+        "lot_id": "LOT-EPO-002",
+        "supplier_id": "SUP04",
+        "material_type": "epoxy_resin",
+        "received_date": "2026-05-01",
+        "quantity": 367.7,
+        "unit": "liters"
+      },
+      {
+        "lot_id": "LOT-EPO-003",
+        "supplier_id": "SUP04",
+        "material_type": "epoxy_resin",
+        "received_date": "2025-09-14",
+        "quantity": 292.8,
+        "unit": "liters"
+      },
+      {
+        "lot_id": "LOT-EPO-004",
+        "supplier_id": "SUP05",
+        "material_type": "epoxy_resin",
+        "received_date": "2025-12-05",
+        "quantity": 433.9,
+        "unit": "liters"
+      },
+      {
+        "lot_id": "LOT-MAP-011",
+        "supplier_id": "SUP01",
+        "material_type": "maple_veneer",
+        "received_date": "2025-05-28",
+        "quantity": 1042.5,
+        "unit": "sheets"
+      }
+    ],
+    "ProductionBatch": [
+      {
+        "batch_id": "B0001",
+        "press_line_id": "PL03",
+        "run_date": "2026-04-15",
+        "series": "Longboard",
+        "deck_count": 33,
+        "status": "normal"
+      },
+      {
+        "batch_id": "B0002",
+        "press_line_id": "PL01",
+        "run_date": "2025-11-26",
+        "series": "Classic",
+        "deck_count": 25,
+        "status": "normal"
+      },
+      {
+        "batch_id": "B0003",
+        "press_line_id": "PL03",
+        "run_date": "2026-07-07",
+        "series": "Pro",
+        "deck_count": 26,
+        "status": "normal"
+      },
+      {
+        "batch_id": "B0004",
+        "press_line_id": "PL02",
+        "run_date": "2026-07-02",
+        "series": "Classic",
+        "deck_count": 28,
+        "status": "normal"
+      },
+      {
+        "batch_id": "B0050",
+        "press_line_id": "PL01",
+        "run_date": "2026-04-06",
+        "series": "Pro",
+        "deck_count": 32,
+        "status": "normal"
+      }
+    ],
+    "WarrantyClaim": [
+      {
+        "claim_id": "WC00001",
+        "deck_id": "D000002",
+        "claim_date": "2025-06-09",
+        "defect_type": "delamination",
+        "resolution": "replaced",
+        "warranty_cost": 152.1
+      },
+      {
+        "claim_id": "WC00002",
+        "deck_id": "D000040",
+        "claim_date": "2025-05-26",
+        "defect_type": "crack",
+        "resolution": "denied",
+        "warranty_cost": 75.66
+      },
+      {
+        "claim_id": "WC00003",
+        "deck_id": "D000064",
+        "claim_date": "2025-06-19",
+        "defect_type": "hardware_failure",
+        "resolution": "replaced",
+        "warranty_cost": 38.71
+      },
+      {
+        "claim_id": "WC00004",
+        "deck_id": "D000089",
+        "claim_date": "2025-04-11",
+        "defect_type": "crack",
+        "resolution": "pending",
+        "warranty_cost": 93.89
+      },
+      {
+        "claim_id": "WC00438",
+        "deck_id": "D008147",
+        "claim_date": "2026-05-26",
+        "defect_type": "delamination",
+        "resolution": "replaced",
+        "warranty_cost": 175.77
+      }
+    ]
+  },
+  "generated_at": "2026-08-30T21:35:05.575200+00:00"
+}

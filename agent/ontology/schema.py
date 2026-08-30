@@ -21,6 +21,7 @@ DEFAULT_ONTOLOGY_PATH = Path(__file__).parent / "eval_boards.yml"
 
 
 class ObjectType(BaseModel):
+    description: str
     primary_key: str
     properties: dict[str, PropertyType]
 
@@ -38,6 +39,7 @@ class Link(BaseModel):
     from_: str = Field(alias="from")
     to: str
     cardinality: Literal["many_to_many", "many_to_one", "one_to_many", "one_to_one"]
+    description: str
 
     # many_to_one / one_to_many / one_to_one shape
     from_key: str | None = None

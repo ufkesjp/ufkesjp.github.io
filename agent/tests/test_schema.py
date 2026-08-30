@@ -9,10 +9,12 @@ from ontology.schema import Ontology, load_ontology
 MINIMAL_VALID = {
     "object_types": {
         "Widget": {
+            "description": "A thing made at a factory.",
             "primary_key": "widget_id",
             "properties": {"widget_id": "string", "name": "string"},
         },
         "Factory": {
+            "description": "A place that makes widgets.",
             "primary_key": "factory_id",
             "properties": {"factory_id": "string"},
         },
@@ -25,6 +27,7 @@ MINIMAL_VALID = {
             "cardinality": "many_to_one",
             "from_key": "widget_id",
             "to_key": "factory_id",
+            "description": "Which factory made a widget.",
         }
     ],
     "actions": {

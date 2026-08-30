@@ -15,6 +15,9 @@
 
 object_types:
   Deck:
+    description: >-
+      A single finished skateboard deck, the physical unit that ships to a
+      customer and can be the subject of a warranty claim.
     primary_key: deck_id
     properties:
       deck_id: string
@@ -26,6 +29,10 @@ object_types:
       ship_date: date         # nullable until sold
 
   ProductionBatch:
+    description: >-
+      One press run of decks made together from the same materials on the
+      same line, on the same day. Decks, quality inspections, and material
+      consumption are all tracked at this grain.
     primary_key: batch_id
     properties:
       batch_id: string
@@ -36,6 +43,10 @@ object_types:
       status: string          # enum: normal, quarantined
 
   MaterialLot:
+    description: >-
+      A single delivered batch of raw material — veneer, resin, grip tape,
+      hardware, or paint — from one supplier, received on one date. Multiple
+      production batches can draw from the same lot.
     primary_key: lot_id
     properties:
       lot_id: string
@@ -46,6 +57,9 @@ object_types:
       unit: string
 
   Supplier:
+    description: >-
+      A vendor that ships raw material lots. Ranked into a quality tier that
+      can be downgraded to probation after a corrective action is opened.
     primary_key: supplier_id
     properties:
       supplier_id: string
@@ -55,6 +69,10 @@ object_types:
       quality_tier: string    # enum: preferred, standard, probation
 
   QualityInspection:
+    description: >-
+      A quality-control check of a sample of decks from one production
+      batch, recording how many passed and, for the failures, the dominant
+      defect found.
     primary_key: inspection_id
     properties:
       inspection_id: string
@@ -66,6 +84,9 @@ object_types:
       defect_type: string     # dominant defect among failures; nullable
 
   WarrantyClaim:
+    description: >-
+      A customer's claim that one specific deck they own is defective, filed
+      after it has already shipped and been in use.
     primary_key: claim_id
     properties:
       claim_id: string
@@ -76,6 +97,9 @@ object_types:
       warranty_cost: float
 
   Order:
+    description: >-
+      A retail account's request for a quantity of decks, fulfilled from one
+      production batch and tracked from placement through shipment.
     primary_key: order_id
     properties:
       order_id: string
@@ -87,6 +111,9 @@ object_types:
       deck_count: int
 
   RetailAccount:
+    description: >-
+      A retailer that places orders for decks, ranked into a tier from
+      flagship storefronts down to online-only accounts.
     primary_key: account_id
     properties:
       account_id: string
@@ -95,6 +122,9 @@ object_types:
       tier: string            # enum: flagship, standard, online_only
 
   PressLine:
+    description: >-
+      One physical production line in the factory. Every production batch
+      runs on exactly one press line.
     primary_key: press_line_id
     properties:
       press_line_id: string
@@ -110,6 +140,10 @@ links:
     join_table: batch_material_lots
     join_from_key: batch_id
     join_to_key: lot_id
+    description: >-
+      Which material lots physically went into a production batch — the
+      link a bad lot has to be traced through to find every batch it
+      touched.
 
   - name: supplied_by
     from: MaterialLot
@@ -117,6 +151,7 @@ links:
     cardinality: many_to_one
     from_key: supplier_id
     to_key: supplier_id
+    description: Which supplier shipped a given material lot.
 
   - name: produced_by
     from: Deck
@@ -124,6 +159,7 @@ links:
     cardinality: many_to_one
     from_key: batch_id
     to_key: batch_id
+    description: Which production batch a finished deck came from.
 
   - name: ran_on
     from: ProductionBatch
@@ -131,6 +167,7 @@ links:
     cardinality: many_to_one
     from_key: press_line_id
     to_key: press_line_id
+    description: Which physical press line ran a production batch.
 
   - name: concerns
     from: WarrantyClaim
@@ -138,6 +175,7 @@ links:
     cardinality: many_to_one
     from_key: deck_id
     to_key: deck_id
+    description: Which specific deck a warranty claim was filed against.
 
   - name: placed_by
     from: Order
@@ -145,6 +183,7 @@ links:
     cardinality: many_to_one
     from_key: account_id
     to_key: account_id
+    description: Which retail account placed an order.
 
   - name: fulfilled_from
     from: Order
@@ -152,6 +191,7 @@ links:
     cardinality: many_to_one
     from_key: batch_id
     to_key: batch_id
+    description: Which production batch an order's decks were fulfilled from.
 
   - name: inspected_by
     from: QualityInspection
@@ -159,6 +199,7 @@ links:
     cardinality: many_to_one
     from_key: batch_id
     to_key: batch_id
+    description: Which production batch a quality inspection was performed on.
 
 actions:
   quarantine_batch:

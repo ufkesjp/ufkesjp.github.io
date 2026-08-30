@@ -33,6 +33,20 @@ scorecard.
   (`list_available_metrics`, `get_metric`, `compare_periods`, `get_object`,
   `traverse_link`, `propose_action`) from the loaded ontology at import
   time, and dispatches tool calls to the compiler.
+- `ontology/describe.py` — reads the ontology and `data/eval_boards.duckdb`
+  and writes `eval_boards/data/datamodel.json` (links, object types with live
+  row counts and columns, and sample rows connecting to the flagship trace's
+  lot/batch/claim). Regenerate it with:
+
+  ```bash
+  uv run python -m ontology.describe
+  ```
+
+  after any change to `eval_boards.yml` or the seed data. The ontology
+  diagram in `eval_boards/index.html` is hand-authored inline SVG, not
+  generated from this file — `tests/test_datamodel.py` guards against it
+  drifting out of sync by asserting every object type and link name appears
+  in both the SVG markup and `datamodel.json`.
 - `runtime/guard.py` — a coverage check, separate from the agent's own
   judgment, that decides whether a question is answerable at all before the
   loop starts.
