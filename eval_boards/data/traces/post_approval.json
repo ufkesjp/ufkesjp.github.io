@@ -1,0 +1,3445 @@
+{
+  "question": "Delamination claims are up - what's going on?",
+  "guard_decision": {
+    "in_scope": true,
+    "ambiguous": false,
+    "reason": "The question asks to investigate delamination warranty claims, which is directly measurable via the delamination_claim_rate metric. While the question doesn't specify a time window or grouping, the reasonable default is to investigate the most recent data using the metric's available dimensions (batch, press_line, or month grain) to surface patterns explaining the increase.",
+    "nearest_metrics": [
+      "delamination_claim_rate"
+    ],
+    "clarifying_question": null
+  },
+  "refused": false,
+  "asked_clarification": false,
+  "tool_calls": [
+    {
+      "name": "list_available_metrics",
+      "arguments": {},
+      "result": {
+        "metrics": [
+          {
+            "name": "delamination_claim_rate",
+            "definition": "Warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity (90 days since ship_date as of the metric's as-of date). Decks younger than 90 days are excluded from both the numerator and the denominator.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "quality_engineering"
+          },
+          {
+            "name": "first_pass_yield",
+            "definition": "The share of decks in a production batch that pass quality inspection on the first inspection, with no rework or reprocessing. Computed as decks passing first inspection divided by total decks inspected in the batch.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "quality_engineering"
+          },
+          {
+            "name": "on_time_ship_rate",
+            "definition": "The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.",
+            "grain": [
+              "account",
+              "region",
+              "month"
+            ],
+            "allowed_filters": [
+              "region",
+              "tier",
+              "account_id"
+            ],
+            "owner": "operations"
+          },
+          {
+            "name": "scrap_cost_per_batch",
+            "definition": "Total material and labor cost attributed to decks scrapped during production for a batch, divided by the batch's planned deck count. Scrap is any deck that fails inspection and is not reworked.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "manufacturing_finance"
+          },
+          {
+            "name": "veneer_yield",
+            "definition": "The fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim. Computed as the sum of quantity_used across every batch that consumes the lot, divided by the lot's received quantity.",
+            "grain": [
+              "lot",
+              "supplier",
+              "month"
+            ],
+            "allowed_filters": [
+              "supplier_id",
+              "material_type"
+            ],
+            "owner": "quality_engineering"
+          }
+        ]
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_metric",
+      "arguments": {
+        "metric_name": "delamination_claim_rate",
+        "grain": [
+          "month"
+        ]
+      },
+      "result": {
+        "metric": "delamination_claim_rate",
+        "definition": "Warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity (90 days since ship_date as of the metric's as-of date). Decks younger than 90 days are excluded from both the numerator and the denominator.",
+        "rationale": "Delamination is a defect that surfaces with use, not at the moment of sale \u2014 a deck typically has to be ridden, get wet, and take a few impacts before a sub-par adhesive bond starts to show itself. A metric of raw claims over decks shipped is biased toward whichever batches are oldest, because they have had the most time to accumulate claims, and it is biased against the newest batches, which look artificially safe simply because they have not been skated long enough to start to fail. That makes \"raw claims over shipped\" actively misleading during exactly the window when catching a bad batch matters most: a newly-discovered material problem would look clean under that definition for months, by which time far more decks have shipped. Matching on maturity \u2014 comparing batches only once each has had the same amount of field time \u2014 is what makes the batches comparable at all, and it is the difference between \"we have a lot problem\" and \"we have a plausible pattern that might just be an aging artifact.\"",
+        "grain": [
+          "month"
+        ],
+        "filters": {},
+        "rows": [
+          {
+            "month": "2025-12-01T00:00:00",
+            "value": 1.2965964343598055
+          },
+          {
+            "month": "2026-05-01T00:00:00",
+            "value": 2.4896265560165975
+          },
+          {
+            "month": "2025-03-01T00:00:00",
+            "value": 1.098901098901099
+          },
+          {
+            "month": "2025-05-01T00:00:00",
+            "value": 1.5985790408525755
+          },
+          {
+            "month": "2025-08-01T00:00:00",
+            "value": 1.2987012987012987
+          },
+          {
+            "month": "2026-01-01T00:00:00",
+            "value": 1.9973368841544608
+          },
+          {
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0398613518197575
+          },
+          {
+            "month": "2026-02-01T00:00:00",
+            "value": 2.1108179419525066
+          },
+          {
+            "month": "2025-09-01T00:00:00",
+            "value": 1.2893982808022924
+          },
+          {
+            "month": "2026-03-01T00:00:00",
+            "value": 1.8050541516245486
+          },
+          {
+            "month": "2025-06-01T00:00:00",
+            "value": 1.594896331738437
+          },
+          {
+            "month": "2025-10-01T00:00:00",
+            "value": 2.8957528957528957
+          },
+          {
+            "month": "2026-04-01T00:00:00",
+            "value": 1.3736263736263736
+          },
+          {
+            "month": "2025-07-01T00:00:00",
+            "value": 1.3133208255159474
+          },
+          {
+            "month": "2025-11-01T00:00:00",
+            "value": 2.4752475247524752
+          }
+        ],
+        "excluded_batches": [
+          "B0050",
+          "B0203",
+          "B0233"
+        ],
+        "excluded_reason": "held out of this result because each has an approved quarantine_batch action"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_metric",
+      "arguments": {
+        "metric_name": "delamination_claim_rate",
+        "grain": [
+          "batch"
+        ]
+      },
+      "result": {
+        "metric": "delamination_claim_rate",
+        "definition": "Warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity (90 days since ship_date as of the metric's as-of date). Decks younger than 90 days are excluded from both the numerator and the denominator.",
+        "rationale": "Delamination is a defect that surfaces with use, not at the moment of sale \u2014 a deck typically has to be ridden, get wet, and take a few impacts before a sub-par adhesive bond starts to show itself. A metric of raw claims over decks shipped is biased toward whichever batches are oldest, because they have had the most time to accumulate claims, and it is biased against the newest batches, which look artificially safe simply because they have not been skated long enough to start to fail. That makes \"raw claims over shipped\" actively misleading during exactly the window when catching a bad batch matters most: a newly-discovered material problem would look clean under that definition for months, by which time far more decks have shipped. Matching on maturity \u2014 comparing batches only once each has had the same amount of field time \u2014 is what makes the batches comparable at all, and it is the difference between \"we have a lot problem\" and \"we have a plausible pattern that might just be an aging artifact.\"",
+        "grain": [
+          "batch"
+        ],
+        "filters": {},
+        "rows": [
+          {
+            "batch": "B0214",
+            "value": 0.0
+          },
+          {
+            "batch": "B0044",
+            "value": 0.0
+          },
+          {
+            "batch": "B0368",
+            "value": 0.0
+          },
+          {
+            "batch": "B0058",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0398",
+            "value": 0.0
+          },
+          {
+            "batch": "B0134",
+            "value": 0.0
+          },
+          {
+            "batch": "B0389",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0176",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0235",
+            "value": 0.0
+          },
+          {
+            "batch": "B0289",
+            "value": 0.0
+          },
+          {
+            "batch": "B0135",
+            "value": 0.0
+          },
+          {
+            "batch": "B0345",
+            "value": 3.125
+          },
+          {
+            "batch": "B0071",
+            "value": 0.0
+          },
+          {
+            "batch": "B0046",
+            "value": 0.0
+          },
+          {
+            "batch": "B0053",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0178",
+            "value": 0.0
+          },
+          {
+            "batch": "B0304",
+            "value": 0.0
+          },
+          {
+            "batch": "B0104",
+            "value": 0.0
+          },
+          {
+            "batch": "B0015",
+            "value": 0.0
+          },
+          {
+            "batch": "B0319",
+            "value": 0.0
+          },
+          {
+            "batch": "B0119",
+            "value": 0.0
+          },
+          {
+            "batch": "B0231",
+            "value": 0.0
+          },
+          {
+            "batch": "B0209",
+            "value": 0.0
+          },
+          {
+            "batch": "B0237",
+            "value": 0.0
+          },
+          {
+            "batch": "B0379",
+            "value": 2.857142857142857
+          },
+          {
+            "batch": "B0180",
+            "value": 0.0
+          },
+          {
+            "batch": "B0163",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0362",
+            "value": 0.0
+          },
+          {
+            "batch": "B0143",
+            "value": 8.695652173913043
+          },
+          {
+            "batch": "B0021",
+            "value": 0.0
+          },
+          {
+            "batch": "B0337",
+            "value": 7.407407407407407
+          },
+          {
+            "batch": "B0287",
+            "value": 0.0
+          },
+          {
+            "batch": "B0131",
+            "value": 0.0
+          },
+          {
+            "batch": "B0220",
+            "value": 0.0
+          },
+          {
+            "batch": "B0087",
+            "value": 0.0
+          },
+          {
+            "batch": "B0388",
+            "value": 0.0
+          },
+          {
+            "batch": "B0257",
+            "value": 0.0
+          },
+          {
+            "batch": "B0093",
+            "value": 0.0
+          },
+          {
+            "batch": "B0103",
+            "value": 0.0
+          },
+          {
+            "batch": "B0187",
+            "value": 3.225806451612903
+          },
+          {
+            "batch": "B0117",
+            "value": 0.0
+          },
+          {
+            "batch": "B0028",
+            "value": 6.25
+          },
+          {
+            "batch": "B0294",
+            "value": 0.0
+          },
+          {
+            "batch": "B0230",
+            "value": 3.125
+          },
+          {
+            "batch": "B0061",
+            "value": 0.0
+          },
+          {
+            "batch": "B0120",
+            "value": 7.407407407407407
+          },
+          {
+            "batch": "B0385",
+            "value": 0.0
+          },
+          {
+            "batch": "B0325",
+            "value": 0.0
+          },
+          {
+            "batch": "B0097",
+            "value": 0.0
+          },
+          {
+            "batch": "B0107",
+            "value": 0.0
+          },
+          {
+            "batch": "B0238",
+            "value": 0.0
+          },
+          {
+            "batch": "B0128",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0183",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0002",
+            "value": 8.695652173913043
+          },
+          {
+            "batch": "B0392",
+            "value": 0.0
+          },
+          {
+            "batch": "B0296",
+            "value": 0.0
+          },
+          {
+            "batch": "B0312",
+            "value": 0.0
+          },
+          {
+            "batch": "B0022",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0138",
+            "value": 0.0
+          },
+          {
+            "batch": "B0150",
+            "value": 0.0
+          },
+          {
+            "batch": "B0375",
+            "value": 0.0
+          },
+          {
+            "batch": "B0217",
+            "value": 0.0
+          },
+          {
+            "batch": "B0173",
+            "value": 0.0
+          },
+          {
+            "batch": "B0125",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0360",
+            "value": 0.0
+          },
+          {
+            "batch": "B0089",
+            "value": 0.0
+          },
+          {
+            "batch": "B0202",
+            "value": 6.0606060606060606
+          },
+          {
+            "batch": "B0225",
+            "value": 0.0
+          },
+          {
+            "batch": "B0085",
+            "value": 0.0
+          },
+          {
+            "batch": "B0316",
+            "value": 0.0
+          },
+          {
+            "batch": "B0321",
+            "value": 0.0
+          },
+          {
+            "batch": "B0273",
+            "value": 0.0
+          },
+          {
+            "batch": "B0268",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0043",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0014",
+            "value": 0.0
+          },
+          {
+            "batch": "B0155",
+            "value": 8.695652173913043
+          },
+          {
+            "batch": "B0074",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0260",
+            "value": 0.0
+          },
+          {
+            "batch": "B0154",
+            "value": 0.0
+          },
+          {
+            "batch": "B0024",
+            "value": 6.451612903225806
+          },
+          {
+            "batch": "B0297",
+            "value": 5.882352941176471
+          },
+          {
+            "batch": "B0098",
+            "value": 0.0
+          },
+          {
+            "batch": "B0106",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0354",
+            "value": 0.0
+          },
+          {
+            "batch": "B0168",
+            "value": 4.0
+          },
+          {
+            "batch": "B0100",
+            "value": 0.0
+          },
+          {
+            "batch": "B0179",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0282",
+            "value": 0.0
+          },
+          {
+            "batch": "B0006",
+            "value": 6.666666666666667
+          },
+          {
+            "batch": "B0355",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0303",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0381",
+            "value": 0.0
+          },
+          {
+            "batch": "B0101",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0227",
+            "value": 0.0
+          },
+          {
+            "batch": "B0185",
+            "value": 0.0
+          },
+          {
+            "batch": "B0279",
+            "value": 0.0
+          },
+          {
+            "batch": "B0338",
+            "value": 0.0
+          },
+          {
+            "batch": "B0327",
+            "value": 0.0
+          },
+          {
+            "batch": "B0240",
+            "value": 3.125
+          },
+          {
+            "batch": "B0386",
+            "value": 0.0
+          },
+          {
+            "batch": "B0144",
+            "value": 0.0
+          },
+          {
+            "batch": "B0262",
+            "value": 0.0
+          },
+          {
+            "batch": "B0223",
+            "value": 4.0
+          },
+          {
+            "batch": "B0339",
+            "value": 0.0
+          },
+          {
+            "batch": "B0063",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0147",
+            "value": 0.0
+          },
+          {
+            "batch": "B0196",
+            "value": 0.0
+          },
+          {
+            "batch": "B0081",
+            "value": 0.0
+          },
+          {
+            "batch": "B0030",
+            "value": 9.67741935483871
+          },
+          {
+            "batch": "B0066",
+            "value": 3.225806451612903
+          },
+          {
+            "batch": "B0371",
+            "value": 3.125
+          },
+          {
+            "batch": "B0256",
+            "value": 4.0
+          },
+          {
+            "batch": "B0283",
+            "value": 0.0
+          },
+          {
+            "batch": "B0267",
+            "value": 0.0
+          },
+          {
+            "batch": "B0243",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0298",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0396",
+            "value": 0.0
+          },
+          {
+            "batch": "B0151",
+            "value": 0.0
+          },
+          {
+            "batch": "B0079",
+            "value": 0.0
+          },
+          {
+            "batch": "B0295",
+            "value": 0.0
+          },
+          {
+            "batch": "B0036",
+            "value": 0.0
+          },
+          {
+            "batch": "B0367",
+            "value": 0.0
+          },
+          {
+            "batch": "B0010",
+            "value": 3.125
+          },
+          {
+            "batch": "B0011",
+            "value": 7.6923076923076925
+          },
+          {
+            "batch": "B0192",
+            "value": 0.0
+          },
+          {
+            "batch": "B0057",
+            "value": 0.0
+          },
+          {
+            "batch": "B0270",
+            "value": 0.0
+          },
+          {
+            "batch": "B0205",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0281",
+            "value": 0.0
+          },
+          {
+            "batch": "B0306",
+            "value": 0.0
+          },
+          {
+            "batch": "B0193",
+            "value": 0.0
+          },
+          {
+            "batch": "B0234",
+            "value": 3.225806451612903
+          },
+          {
+            "batch": "B0313",
+            "value": 0.0
+          },
+          {
+            "batch": "B0350",
+            "value": 0.0
+          },
+          {
+            "batch": "B0023",
+            "value": 0.0
+          },
+          {
+            "batch": "B0341",
+            "value": 6.25
+          },
+          {
+            "batch": "B0310",
+            "value": 0.0
+          },
+          {
+            "batch": "B0346",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0343",
+            "value": 0.0
+          },
+          {
+            "batch": "B0208",
+            "value": 0.0
+          },
+          {
+            "batch": "B0181",
+            "value": 7.6923076923076925
+          },
+          {
+            "batch": "B0347",
+            "value": 0.0
+          },
+          {
+            "batch": "B0092",
+            "value": 0.0
+          },
+          {
+            "batch": "B0216",
+            "value": 0.0
+          },
+          {
+            "batch": "B0040",
+            "value": 0.0
+          },
+          {
+            "batch": "B0395",
+            "value": 3.0303030303030303
+          },
+          {
+            "batch": "B0378",
+            "value": 0.0
+          },
+          {
+            "batch": "B0118",
+            "value": 0.0
+          },
+          {
+            "batch": "B0105",
+            "value": 6.896551724137931
+          },
+          {
+            "batch": "B0132",
+            "value": 0.0
+          },
+          {
+            "batch": "B0025",
+            "value": 0.0
+          },
+          {
+            "batch": "B0075",
+            "value": 0.0
+          },
+          {
+            "batch": "B0029",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0254",
+            "value": 0.0
+          },
+          {
+            "batch": "B0086",
+            "value": 0.0
+          },
+          {
+            "batch": "B0307",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0008",
+            "value": 0.0
+          },
+          {
+            "batch": "B0005",
+            "value": 0.0
+          },
+          {
+            "batch": "B0332",
+            "value": 0.0
+          },
+          {
+            "batch": "B0212",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0363",
+            "value": 3.7037037037037037
+          },
+          {
+            "batch": "B0160",
+            "value": 0.0
+          },
+          {
+            "batch": "B0076",
+            "value": 0.0
+          },
+          {
+            "batch": "B0141",
+            "value": 0.0
+          },
+          {
+            "batch": "B0353",
+            "value": 0.0
+          },
+          {
+            "batch": "B0080",
+            "value": 0.0
+          },
+          {
+            "batch": "B0221",
+            "value": 0.0
+          },
+          {
+            "batch": "B0013",
+            "value": 0.0
+          },
+          {
+            "batch": "B0207",
+            "value": 2.9411764705882355
+          },
+          {
+            "batch": "B0039",
+            "value": 0.0
+          },
+          {
+            "batch": "B0198",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0007",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0331",
+            "value": 0.0
+          },
+          {
+            "batch": "B0113",
+            "value": 0.0
+          },
+          {
+            "batch": "B0301",
+            "value": 0.0
+          },
+          {
+            "batch": "B0359",
+            "value": 0.0
+          },
+          {
+            "batch": "B0249",
+            "value": 0.0
+          },
+          {
+            "batch": "B0204",
+            "value": 3.7037037037037037
+          },
+          {
+            "batch": "B0012",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0116",
+            "value": 0.0
+          },
+          {
+            "batch": "B0246",
+            "value": 0.0
+          },
+          {
+            "batch": "B0274",
+            "value": 0.0
+          },
+          {
+            "batch": "B0200",
+            "value": 3.225806451612903
+          },
+          {
+            "batch": "B0222",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0322",
+            "value": 0.0
+          },
+          {
+            "batch": "B0112",
+            "value": 0.0
+          },
+          {
+            "batch": "B0197",
+            "value": 0.0
+          },
+          {
+            "batch": "B0377",
+            "value": 0.0
+          },
+          {
+            "batch": "B0073",
+            "value": 0.0
+          },
+          {
+            "batch": "B0265",
+            "value": 0.0
+          },
+          {
+            "batch": "B0291",
+            "value": 0.0
+          },
+          {
+            "batch": "B0286",
+            "value": 0.0
+          },
+          {
+            "batch": "B0239",
+            "value": 0.0
+          },
+          {
+            "batch": "B0351",
+            "value": 7.142857142857143
+          },
+          {
+            "batch": "B0305",
+            "value": 0.0
+          },
+          {
+            "batch": "B0364",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0311",
+            "value": 0.0
+          },
+          {
+            "batch": "B0020",
+            "value": 0.0
+          },
+          {
+            "batch": "B0068",
+            "value": 0.0
+          },
+          {
+            "batch": "B0169",
+            "value": 0.0
+          },
+          {
+            "batch": "B0236",
+            "value": 0.0
+          },
+          {
+            "batch": "B0275",
+            "value": 0.0
+          },
+          {
+            "batch": "B0159",
+            "value": 0.0
+          },
+          {
+            "batch": "B0109",
+            "value": 0.0
+          },
+          {
+            "batch": "B0219",
+            "value": 7.6923076923076925
+          },
+          {
+            "batch": "B0244",
+            "value": 4.0
+          },
+          {
+            "batch": "B0228",
+            "value": 0.0
+          },
+          {
+            "batch": "B0027",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0358",
+            "value": 0.0
+          },
+          {
+            "batch": "B0293",
+            "value": 4.0
+          },
+          {
+            "batch": "B0340",
+            "value": 0.0
+          },
+          {
+            "batch": "B0165",
+            "value": 0.0
+          },
+          {
+            "batch": "B0266",
+            "value": 0.0
+          },
+          {
+            "batch": "B0263",
+            "value": 0.0
+          },
+          {
+            "batch": "B0278",
+            "value": 0.0
+          },
+          {
+            "batch": "B0394",
+            "value": 3.7037037037037037
+          },
+          {
+            "batch": "B0320",
+            "value": 0.0
+          },
+          {
+            "batch": "B0126",
+            "value": 9.523809523809524
+          },
+          {
+            "batch": "B0261",
+            "value": 0.0
+          },
+          {
+            "batch": "B0314",
+            "value": 0.0
+          },
+          {
+            "batch": "B0161",
+            "value": 0.0
+          },
+          {
+            "batch": "B0284",
+            "value": 7.407407407407407
+          },
+          {
+            "batch": "B0094",
+            "value": 0.0
+          },
+          {
+            "batch": "B0269",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0251",
+            "value": 0.0
+          },
+          {
+            "batch": "B0264",
+            "value": 5.882352941176471
+          },
+          {
+            "batch": "B0096",
+            "value": 0.0
+          },
+          {
+            "batch": "B0258",
+            "value": 0.0
+          },
+          {
+            "batch": "B0373",
+            "value": 0.0
+          },
+          {
+            "batch": "B0357",
+            "value": 0.0
+          },
+          {
+            "batch": "B0051",
+            "value": 8.333333333333334
+          },
+          {
+            "batch": "B0272",
+            "value": 0.0
+          },
+          {
+            "batch": "B0054",
+            "value": 0.0
+          },
+          {
+            "batch": "B0318",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0182",
+            "value": 3.0303030303030303
+          },
+          {
+            "batch": "B0069",
+            "value": 9.090909090909092
+          },
+          {
+            "batch": "B0348",
+            "value": 0.0
+          },
+          {
+            "batch": "B0049",
+            "value": 10.0
+          },
+          {
+            "batch": "B0302",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0026",
+            "value": 0.0
+          },
+          {
+            "batch": "B0206",
+            "value": 4.0
+          },
+          {
+            "batch": "B0335",
+            "value": 3.7037037037037037
+          },
+          {
+            "batch": "B0102",
+            "value": 0.0
+          },
+          {
+            "batch": "B0191",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0124",
+            "value": 0.0
+          },
+          {
+            "batch": "B0352",
+            "value": 0.0
+          },
+          {
+            "batch": "B0140",
+            "value": 0.0
+          },
+          {
+            "batch": "B0324",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0052",
+            "value": 0.0
+          },
+          {
+            "batch": "B0374",
+            "value": 0.0
+          },
+          {
+            "batch": "B0122",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0088",
+            "value": 0.0
+          },
+          {
+            "batch": "B0041",
+            "value": 8.333333333333334
+          },
+          {
+            "batch": "B0047",
+            "value": 4.545454545454546
+          },
+          {
+            "batch": "B0242",
+            "value": 3.5714285714285716
+          },
+          {
+            "batch": "B0142",
+            "value": 8.333333333333334
+          },
+          {
+            "batch": "B0062",
+            "value": 0.0
+          },
+          {
+            "batch": "B0070",
+            "value": 0.0
+          },
+          {
+            "batch": "B0171",
+            "value": 5.882352941176471
+          },
+          {
+            "batch": "B0334",
+            "value": 0.0
+          },
+          {
+            "batch": "B0099",
+            "value": 3.0303030303030303
+          },
+          {
+            "batch": "B0077",
+            "value": 0.0
+          },
+          {
+            "batch": "B0188",
+            "value": 0.0
+          },
+          {
+            "batch": "B0078",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0083",
+            "value": 0.0
+          },
+          {
+            "batch": "B0288",
+            "value": 0.0
+          },
+          {
+            "batch": "B0153",
+            "value": 0.0
+          },
+          {
+            "batch": "B0323",
+            "value": 3.0303030303030303
+          },
+          {
+            "batch": "B0157",
+            "value": 9.090909090909092
+          },
+          {
+            "batch": "B0393",
+            "value": 0.0
+          },
+          {
+            "batch": "B0226",
+            "value": 3.3333333333333335
+          },
+          {
+            "batch": "B0018",
+            "value": 0.0
+          },
+          {
+            "batch": "B0356",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0190",
+            "value": 0.0
+          },
+          {
+            "batch": "B0082",
+            "value": 0.0
+          },
+          {
+            "batch": "B0241",
+            "value": 0.0
+          },
+          {
+            "batch": "B0060",
+            "value": 4.166666666666667
+          },
+          {
+            "batch": "B0384",
+            "value": 0.0
+          },
+          {
+            "batch": "B0292",
+            "value": 3.0303030303030303
+          },
+          {
+            "batch": "B0038",
+            "value": 0.0
+          },
+          {
+            "batch": "B0255",
+            "value": 0.0
+          },
+          {
+            "batch": "B0130",
+            "value": 0.0
+          },
+          {
+            "batch": "B0232",
+            "value": 5.0
+          },
+          {
+            "batch": "B0309",
+            "value": 3.4482758620689653
+          },
+          {
+            "batch": "B0145",
+            "value": 4.0
+          },
+          {
+            "batch": "B0329",
+            "value": 6.666666666666667
+          },
+          {
+            "batch": "B0397",
+            "value": 8.333333333333334
+          },
+          {
+            "batch": "B0175",
+            "value": 0.0
+          },
+          {
+            "batch": "B0387",
+            "value": 0.0
+          },
+          {
+            "batch": "B0250",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0091",
+            "value": 3.8461538461538463
+          },
+          {
+            "batch": "B0158",
+            "value": 0.0
+          },
+          {
+            "batch": "B0017",
+            "value": 0.0
+          },
+          {
+            "batch": "B0315",
+            "value": 0.0
+          },
+          {
+            "batch": "B0167",
+            "value": 3.7037037037037037
+          },
+          {
+            "batch": "B0285",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0111",
+            "value": 0.0
+          },
+          {
+            "batch": "B0019",
+            "value": 0.0
+          },
+          {
+            "batch": "B0123",
+            "value": 0.0
+          },
+          {
+            "batch": "B0166",
+            "value": 0.0
+          },
+          {
+            "batch": "B0184",
+            "value": 4.0
+          },
+          {
+            "batch": "B0064",
+            "value": 0.0
+          },
+          {
+            "batch": "B0114",
+            "value": 0.0
+          },
+          {
+            "batch": "B0189",
+            "value": 0.0
+          },
+          {
+            "batch": "B0056",
+            "value": 4.0
+          },
+          {
+            "batch": "B0186",
+            "value": 0.0
+          },
+          {
+            "batch": "B0342",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0372",
+            "value": 4.3478260869565215
+          },
+          {
+            "batch": "B0037",
+            "value": 0.0
+          },
+          {
+            "batch": "B0001",
+            "value": 3.0303030303030303
+          }
+        ],
+        "excluded_batches": [
+          "B0050",
+          "B0203",
+          "B0233"
+        ],
+        "excluded_reason": "held out of this result because each has an approved quarantine_batch action"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0049"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0049",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-005",
+            "supplier_id": "SUP03",
+            "material_type": "maple_veneer",
+            "received_date": "2026-02-04",
+            "quantity": 1091.3,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-009",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2026-02-20",
+            "quantity": 326.8,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-002",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-08-02",
+            "quantity": 10449.8,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-001",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-09-14",
+            "quantity": 240.4,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0049"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0049",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_object",
+      "arguments": {
+        "object_type": "ProductionBatch",
+        "object_id": "B0049"
+      },
+      "result": {
+        "object_type": "ProductionBatch",
+        "object_id": "B0049",
+        "found": true,
+        "object": {
+          "batch_id": "B0049",
+          "press_line_id": "PL03",
+          "run_date": "2026-05-01",
+          "series": "Longboard",
+          "deck_count": 26,
+          "status": "normal"
+        }
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0126"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0126",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-014",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2026-02-21",
+            "quantity": 847.7,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-002",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2026-05-01",
+            "quantity": 367.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-008",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-12-05",
+            "quantity": 13782.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-010",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-11-19",
+            "quantity": 141.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0030"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0030",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-007",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-08-16",
+            "quantity": 1317.1,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-010",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-07-30",
+            "quantity": 8536.1,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0069"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0069",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-007",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-08-16",
+            "quantity": 1317.1,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-005",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-10-15",
+            "quantity": 446.8,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-008",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-11-04",
+            "quantity": 751.6,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-002",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-08-02",
+            "quantity": 10449.8,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0157"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0157",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-001",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-24",
+            "quantity": 1387.5,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-004",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-12-05",
+            "quantity": 433.9,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-008",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-11-04",
+            "quantity": 751.6,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-010",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-07-30",
+            "quantity": 8536.1,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-010",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-11-19",
+            "quantity": 141.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0143"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0143",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-012",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-08-19",
+            "quantity": 619.1,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-010",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-30",
+            "quantity": 292.5,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-001",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-19",
+            "quantity": 833.9,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-002",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-08-02",
+            "quantity": 10449.8,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-008",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-09-22",
+            "quantity": 142.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0002"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0002",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-007",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-08-16",
+            "quantity": 1317.1,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-005",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-10-15",
+            "quantity": 446.8,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-011",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-17",
+            "quantity": 445.2,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-004",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-08-17",
+            "quantity": 14614.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-010",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-11-19",
+            "quantity": 141.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0155"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0155",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-009",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-05-08",
+            "quantity": 1237.4,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-010",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-30",
+            "quantity": 292.5,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-001",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-19",
+            "quantity": 833.9,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-008",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-12-05",
+            "quantity": 13782.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-004",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-12-27",
+            "quantity": 213.7,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0397"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0397",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-001",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-24",
+            "quantity": 1387.5,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-004",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-12-05",
+            "quantity": 433.9,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-011",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-17",
+            "quantity": 445.2,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-004",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-08-17",
+            "quantity": 14614.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-008",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-09-22",
+            "quantity": 142.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0051"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0051",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-001",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-24",
+            "quantity": 1387.5,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-001",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-19",
+            "quantity": 833.9,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-004",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-08-17",
+            "quantity": 14614.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0041"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0041",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-010",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-16",
+            "quantity": 985.6,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-003",
+            "supplier_id": "SUP04",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-09-14",
+            "quantity": 292.8,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-010",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2026-01-12",
+            "quantity": 368.7,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-004",
+            "supplier_id": "SUP06",
+            "material_type": "hardware",
+            "received_date": "2025-08-17",
+            "quantity": 14614.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0142"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0142",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-008",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2026-04-16",
+            "quantity": 653.8,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-004",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-12-05",
+            "quantity": 433.9,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-011",
+            "supplier_id": "SUP05",
+            "material_type": "grip_tape",
+            "received_date": "2025-07-17",
+            "quantity": 445.2,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-008",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-12-05",
+            "quantity": 13782.7,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-008",
+            "supplier_id": "SUP07",
+            "material_type": "paint",
+            "received_date": "2025-09-22",
+            "quantity": 142.8,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0044"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0044",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-010",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-16",
+            "quantity": 985.6,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0214"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0214",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-010",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-16",
+            "quantity": 985.6,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0368"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0368",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-001",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-24",
+            "quantity": 1387.5,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0398"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0398",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-010",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-16",
+            "quantity": 985.6,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0134"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0134",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-009",
+            "supplier_id": "SUP02",
+            "material_type": "maple_veneer",
+            "received_date": "2025-05-08",
+            "quantity": 1237.4,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_object",
+      "arguments": {
+        "object_type": "MaterialLot",
+        "object_id": "LOT-EPO-012"
+      },
+      "result": {
+        "object_type": "MaterialLot",
+        "object_id": "LOT-EPO-012",
+        "found": true,
+        "object": {
+          "lot_id": "LOT-EPO-012",
+          "supplier_id": "SUP05",
+          "material_type": "epoxy_resin",
+          "received_date": "2025-07-12",
+          "quantity": 548.7,
+          "unit": "liters"
+        }
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0126"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0126",
+        "rows": [
+          {
+            "press_line_id": "PL01",
+            "name": "Press Line 1",
+            "location": "Portland, OR",
+            "install_date": "2019-03-01"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0030"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0030",
+        "rows": [
+          {
+            "press_line_id": "PL01",
+            "name": "Press Line 1",
+            "location": "Portland, OR",
+            "install_date": "2019-03-01"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0069"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0069",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0157"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0157",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0143"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0143",
+        "rows": [
+          {
+            "press_line_id": "PL01",
+            "name": "Press Line 1",
+            "location": "Portland, OR",
+            "install_date": "2019-03-01"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0002"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0002",
+        "rows": [
+          {
+            "press_line_id": "PL01",
+            "name": "Press Line 1",
+            "location": "Portland, OR",
+            "install_date": "2019-03-01"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0155"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0155",
+        "rows": [
+          {
+            "press_line_id": "PL02",
+            "name": "Press Line 2",
+            "location": "Portland, OR",
+            "install_date": "2020-06-15"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0397"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0397",
+        "rows": [
+          {
+            "press_line_id": "PL01",
+            "name": "Press Line 1",
+            "location": "Portland, OR",
+            "install_date": "2019-03-01"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0051"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0051",
+        "rows": [
+          {
+            "press_line_id": "PL02",
+            "name": "Press Line 2",
+            "location": "Portland, OR",
+            "install_date": "2020-06-15"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0041"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0041",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0142"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0142",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0044"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0044",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0214"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0214",
+        "rows": [
+          {
+            "press_line_id": "PL02",
+            "name": "Press Line 2",
+            "location": "Portland, OR",
+            "install_date": "2020-06-15"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0368"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0368",
+        "rows": [
+          {
+            "press_line_id": "PL02",
+            "name": "Press Line 2",
+            "location": "Portland, OR",
+            "install_date": "2020-06-15"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0398"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0398",
+        "rows": [
+          {
+            "press_line_id": "PL02",
+            "name": "Press Line 2",
+            "location": "Portland, OR",
+            "install_date": "2020-06-15"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "ran_on",
+        "from_id": "B0134"
+      },
+      "result": {
+        "link": "ran_on",
+        "from_id": "B0134",
+        "rows": [
+          {
+            "press_line_id": "PL03",
+            "name": "Press Line 3",
+            "location": "Reno, NV",
+            "install_date": "2022-01-10"
+          }
+        ],
+        "count": 1
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_metric",
+      "arguments": {
+        "metric_name": "delamination_claim_rate",
+        "grain": [
+          "press_line",
+          "month"
+        ]
+      },
+      "result": {
+        "metric": "delamination_claim_rate",
+        "definition": "Warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity (90 days since ship_date as of the metric's as-of date). Decks younger than 90 days are excluded from both the numerator and the denominator.",
+        "rationale": "Delamination is a defect that surfaces with use, not at the moment of sale \u2014 a deck typically has to be ridden, get wet, and take a few impacts before a sub-par adhesive bond starts to show itself. A metric of raw claims over decks shipped is biased toward whichever batches are oldest, because they have had the most time to accumulate claims, and it is biased against the newest batches, which look artificially safe simply because they have not been skated long enough to start to fail. That makes \"raw claims over shipped\" actively misleading during exactly the window when catching a bad batch matters most: a newly-discovered material problem would look clean under that definition for months, by which time far more decks have shipped. Matching on maturity \u2014 comparing batches only once each has had the same amount of field time \u2014 is what makes the batches comparable at all, and it is the difference between \"we have a lot problem\" and \"we have a plausible pattern that might just be an aging artifact.\"",
+        "grain": [
+          "press_line",
+          "month"
+        ],
+        "filters": {},
+        "rows": [
+          {
+            "press_line": "PL01",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.2903225806451613
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.1952191235059761
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.9607843137254901
+          },
+          {
+            "press_line": "PL02",
+            "month": "2026-05-01T00:00:00",
+            "value": 4.081632653061225
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-10-01T00:00:00",
+            "value": 3.35195530726257
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-11-01T00:00:00",
+            "value": 3.867403314917127
+          },
+          {
+            "press_line": "PL02",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.7857142857142858
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-06-01T00:00:00",
+            "value": 2.6785714285714284
+          },
+          {
+            "press_line": "PL03",
+            "month": "2026-03-01T00:00:00",
+            "value": 0.6944444444444444
+          },
+          {
+            "press_line": "PL01",
+            "month": "2026-02-01T00:00:00",
+            "value": 0.0
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-03-01T00:00:00",
+            "value": 3.2967032967032965
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.1560693641618498
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-07-01T00:00:00",
+            "value": 0.5102040816326531
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-08-01T00:00:00",
+            "value": 2.3076923076923075
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-12-01T00:00:00",
+            "value": 0.9009009009009009
+          },
+          {
+            "press_line": "PL03",
+            "month": "2026-01-01T00:00:00",
+            "value": 2.572347266881029
+          },
+          {
+            "press_line": "PL01",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.680672268907563
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-03-01T00:00:00",
+            "value": 0.0
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-05-01T00:00:00",
+            "value": 2.242152466367713
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.8181818181818181
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-09-01T00:00:00",
+            "value": 0.0
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0471204188481675
+          },
+          {
+            "press_line": "PL01",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.6129032258064515
+          },
+          {
+            "press_line": "PL03",
+            "month": "2026-05-01T00:00:00",
+            "value": 2.73972602739726
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-10-01T00:00:00",
+            "value": 2.4390243902439024
+          },
+          {
+            "press_line": "PL03",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0554089709762533
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-10-01T00:00:00",
+            "value": 2.985074626865672
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.7094017094017093
+          },
+          {
+            "press_line": "PL01",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.6877637130801688
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-06-01T00:00:00",
+            "value": 0.8928571428571429
+          },
+          {
+            "press_line": "PL02",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.9736842105263157
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-11-01T00:00:00",
+            "value": 0.9433962264150944
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-03-01T00:00:00",
+            "value": 0.7092198581560284
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.1976047904191616
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-07-01T00:00:00",
+            "value": 2.197802197802198
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-08-01T00:00:00",
+            "value": 0.7537688442211056
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-09-01T00:00:00",
+            "value": 3.2085561497326203
+          },
+          {
+            "press_line": "PL02",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.5748031496062993
+          },
+          {
+            "press_line": "PL01",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.7241379310344827
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-06-01T00:00:00",
+            "value": 2.2346368715083798
+          },
+          {
+            "press_line": "PL01",
+            "month": "2026-03-01T00:00:00",
+            "value": 2.830188679245283
+          },
+          {
+            "press_line": "PL03",
+            "month": "2025-04-01T00:00:00",
+            "value": 0.3968253968253968
+          },
+          {
+            "press_line": "PL02",
+            "month": "2026-02-01T00:00:00",
+            "value": 3.076923076923077
+          },
+          {
+            "press_line": "PL02",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.3245033112582782
+          },
+          {
+            "press_line": "PL03",
+            "month": "2026-02-01T00:00:00",
+            "value": 3.225806451612903
+          }
+        ],
+        "excluded_batches": [
+          "B0050",
+          "B0203",
+          "B0233"
+        ],
+        "excluded_reason": "held out of this result because each has an approved quarantine_batch action"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_metric",
+      "arguments": {
+        "metric_name": "veneer_yield",
+        "grain": [
+          "lot"
+        ],
+        "filters": {
+          "supplier_id": "SUP02"
+        }
+      },
+      "result": {
+        "metric": "veneer_yield",
+        "definition": "The fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim. Computed as the sum of quantity_used across every batch that consumes the lot, divided by the lot's received quantity.",
+        "rationale": "Veneer is the highest-variance input cost and the most common root cause of delamination. Tracking yield at the lot grain (not the supplier average) is what makes a single bad lot detectable instead of being diluted into a supplier's otherwise-normal track record.",
+        "grain": [
+          "lot"
+        ],
+        "filters": {
+          "supplier_id": "SUP02"
+        },
+        "rows": [
+          {
+            "lot": "LOT-MAP-002",
+            "value": 0.899989856983467
+          },
+          {
+            "lot": "LOT-MAP-007",
+            "value": 0.8998557436792953
+          },
+          {
+            "lot": "LOT-MAP-012",
+            "value": 0.899370053303182
+          },
+          {
+            "lot": "LOT-MAP-009",
+            "value": 0.9001131404557945
+          }
+        ],
+        "excluded_batches": [],
+        "excluded_reason": null
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_object",
+      "arguments": {
+        "object_type": "MaterialLot",
+        "object_id": "LOT-MAP-007"
+      },
+      "result": {
+        "object_type": "MaterialLot",
+        "object_id": "LOT-MAP-007",
+        "found": true,
+        "object": {
+          "lot_id": "LOT-MAP-007",
+          "supplier_id": "SUP02",
+          "material_type": "maple_veneer",
+          "received_date": "2025-08-16",
+          "quantity": 1317.1,
+          "unit": "sheets"
+        }
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0368"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0368",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-001",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-24",
+            "quantity": 1387.5,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "traverse_link",
+      "arguments": {
+        "link_name": "consumes",
+        "from_id": "B0398"
+      },
+      "result": {
+        "link": "consumes",
+        "from_id": "B0398",
+        "rows": [
+          {
+            "lot_id": "LOT-MAP-010",
+            "supplier_id": "SUP01",
+            "material_type": "maple_veneer",
+            "received_date": "2025-02-16",
+            "quantity": 985.6,
+            "unit": "sheets"
+          },
+          {
+            "lot_id": "LOT-EPO-012",
+            "supplier_id": "SUP05",
+            "material_type": "epoxy_resin",
+            "received_date": "2025-07-12",
+            "quantity": 548.7,
+            "unit": "liters"
+          },
+          {
+            "lot_id": "LOT-GRI-006",
+            "supplier_id": "SUP06",
+            "material_type": "grip_tape",
+            "received_date": "2025-03-03",
+            "quantity": 307.5,
+            "unit": "rolls"
+          },
+          {
+            "lot_id": "LOT-HAR-011",
+            "supplier_id": "SUP08",
+            "material_type": "hardware",
+            "received_date": "2025-04-13",
+            "quantity": 6041.2,
+            "unit": "sets"
+          },
+          {
+            "lot_id": "LOT-PAI-005",
+            "supplier_id": "SUP08",
+            "material_type": "paint",
+            "received_date": "2025-09-07",
+            "quantity": 104.5,
+            "unit": "liters"
+          }
+        ],
+        "count": 5
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0030"
+        },
+        "evidence": "Delamination claim rate 9.68 per 100 decks (definition: warranty claims with defect_type \"delamination\" per 100 decks among decks with 90+ days field maturity) \u2014 among the highest of any batch. Consumes maple veneer LOT-MAP-007 (supplier SUP02), which is also consumed by two other elevated-rate batches (B0069 at 9.09, B0002 at 8.70) and was absent from every zero-claim batch checked (B0044, B0214, B0368, B0398, B0134)."
+      },
+      "result": {
+        "status": "rejected",
+        "reason": "missing required parameters: ['reason']"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0069"
+        },
+        "evidence": "Delamination claim rate 9.09 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0002 (8.70), and absent from sampled zero-claim batches."
+      },
+      "result": {
+        "status": "rejected",
+        "reason": "missing required parameters: ['reason']"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0002"
+        },
+        "evidence": "Delamination claim rate 8.70 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0069 (9.09), and absent from sampled zero-claim batches."
+      },
+      "result": {
+        "status": "rejected",
+        "reason": "missing required parameters: ['reason']"
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0030",
+          "reason": "Elevated delamination claim rate (9.68/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 9.68 per 100 decks (definition: warranty claims with defect_type \"delamination\" per 100 decks among decks with 90+ days field maturity) \u2014 among the highest of any batch. Consumes maple veneer LOT-MAP-007 (supplier SUP02), also consumed by two other elevated-rate batches (B0069 at 9.09, B0002 at 8.70) and absent from every zero-claim batch checked (B0044, B0214, B0368, B0398, B0134)."
+      },
+      "result": {
+        "status": "pending_approval",
+        "action_id": "ACT-8e4291e1ae",
+        "action_type": "quarantine_batch",
+        "target_object_type": "ProductionBatch",
+        "target_id": "B0030",
+        "parameters": {
+          "batch_id": "B0030",
+          "reason": "Elevated delamination claim rate (9.68/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 9.68 per 100 decks (definition: warranty claims with defect_type \"delamination\" per 100 decks among decks with 90+ days field maturity) \u2014 among the highest of any batch. Consumes maple veneer LOT-MAP-007 (supplier SUP02), also consumed by two other elevated-rate batches (B0069 at 9.09, B0002 at 8.70) and absent from every zero-claim batch checked (B0044, B0214, B0368, B0398, B0134)."
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0069",
+          "reason": "Elevated delamination claim rate (9.09/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 9.09 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0002 (8.70), and absent from sampled zero-claim batches."
+      },
+      "result": {
+        "status": "pending_approval",
+        "action_id": "ACT-cf6542ef6b",
+        "action_type": "quarantine_batch",
+        "target_object_type": "ProductionBatch",
+        "target_id": "B0069",
+        "parameters": {
+          "batch_id": "B0069",
+          "reason": "Elevated delamination claim rate (9.09/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 9.09 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0002 (8.70), and absent from sampled zero-claim batches."
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "propose_action",
+      "arguments": {
+        "action_type": "quarantine_batch",
+        "parameters": {
+          "batch_id": "B0002",
+          "reason": "Elevated delamination claim rate (8.70/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 8.70 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0069 (9.09), and absent from sampled zero-claim batches."
+      },
+      "result": {
+        "status": "pending_approval",
+        "action_id": "ACT-946df3f960",
+        "action_type": "quarantine_batch",
+        "target_object_type": "ProductionBatch",
+        "target_id": "B0002",
+        "parameters": {
+          "batch_id": "B0002",
+          "reason": "Elevated delamination claim rate (8.70/100 decks) linked to maple veneer lot LOT-MAP-007 (SUP02) shared with two other elevated batches"
+        },
+        "evidence": "Delamination claim rate 8.70 per 100 decks. Consumes maple veneer LOT-MAP-007 (supplier SUP02), shared with B0030 (9.68) and B0069 (9.09), and absent from sampled zero-claim batches."
+      },
+      "is_error": false,
+      "is_empty": false
+    }
+  ],
+  "token_usage": [
+    {
+      "iteration": 1,
+      "input_tokens": 3294,
+      "output_tokens": 142
+    },
+    {
+      "iteration": 2,
+      "input_tokens": 5206,
+      "output_tokens": 177
+    },
+    {
+      "iteration": 3,
+      "input_tokens": 12211,
+      "output_tokens": 562
+    },
+    {
+      "iteration": 4,
+      "input_tokens": 13448,
+      "output_tokens": 1064
+    },
+    {
+      "iteration": 5,
+      "input_tokens": 19343,
+      "output_tokens": 2421
+    },
+    {
+      "iteration": 6,
+      "input_tokens": 24103,
+      "output_tokens": 2194
+    },
+    {
+      "iteration": 7,
+      "input_tokens": 28031,
+      "output_tokens": 1059
+    },
+    {
+      "iteration": 8,
+      "input_tokens": 31472,
+      "output_tokens": 1271
+    },
+    {
+      "iteration": 9,
+      "input_tokens": 34156,
+      "output_tokens": 3951
+    },
+    {
+      "iteration": 10,
+      "input_tokens": 38275,
+      "output_tokens": 859
+    },
+    {
+      "iteration": 11,
+      "input_tokens": 40036,
+      "output_tokens": 915
+    }
+  ],
+  "iterations": 11,
+  "final_answer": "## Summary\n\n**Delamination claim rate** (warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity) has drifted up over the last several months \u2014 monthly readings of ~2.0\u20132.9 in Oct/Nov 2025 and Jan/Feb/May 2026 versus a baseline of ~1.0\u20131.6 earlier in 2025. (Note: batches B0050, B0203, B0233 are excluded from all these readings because they already have an approved quarantine action.)\n\nAt the batch level, the picture isn't a single across-the-board rise \u2014 it's driven by a tail of specific batches with unusually high rates (up to 10 claims/100 decks) sitting far above the rest, which mostly read 0. I anchored on the single most extreme batch, **B0049** (10.0/100), and traversed its consumed material lots and press line. Its maple veneer lot (LOT-MAP-005) and press line (PL03) didn't recur among the other high-rate batches, and its epoxy resin lot (LOT-EPO-012) turned out to be used by essentially every batch I checked \u2014 including all-zero-claim ones \u2014 so that's a generic, fleet-wide input and not a meaningful signal on its own.\n\nWidening to the next tier of elevated batches turned up a cleaner pattern: **B0030 (9.68), B0069 (9.09), and B0002 (8.70)** all consume the same maple veneer lot, **LOT-MAP-007**, received 2025-08-16 from supplier **SUP02**. That lot did not appear in any of the zero-claim batches I checked (B0044, B0214, B0368, B0398, B0134) as a control set. Veneer yield for this lot (0.90) looks normal and in line with other SUP02 lots, so this is a correlational finding based on shared lot usage among the elevated batches \u2014 not corroborated by a yield anomaly \u2014 but the recurrence of the same specific lot across three of the highest-rate batches, absent from the zero-rate set, is the strongest lead available.\n\nI've submitted `quarantine_batch` proposals for B0030, B0069, and B0002 citing this shared-lot evidence; these are now pending_approval and won't affect what any tool sees until a human approves them. I did not extend this to a supplier-wide corrective action against SUP02, since SUP02's other lots (LOT-MAP-002, -009, -012) show normal yield and aren't implicated \u2014 the evidence points specifically at LOT-MAP-007, not the supplier as a whole. B0049 remains the single highest-rate batch but its own material/press-line trail didn't corroborate against other affected batches, so I'm not proposing action on it beyond flagging it as worth a closer look if more claim detail becomes available.",
+  "model": "claude-sonnet-5",
+  "started_at": "2026-08-30T04:03:49.043146+00:00",
+  "latency_seconds": 143.834
+}

@@ -15,7 +15,7 @@ as query parameters, never interpolated.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .schema import Ontology, load_ontology
 
@@ -45,6 +45,14 @@ class UnknownLinkError(CompilerError):
     pass
 
 
+class UnknownObjectTypeError(CompilerError):
+    pass
+
+
+class UnknownActionError(CompilerError):
+    pass
+
+
 @dataclass
 class MetricQuerySpec:
     """Everything the compiler needs to build SQL for one metric, expressed
@@ -56,6 +64,7 @@ class MetricQuerySpec:
     filter_columns: dict[str, str]  # filter field name -> SQL column expression
     where_extra: str = ""  # always-applied predicate (e.g. maturity window)
     ctes: str = ""
+    batch_column: str | None = None  # column expr identifying a batch, if any
 
 
 def _metric_specs() -> dict[str, MetricQuerySpec]:
@@ -78,6 +87,7 @@ def _metric_specs() -> dict[str, MetricQuerySpec]:
                 "press_line_id": "b.press_line_id",
                 "batch_id": "qi.batch_id",
             },
+            batch_column="b.batch_id",
         ),
         "scrap_cost_per_batch": MetricQuerySpec(
             from_clause=(
@@ -98,6 +108,7 @@ def _metric_specs() -> dict[str, MetricQuerySpec]:
                 "press_line_id": "b.press_line_id",
                 "batch_id": "qi.batch_id",
             },
+            batch_column="b.batch_id",
         ),
         "veneer_yield": MetricQuerySpec(
             ctes=(
@@ -161,6 +172,7 @@ def _metric_specs() -> dict[str, MetricQuerySpec]:
                 f"d.ship_date IS NOT NULL AND "
                 f"DATE '{AS_OF_DATE}' - d.ship_date >= {DELAM_MATURITY_DAYS}"
             ),
+            batch_column="b.batch_id",
         ),
     }
 
@@ -172,6 +184,53 @@ METRIC_SPECS = _metric_specs()
 class CompiledQuery:
     sql: str
     params: list
+    excluded_batch_ids: list[str] = field(default_factory=list)
+
+
+# --- approved actions -------------------------------------------------------
+#
+# `actions` is the only writable table in this project (see propose_action /
+# the approval CLI). It is never joined into query results directly; instead
+# an approved quarantine_batch action changes which batches a metric query
+# is even allowed to see. This keeps the exclusion logic in one place instead
+# of scattered across every tool that happens to touch batch-grain data, and
+# keeps warehouse fact tables (production_batches included) untouched by an
+# approval — only the actions table records status.
+
+ACTIONS_TABLE_DDL = """
+CREATE TABLE IF NOT EXISTS actions (
+    action_id VARCHAR PRIMARY KEY,
+    action_type VARCHAR NOT NULL,
+    target_object_type VARCHAR NOT NULL,
+    target_id VARCHAR NOT NULL,
+    parameters JSON NOT NULL,
+    evidence VARCHAR NOT NULL,
+    status VARCHAR NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    approved_at TIMESTAMP
+)
+"""
+
+
+def ensure_actions_table(con) -> None:
+    con.execute(ACTIONS_TABLE_DDL)
+
+
+def approved_quarantined_batch_ids(con) -> list[str]:
+    # Read-only, and deliberately doesn't call ensure_actions_table: a
+    # metric query against a read-only connection (or before any action has
+    # ever been proposed) must not attempt a CREATE TABLE just to learn
+    # there are no quarantines.
+    table_exists = con.execute(
+        "SELECT 1 FROM information_schema.tables WHERE table_name = 'actions'"
+    ).fetchone()
+    if not table_exists:
+        return []
+    rows = con.execute(
+        "SELECT target_id FROM actions "
+        "WHERE action_type = 'quarantine_batch' AND status = 'approved'"
+    ).fetchall()
+    return [r[0] for r in rows]
 
 
 def build_metric_query(
@@ -179,6 +238,7 @@ def build_metric_query(
     metric_name: str,
     filters: dict[str, str] | None = None,
     grain: list[str] | None = None,
+    con=None,
 ) -> CompiledQuery:
     """Compile a metric + filters + grain into parameterized SQL.
 
@@ -186,6 +246,10 @@ def build_metric_query(
     metric, a filter field, or a grain dimension isn't declared for this
     metric in the ontology. Filter *values* are bound as parameters; only
     ontology-declared column expressions are interpolated into the SQL text.
+
+    If `con` is given and the metric has a batch_column, batches with an
+    approved quarantine_batch action are excluded and reported back on
+    `CompiledQuery.excluded_batch_ids`.
     """
     filters = filters or {}
     grain = grain or []
@@ -233,6 +297,15 @@ def build_metric_query(
         where_parts.append(f"{column_expr} = ?")
         params.append(value)
 
+    excluded_batch_ids: list[str] = []
+    if con is not None and spec.batch_column:
+        quarantined = approved_quarantined_batch_ids(con)
+        if quarantined:
+            placeholders = ", ".join(["?"] * len(quarantined))
+            where_parts.append(f"{spec.batch_column} NOT IN ({placeholders})")
+            params.extend(quarantined)
+            excluded_batch_ids = quarantined
+
     sql_parts = []
     if spec.ctes:
         sql_parts.append(spec.ctes)
@@ -243,7 +316,9 @@ def build_metric_query(
     if group_by_parts:
         sql_parts.append(f"GROUP BY {', '.join(group_by_parts)}")
 
-    return CompiledQuery(sql="\n".join(sql_parts), params=params)
+    return CompiledQuery(
+        sql="\n".join(sql_parts), params=params, excluded_batch_ids=excluded_batch_ids
+    )
 
 
 # --- link traversal -------------------------------------------------------
@@ -259,6 +334,25 @@ LINK_TABLES: dict[str, str] = {
     "RetailAccount": "retail_accounts",
     "PressLine": "press_lines",
 }
+
+
+def build_get_object_query(
+    ontology: Ontology, object_type: str, object_id: str
+) -> CompiledQuery:
+    """Compile a query that fetches one object by its primary key.
+
+    Raises UnknownObjectTypeError if object_type is not declared in the
+    ontology.
+    """
+    if object_type not in ontology.object_types:
+        raise UnknownObjectTypeError(
+            f"'{object_type}' is not an object type defined in the ontology. "
+            f"Known object types: {sorted(ontology.object_types)}"
+        )
+    table = LINK_TABLES[object_type]
+    primary_key = ontology.object_types[object_type].primary_key
+    sql = f"SELECT * FROM {table} WHERE {primary_key} = ?"
+    return CompiledQuery(sql=sql, params=[object_id])
 
 
 def build_link_traversal_query(

@@ -1,0 +1,19 @@
+{
+  "question": "What's our Net Promoter Score been trending like this year?",
+  "guard_decision": {
+    "in_scope": false,
+    "ambiguous": false,
+    "reason": "Net Promoter Score (NPS) is not tracked in this ontology. The available metrics focus on production quality, yield, warranty claims, and on-time shipping, but do not include customer satisfaction measures like NPS.",
+    "nearest_metrics": [],
+    "clarifying_question": null
+  },
+  "refused": true,
+  "asked_clarification": false,
+  "tool_calls": [],
+  "token_usage": [],
+  "iterations": 0,
+  "final_answer": "This is out of scope for what I can answer: Net Promoter Score (NPS) is not tracked in this ontology. The available metrics focus on production quality, yield, warranty claims, and on-time shipping, but do not include customer satisfaction measures like NPS. Nearest available metrics: none.",
+  "model": "claude-sonnet-5",
+  "started_at": "2026-08-30T04:01:24.612497+00:00",
+  "latency_seconds": 2.037
+}

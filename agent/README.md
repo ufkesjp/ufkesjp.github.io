@@ -6,8 +6,9 @@ project managed with `uv`, unrelated to how the rest of the site is served.
 
 ## Status
 
-Run 1 (foundation) only. No agent loop, tools, or HTML yet — see
-`EVAL_BOARDS_KICKOFF.md` at the repo root for the full three-run plan.
+Run 1 (foundation) and Run 2 (agent) done. No eval harness or public page
+yet — see `EVAL_BOARDS_KICKOFF.md` at the repo root for the full three-run
+plan.
 
 ## Layout
 
@@ -26,8 +27,26 @@ Run 1 (foundation) only. No agent loop, tools, or HTML yet — see
   veneer lot consumed by 12 batches across two press lines, whose decks
   show an elevated delamination claim rate once compared at matched (90
   day) field maturity.
-- `tests/` — pytest suite covering ontology validation and the compiler,
-  including regenerating and re-verifying the planted signal.
+- `ontology/tools.py` — generates the six Anthropic tool schemas
+  (`list_available_metrics`, `get_metric`, `compare_periods`, `get_object`,
+  `traverse_link`, `propose_action`) from the loaded ontology at import
+  time, and dispatches tool calls to the compiler.
+- `runtime/guard.py` — a coverage check, separate from the agent's own
+  judgment, that decides whether a question is answerable at all before the
+  loop starts.
+- `runtime/loop.py` — the plain Anthropic tool-use loop (no framework),
+  12 iterations max.
+- `runtime/trace.py` — structured JSON logging of every run: guard
+  decision, each tool call and result, token counts, latency, final answer.
+- `runtime/approve.py` — the human half of the closed loop:
+  `uv run python -m runtime.approve <action_id>` flips a pending action to
+  approved. An approved `quarantine_batch` then changes what
+  `build_metric_query` returns — the whole point of the actions table.
+- `runtime/cli.py` — `uv run python -m runtime.cli "question"` runs the
+  agent once and writes a trace to `eval_boards/data/traces/`.
+- `tests/` — pytest suite covering ontology validation, the compiler, the
+  tools, and the guard/loop (against a fake Anthropic client — the test
+  suite makes no real API calls).
 
 ## Setup
 
@@ -36,6 +55,17 @@ cd agent
 uv sync
 uv run python -m data.seed   # regenerate data/eval_boards.duckdb
 uv run pytest
+```
+
+## Running the agent
+
+Needs `ANTHROPIC_API_KEY` in the repo-root `.env` (loaded automatically —
+see `runtime/env.py`). If the key is a Console identity-linked key rather
+than a plain project key, also set `ANTHROPIC_WORKSPACE_ID` in `.env`.
+
+```bash
+uv run python -m runtime.cli "Delamination claims are up - what's going on?"
+uv run python -m runtime.approve ACT-xxxxxxxxxx
 ```
 
 ## Querying a metric

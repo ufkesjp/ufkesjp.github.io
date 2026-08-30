@@ -1,0 +1,688 @@
+{
+  "question": "What's our on-time ship rate by region this year?",
+  "guard_decision": {
+    "in_scope": true,
+    "ambiguous": false,
+    "reason": "The question can be answered using the on_time_ship_rate metric, which has 'region' as an available grain and 'region' as a filter. The request for \"this year\" specifies a reasonable time window.",
+    "nearest_metrics": [
+      "on_time_ship_rate"
+    ],
+    "clarifying_question": null
+  },
+  "refused": false,
+  "asked_clarification": false,
+  "tool_calls": [
+    {
+      "name": "list_available_metrics",
+      "arguments": {},
+      "result": {
+        "metrics": [
+          {
+            "name": "delamination_claim_rate",
+            "definition": "Warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity (90 days since ship_date as of the metric's as-of date). Decks younger than 90 days are excluded from both the numerator and the denominator.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "quality_engineering"
+          },
+          {
+            "name": "first_pass_yield",
+            "definition": "The share of decks in a production batch that pass quality inspection on the first inspection, with no rework or reprocessing. Computed as decks passing first inspection divided by total decks inspected in the batch.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "quality_engineering"
+          },
+          {
+            "name": "on_time_ship_rate",
+            "definition": "The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.",
+            "grain": [
+              "account",
+              "region",
+              "month"
+            ],
+            "allowed_filters": [
+              "region",
+              "tier",
+              "account_id"
+            ],
+            "owner": "operations"
+          },
+          {
+            "name": "scrap_cost_per_batch",
+            "definition": "Total material and labor cost attributed to decks scrapped during production for a batch, divided by the batch's planned deck count. Scrap is any deck that fails inspection and is not reworked.",
+            "grain": [
+              "batch",
+              "press_line",
+              "month"
+            ],
+            "allowed_filters": [
+              "series",
+              "press_line_id",
+              "batch_id"
+            ],
+            "owner": "manufacturing_finance"
+          },
+          {
+            "name": "veneer_yield",
+            "definition": "The fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim. Computed as the sum of quantity_used across every batch that consumes the lot, divided by the lot's received quantity.",
+            "grain": [
+              "lot",
+              "supplier",
+              "month"
+            ],
+            "allowed_filters": [
+              "supplier_id",
+              "material_type"
+            ],
+            "owner": "quality_engineering"
+          }
+        ]
+      },
+      "is_error": false,
+      "is_empty": false
+    },
+    {
+      "name": "get_metric",
+      "arguments": {
+        "metric_name": "on_time_ship_rate",
+        "grain": [
+          "region",
+          "month"
+        ]
+      },
+      "result": {
+        "metric": "on_time_ship_rate",
+        "definition": "The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.",
+        "rationale": "Cancelled orders are excluded from the denominator because a cancellation is a different failure mode (demand or account issue, not fulfillment speed) and blending the two would let fulfillment problems hide behind a wave of cancellations, or vice versa.",
+        "grain": [
+          "region",
+          "month"
+        ],
+        "filters": {},
+        "rows": [
+          {
+            "region": "Midwest",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7394366197183099
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7655502392344498
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7365269461077845
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7125748502994012
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-10-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7902097902097902
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-11-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-08-01T00:00:00",
+            "value": 0.7415730337078652
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2026-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2025-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-12-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Pacific NW",
+            "month": "2025-04-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-09-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Northeast",
+            "month": "2026-06-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southwest",
+            "month": "2025-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Southeast",
+            "month": "2026-07-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "West",
+            "month": "2026-02-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-08-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-03-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2025-05-01T00:00:00",
+            "value": 1.0
+          },
+          {
+            "region": "Midwest",
+            "month": "2026-01-01T00:00:00",
+            "value": 1.0
+          }
+        ],
+        "excluded_batches": [],
+        "excluded_reason": null
+      },
+      "is_error": false,
+      "is_empty": false
+    }
+  ],
+  "token_usage": [
+    {
+      "iteration": 1,
+      "input_tokens": 3295,
+      "output_tokens": 87
+    },
+    {
+      "iteration": 2,
+      "input_tokens": 4110,
+      "output_tokens": 240
+    },
+    {
+      "iteration": 3,
+      "input_tokens": 8451,
+      "output_tokens": 1906
+    }
+  ],
+  "iterations": 3,
+  "final_answer": "Here's the **on-time ship rate** by region for 2026 year-to-date (Jan\u2013Aug 2026, the latest data available), per the metric definition: *\"The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.\"*\n\n| Region | 2026 YTD avg on-time rate |\n|---|---|\n| Midwest | ~97.4% |\n| Northeast | ~97.1% |\n| West | ~96.8% |\n| Pacific NW | ~96.7% |\n| Southwest | ~96.7% |\n| Southeast | ~96.4% |\n\nAll six regions ran at essentially **100% on-time** every month from March 2025 through July 2026 \u2014 the regional averages above are pulled down almost entirely by a single month.\n\n**Notable pattern:** In **August 2026**, every region's rate dropped sharply and simultaneously:\n- Southeast: 71.3%\n- Southwest: 73.7%\n- Pacific NW: 73.9%\n- West: 74.2%\n- Northeast: 76.6%\n- Midwest: 79.0%\n\nBecause the dip hits all regions in the same month by a similar magnitude (rather than one region trending down over time), this looks like a fleet-wide operational disruption in August 2026 (e.g., a shared logistics/capacity constraint) rather than a region-specific fulfillment problem. If you'd like, I can dig into whether specific accounts, tiers, or press-line/production delays concentrated in that month are driving it \u2014 the region grain alone doesn't point to a single root cause the way a shared batch/lot/supplier would for a quality metric.",
+  "model": "claude-sonnet-5",
+  "started_at": "2026-08-30T04:08:37.429108+00:00",
+  "latency_seconds": 26.123
+}
