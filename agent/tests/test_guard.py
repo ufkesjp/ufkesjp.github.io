@@ -58,6 +58,26 @@ def test_out_of_scope_question_is_refused(ontology):
     assert decision.nearest_metrics == []
 
 
+def test_out_of_scope_clamps_ambiguous_and_clarifying_question(ontology):
+    """The model sometimes returns ambiguous=true alongside in_scope=false,
+    even though the tool schema says ambiguous only means anything when
+    in_scope is true. check_coverage must not pass that combination through:
+    the loop has no defined behavior for an ambiguous refusal."""
+    client = _FakeClient(
+        {
+            "in_scope": False,
+            "ambiguous": True,
+            "reason": "two distinct metrics could match, and neither is a good default",
+            "nearest_metrics": ["first_pass_yield", "veneer_yield"],
+            "clarifying_question": "Which yield did you mean?",
+        }
+    )
+    decision = check_coverage("What's our yield?", ontology, client=client)
+    assert decision.in_scope is False
+    assert decision.ambiguous is False
+    assert decision.clarifying_question is None
+
+
 def test_prompt_lists_declared_metrics(ontology):
     client = _FakeClient(
         {"in_scope": True, "ambiguous": False, "reason": "x", "nearest_metrics": []}

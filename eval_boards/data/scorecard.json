@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-08-30T04:33:56.049442+00:00",
+  "subset": "smoke",
+  "questions_run": 5,
+  "mean_iterations": 2.0,
+  "categories": {
+    "answerable": {
+      "total": 1,
+      "passed": 1,
+      "pass_rate": 1.0,
+      "answer_accuracy": 1.0,
+      "tool_call_precision": 1.0
+    },
+    "out_of_scope": {
+      "total": 1,
+      "passed": 1,
+      "pass_rate": 1.0,
+      "refusal_rate": 1.0
+    },
+    "ambiguous": {
+      "total": 1,
+      "passed": 1,
+      "pass_rate": 1.0,
+      "clarification_rate": 1.0
+    },
+    "degraded_path": {
+      "total": 2,
+      "passed": 2,
+      "pass_rate": 1.0,
+      "recovery_rate": 1.0
+    }
+  },
+  "results": [
+    {
+      "id": "a01",
+      "category": "answerable",
+      "question": "What's the first_pass_yield for press line PL02, by month?",
+      "iterations": 3,
+      "latency_seconds": 10.367,
+      "final_answer": "Here's **first_pass_yield** for press line PL02, by month \u2014 defined as the share of decks in a batch passing quality inspection on the first inspection (no rework), i.e. decks passing first inspection \u00f7 total decks inspected:\n\n| Month | First-Pass Yield |\n|---|---|\n| 2025-03 | 95.1% |\n| 2025-04 | 96.2% |\n| 2025-05 | 96.6% |\n| 2025-06 | 97.4% |\n| 2025-07 | 96.4% |\n| 2025-08 | 96.8% |\n| 2025-09 | 97.3% |\n| 2025-10 | 96.6% |\n| 2025-11 | 93.0% |\n| 2025-12 | 92.2% |\n| 2026-01 | 95.9% |\n| 2026-02 | 94.5% |\n| 2026-03 | 96.2% |\n| 2026-04 | 95.0% |\n| 2026-05 | 93.3% |\n| 2026-06 | 96.7% |\n| 2026-07 | 97.1% |\n| 2026-08 | 95.7% |\n\nNotes:\n- Yield has ranged roughly 92%\u201397% over this period, with a dip in Nov\u2013Dec 2025 (93.0%, 92.2%) and again in May 2026 (93.3%) \u2014 otherwise it's been fairly stable in the mid-to-high 90s.\n- Three batches on PL02 (**B0050, B0203, B0233**) were excluded from these figures because each has an approved quarantine_batch action already in place \u2014 so this series reflects only non-quarantined production.\n\nIf you'd like, I can dig into what drove the Nov\u2013Dec 2025 or May 2026 dips (e.g., shared material lots or suppliers behind those batches).",
+      "checks": {
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
+      },
+      "passed": true
+    },
+    {
+      "id": "o01",
+      "category": "out_of_scope",
+      "question": "What's our customer churn rate this quarter?",
+      "iterations": 0,
+      "latency_seconds": 1.947,
+      "final_answer": "This is out of scope for what I can answer: The ontology does not track customer churn rate. While it includes RetailAccount and Order objects, there is no metric measuring customer retention, attrition, or churn. The available metrics focus on production quality, yield, and on-time shipping performance. Nearest available metrics: on_time_ship_rate.",
+      "checks": {
+        "guard_says_out_of_scope": true,
+        "loop_refused_before_tools": true
+      },
+      "passed": true
+    },
+    {
+      "id": "m01",
+      "category": "ambiguous",
+      "question": "Which yield are we underperforming on?",
+      "iterations": 0,
+      "latency_seconds": 2.876,
+      "final_answer": "Are you asking which of first_pass_yield or veneer_yield is underperforming, and for which time period and production unit (batch, press line, or month) would you like me to analyze?",
+      "checks": {
+        "guard_says_ambiguous": true,
+        "loop_asked_instead_of_assuming": true
+      },
+      "passed": true
+    },
+    {
+      "id": "d01",
+      "category": "degraded_path",
+      "question": "What's the first_pass_yield for batch B0050?",
+      "iterations": 4,
+      "latency_seconds": 9.611,
+      "final_answer": "Batch **B0050** doesn't have a first_pass_yield reading available \u2014 it's currently excluded from this metric because it has an **approved quarantine_batch action** against it (along with batches B0203 and B0233). Since quarantined batches are held out of normal metric aggregation, no yield figure is being reported for it here.\n\nIf you'd like, I can look up the batch's own record and its quality inspection history directly (via `get_object`/`traverse_link`) to see what triggered the quarantine and what its inspection results were.",
+      "checks": {
+        "triggered_genuine_error": true,
+        "gave_real_answer": true,
+        "did_not_hit_iteration_limit": true
+      },
+      "passed": true
+    },
+    {
+      "id": "d02",
+      "category": "degraded_path",
+      "question": "What's the delamination_claim_rate for batch B0203?",
+      "iterations": 3,
+      "latency_seconds": 7.341,
+      "final_answer": "Batch **B0203** doesn't have a computable delamination_claim_rate \u2014 it's currently **excluded from this metric because it has an approved quarantine_batch action** on it, along with batches B0050 and B0233.\n\nSince a human has already approved quarantining B0203 (presumably due to a prior identified quality issue), the metric pipeline holds it out to avoid skewing fleet-wide/aggregate comparisons. If you'd like, I can pull up the batch's record directly (`get_object`) to see its status, associated lots, and any linked warranty claims for more context on why it was quarantined.",
+      "checks": {
+        "triggered_genuine_error": true,
+        "gave_real_answer": true,
+        "did_not_hit_iteration_limit": true
+      },
+      "passed": true
+    }
+  ]
+}

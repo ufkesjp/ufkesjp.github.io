@@ -143,10 +143,18 @@ def check_coverage(
     )
     tool_use = next(block for block in message.content if block.type == "tool_use")
     data = tool_use.input
+    in_scope = data["in_scope"]
+    # The tool schema documents that `ambiguous` only means anything when
+    # `in_scope` is true (see _GUARD_TOOL's description), but the model
+    # doesn't always honor that — enforce it here rather than let the loop
+    # receive an ambiguous-and-refused decision it has no defined behavior
+    # for. Out of scope always wins: there's no clarifying question that
+    # makes an unsupported metric answerable.
+    ambiguous = data["ambiguous"] and in_scope
     return GuardDecision(
-        in_scope=data["in_scope"],
-        ambiguous=data["ambiguous"],
+        in_scope=in_scope,
+        ambiguous=ambiguous,
         reason=data["reason"],
         nearest_metrics=data.get("nearest_metrics", []),
-        clarifying_question=data.get("clarifying_question"),
+        clarifying_question=data.get("clarifying_question") if ambiguous else None,
     )

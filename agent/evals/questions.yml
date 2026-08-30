@@ -1,0 +1,197 @@
+# Golden questions for the Eval Boards agent — Run 3 eval harness.
+#
+# Four categories, 30 questions total:
+#   answerable    (15) — expected_metrics/expected_links name the tool(s)
+#                        the agent's trace must show it used; key_facts are
+#                        substrings the final answer must contain.
+#   out_of_scope  (6)  — the coverage guard must refuse (guard_decision.in_scope
+#                        == false) before any tool call runs.
+#   ambiguous     (4)  — the coverage guard must ask rather than assume
+#                        (guard_decision.ambiguous == true), because no
+#                        single default reading is clearly correct.
+#   degraded_path (5)  — the question explicitly asks for a filter/grain
+#                        combination the ontology does not allow for that
+#                        metric, so the agent's first natural tool call
+#                        raises a real UnknownFilterError/UnknownGrainError
+#                        (tool_calls[i].is_error == true) — not merely an
+#                        empty result. Scored on whether the agent revises
+#                        its approach and gives a real, unfabricated answer
+#                        (or plainly says what it couldn't determine) after
+#                        the error, rather than inventing a number.
+#
+# `smoke` lists 5 question ids (one per category, plus one extra
+# degraded_path) to run first with `--subset smoke`. Only run the full 30
+# once smoke is green — per EVAL_BOARDS_KICKOFF.md this flag is most of the
+# weekend's API budget.
+
+smoke:
+  - a01
+  - o01
+  - m01
+  - d01
+  - d02
+
+answerable:
+  - id: a01
+    question: "What's the first_pass_yield for press line PL02, by month?"
+    expected_metrics: [first_pass_yield]
+    expected_links: []
+    key_facts: ["first_pass_yield", "PL02"]
+
+  - id: a02
+    question: "What's the scrap_cost_per_batch for the Cruiser series?"
+    expected_metrics: [scrap_cost_per_batch]
+    expected_links: []
+    key_facts: ["scrap_cost_per_batch", "Cruiser"]
+
+  - id: a03
+    question: "What's the veneer_yield across SUP01's maple veneer lots?"
+    expected_metrics: [veneer_yield]
+    expected_links: []
+    key_facts: ["veneer_yield", "SUP01"]
+
+  - id: a04
+    question: "What's our on-time ship rate for flagship-tier accounts?"
+    expected_metrics: [on_time_ship_rate]
+    expected_links: []
+    key_facts: ["on_time_ship_rate", "flagship"]
+
+  - id: a05
+    question: "What's the delamination_claim_rate for the Pro series?"
+    expected_metrics: [delamination_claim_rate]
+    expected_links: []
+    key_facts: ["delamination_claim_rate", "Pro"]
+
+  - id: a06
+    question: "Compare first_pass_yield between Q1 2026 (Jan-Mar) and Q2 2026 (Apr-Jun)."
+    expected_metrics: [first_pass_yield]
+    expected_links: []
+    key_facts: ["first_pass_yield"]
+
+  - id: a07
+    question: "Which supplier does material lot LOT-MAP-011 come from, and what's their quality tier?"
+    expected_metrics: []
+    expected_links: [supplied_by]
+    key_facts: ["SUP01"]
+
+  - id: a08
+    question: "Which press line did production batch B0050 run on?"
+    expected_metrics: []
+    expected_links: [ran_on]
+    key_facts: ["PL01"]
+
+  - id: a09
+    question: "Which retail account placed order ORD00005, and what region are they in?"
+    expected_metrics: []
+    expected_links: [placed_by]
+    key_facts: ["ACC0136", "Northeast"]
+
+  - id: a10
+    question: "What production batch fulfilled order ORD00005?"
+    expected_metrics: []
+    expected_links: [fulfilled_from]
+    key_facts: ["B0095"]
+
+  - id: a11
+    question: "What material lots did production batch B0203 consume?"
+    expected_metrics: []
+    expected_links: [consumes]
+    key_facts: ["LOT-MAP-011"]
+
+  - id: a12
+    question: "What deck does warranty claim WC00001 concern, and what batch was it produced from?"
+    expected_metrics: []
+    expected_links: [concerns, produced_by]
+    key_facts: ["D000002", "B0240"]
+
+  - id: a13
+    question: "What batch was quality inspection QI0001 performed on, and what press line did that batch run on?"
+    expected_metrics: []
+    expected_links: [inspected_by, ran_on]
+    key_facts: ["B0240"]
+
+  - id: a14
+    question: "What batch was deck D000001 produced from?"
+    expected_metrics: []
+    expected_links: [produced_by]
+    key_facts: ["B0240"]
+
+  - id: a15
+    question: >-
+      Order ORD00005 is stuck behind a capacity-constrained batch B0095 —
+      reroute it to batch B0070 instead (same series, not quarantined) and
+      file the action.
+    expected_metrics: []
+    expected_links: []
+    expected_tools: [propose_action]
+    key_facts: ["ORD00005", "pending_approval"]
+
+out_of_scope:
+  - id: o01
+    question: "What's our customer churn rate this quarter?"
+  - id: o02
+    question: "How does our marketing spend correlate with order volume?"
+  - id: o03
+    question: "What's the average employee tenure at our press line facilities?"
+  - id: o04
+    question: "How do our prices compare to competitor skateboard brands?"
+  - id: o05
+    question: "What's our carbon footprint per skateboard produced?"
+  - id: o06
+    question: "What's the average response time on customer support tickets?"
+
+# Ambiguous questions name two declared metrics by name and ask which one is
+# "the bigger problem right now" with no stated benchmark — confirmed live
+# against the real guard (not just the fake-client unit tests) to reliably
+# return in_scope=true + ambiguous=true, unlike two earlier drafts that
+# didn't: "What's our yield?" (bare metric-name ambiguity) and "How's that
+# press line doing?" (unnamed-entity ambiguity) both got in_scope=false
+# instead — the guard collapsed "I can't pick a default" into "unanswerable"
+# rather than "answerable, but ambiguous," for both an unnamed metric and an
+# unnamed entity. Comparative phrasing that explicitly names both candidate
+# metrics avoids that: the guard can see both are answerable and only the
+# "bigger problem" judgment itself is undefined. Even this is narrower than
+# it looks — "the more urgent thing to fix" (business-priority framing) and
+# vaguer paraphrases of a metric name ("supplier quality", "press line
+# performance") both still fell back to in_scope=false in testing; only the
+# literal metric name plus "bigger problem" wording confirmed reliably.
+ambiguous:
+  - id: m01
+    question: "Which yield are we underperforming on?"
+  - id: m02
+    question: "Is the veneer yield or the first-pass yield the bigger problem right now?"
+  - id: m03
+    question: "Is our scrap_cost_per_batch or our first_pass_yield the bigger quality problem right now?"
+  - id: m04
+    question: "Is our on_time_ship_rate or our delamination_claim_rate the bigger problem right now?"
+
+# Degraded-path questions ask about one real, specific entity by its id —
+# the same shape as the recorded recovery.json trace, where the agent's
+# own first tool call used the grain-dimension name ("batch") as a filter
+# key instead of the ontology's actual filter key ("batch_id") and got a
+# genuine UnknownFilterError back, then corrected itself. An earlier draft
+# asked explicitly for a filter/grain combination the ontology disallows
+# (e.g. "veneer_yield on press line PL02") — the coverage guard caught that
+# as unanswerable and refused before the loop ever ran a tool, which is
+# indistinguishable from an out_of_scope case, not a genuine tool failure.
+# These avoid naming the filter at all, so if a genuine error happens it's
+# because of how the agent itself named the argument, not because the
+# question described something the guard can already see is invalid. That
+# also means the trap isn't guaranteed on every run the way a guard
+# refusal is — recovery is scored on whatever the trace actually shows.
+degraded_path:
+  - id: d01
+    question: "What's the first_pass_yield for batch B0050?"
+    metric: first_pass_yield
+  - id: d02
+    question: "What's the delamination_claim_rate for batch B0203?"
+    metric: delamination_claim_rate
+  - id: d03
+    question: "What's the scrap_cost_per_batch for batch B0233?"
+    metric: scrap_cost_per_batch
+  - id: d04
+    question: "What's the on_time_ship_rate for account ACC0136?"
+    metric: on_time_ship_rate
+  - id: d05
+    question: "What's the veneer_yield for lot LOT-MAP-011?"
+    metric: veneer_yield
