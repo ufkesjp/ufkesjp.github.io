@@ -1,0 +1,17 @@
+[project]
+name = "eval-boards-agent"
+version = "0.1.0"
+description = "Ontology-grounded analytics agent for Eval Boards (fictional skateboard manufacturer)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=1.2.0",
+    "duckdb>=1.5.5",
+    "pydantic>=2.13.5",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

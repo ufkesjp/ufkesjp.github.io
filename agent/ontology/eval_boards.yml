@@ -1,0 +1,295 @@
+# Eval Boards ontology.
+#
+# This file is the single source of truth for what the agent can talk about.
+# object_types define the entities and their typed properties. links define
+# directional, named relationships with cardinality. actions define the only
+# writes the agent is allowed to propose. metrics define the only aggregate
+# numbers the agent is allowed to compute, each with a rationale a VP could
+# be handed directly.
+#
+# agent/ontology/schema.py validates this file at load time: every link must
+# reference object types defined here, every metric filter/grain field must
+# be a real property of the object type it names, and every action
+# precondition must name a real parameter or a real property reachable from
+# the action's target object type.
+
+object_types:
+  Deck:
+    primary_key: deck_id
+    properties:
+      deck_id: string
+      batch_id: string
+      series: string          # enum: Pro, Classic, Cruiser, Longboard
+      shape: string
+      length_in: float
+      produced_at: date
+      ship_date: date         # nullable until sold
+
+  ProductionBatch:
+    primary_key: batch_id
+    properties:
+      batch_id: string
+      press_line_id: string
+      run_date: date
+      series: string
+      deck_count: int
+      status: string          # enum: normal, quarantined
+
+  MaterialLot:
+    primary_key: lot_id
+    properties:
+      lot_id: string
+      supplier_id: string
+      material_type: string   # enum: maple_veneer, epoxy_resin, grip_tape, hardware, paint
+      received_date: date
+      quantity: float
+      unit: string
+
+  Supplier:
+    primary_key: supplier_id
+    properties:
+      supplier_id: string
+      name: string
+      country: string
+      onboarded_date: date
+      quality_tier: string    # enum: preferred, standard, probation
+
+  QualityInspection:
+    primary_key: inspection_id
+    properties:
+      inspection_id: string
+      batch_id: string
+      inspector: string
+      inspection_date: date
+      decks_inspected: int
+      decks_passed: int
+      defect_type: string     # dominant defect among failures; nullable
+
+  WarrantyClaim:
+    primary_key: claim_id
+    properties:
+      claim_id: string
+      deck_id: string
+      claim_date: date
+      defect_type: string     # enum: delamination, chip, crack, hardware_failure, other
+      resolution: string      # enum: replaced, refunded, denied, pending
+      warranty_cost: float
+
+  Order:
+    primary_key: order_id
+    properties:
+      order_id: string
+      account_id: string
+      batch_id: string
+      order_date: date
+      ship_date: date         # nullable until shipped
+      status: string          # enum: pending, shipped, cancelled
+      deck_count: int
+
+  RetailAccount:
+    primary_key: account_id
+    properties:
+      account_id: string
+      name: string
+      region: string
+      tier: string            # enum: flagship, standard, online_only
+
+  PressLine:
+    primary_key: press_line_id
+    properties:
+      press_line_id: string
+      name: string
+      location: string
+      install_date: date
+
+links:
+  - name: consumes
+    from: ProductionBatch
+    to: MaterialLot
+    cardinality: many_to_many
+    join_table: batch_material_lots
+    join_from_key: batch_id
+    join_to_key: lot_id
+
+  - name: supplied_by
+    from: MaterialLot
+    to: Supplier
+    cardinality: many_to_one
+    from_key: supplier_id
+    to_key: supplier_id
+
+  - name: produced_by
+    from: Deck
+    to: ProductionBatch
+    cardinality: many_to_one
+    from_key: batch_id
+    to_key: batch_id
+
+  - name: ran_on
+    from: ProductionBatch
+    to: PressLine
+    cardinality: many_to_one
+    from_key: press_line_id
+    to_key: press_line_id
+
+  - name: concerns
+    from: WarrantyClaim
+    to: Deck
+    cardinality: many_to_one
+    from_key: deck_id
+    to_key: deck_id
+
+  - name: placed_by
+    from: Order
+    to: RetailAccount
+    cardinality: many_to_one
+    from_key: account_id
+    to_key: account_id
+
+  - name: fulfilled_from
+    from: Order
+    to: ProductionBatch
+    cardinality: many_to_one
+    from_key: batch_id
+    to_key: batch_id
+
+  - name: inspected_by
+    from: QualityInspection
+    to: ProductionBatch
+    cardinality: many_to_one
+    from_key: batch_id
+    to_key: batch_id
+
+actions:
+  quarantine_batch:
+    target_object_type: ProductionBatch
+    parameters:
+      batch_id: string
+      reason: string
+    preconditions:
+      - field: status
+        op: not_equals
+        value: quarantined
+        description: Batch must not already be quarantined.
+    required_evidence: >-
+      At least one metric snapshot or claim/lot reference that names the
+      specific batch and the signal that triggered the proposal (e.g. a
+      delamination_claim_rate reading, or the suspect material lot id).
+
+  open_supplier_corrective_action:
+    target_object_type: Supplier
+    parameters:
+      supplier_id: string
+      lot_id: string           # optional in practice; empty string if not lot-specific
+      reason: string
+    preconditions:
+      - field: quality_tier
+        op: not_equals
+        value: probation
+        description: Supplier must not already be under an active corrective action (probation).
+    required_evidence: >-
+      A named metric or claim pattern implicating the supplier, and, when
+      lot_id is set, evidence the lot (not just the supplier generally) is
+      implicated.
+
+  reroute_order:
+    target_object_type: Order
+    parameters:
+      order_id: string
+      new_batch_id: string
+      reason: string
+    preconditions:
+      - field: status
+        op: equals
+        value: pending
+        description: Order must still be pending (not already shipped or cancelled).
+    required_evidence: >-
+      Evidence that the order's current fulfilling batch is quarantined,
+      capacity-constrained, or otherwise unfit, and that new_batch_id is a
+      valid substitute (same series, not quarantined).
+
+metrics:
+  first_pass_yield:
+    definition: >-
+      The share of decks in a production batch that pass quality inspection
+      on the first inspection, with no rework or reprocessing. Computed as
+      decks passing first inspection divided by total decks inspected in the
+      batch.
+    grain: [batch, press_line, month]
+    allowed_filters: [series, press_line_id, batch_id]
+    owner: quality_engineering
+    rationale: >-
+      First-pass yield is the earliest signal of a process or material
+      problem, before it becomes a warranty claim months later. It is scoped
+      to the first inspection specifically because counting yield after
+      rework hides the cost of the rework itself and would make a struggling
+      line look identical to a clean one.
+
+  scrap_cost_per_batch:
+    definition: >-
+      Total material and labor cost attributed to decks scrapped during
+      production for a batch, divided by the batch's planned deck count.
+      Scrap is any deck that fails inspection and is not reworked.
+    grain: [batch, press_line, month]
+    allowed_filters: [series, press_line_id, batch_id]
+    owner: manufacturing_finance
+    rationale: >-
+      Normalizing by planned deck count (not decks actually produced) keeps
+      the metric comparable across batches even when scrap itself shrinks
+      the denominator — dividing by actual output would understate the cost
+      of high-scrap batches.
+
+  veneer_yield:
+    definition: >-
+      The fraction of a maple veneer material lot's received quantity that
+      is actually drawn into production batches, versus left unused as
+      remainder or trim. Computed as the sum of quantity_used across every
+      batch that consumes the lot, divided by the lot's received quantity.
+    grain: [lot, supplier, month]
+    allowed_filters: [supplier_id, material_type]
+    owner: quality_engineering
+    rationale: >-
+      Veneer is the highest-variance input cost and the most common root
+      cause of delamination. Tracking yield at the lot grain (not the
+      supplier average) is what makes a single bad lot detectable instead of
+      being diluted into a supplier's otherwise-normal track record.
+
+  on_time_ship_rate:
+    definition: >-
+      The share of orders shipped on or before their committed ship date
+      (order_date plus standard lead time), out of all orders with a
+      non-cancelled status.
+    grain: [account, region, month]
+    allowed_filters: [region, tier, account_id]
+    owner: operations
+    rationale: >-
+      Cancelled orders are excluded from the denominator because a
+      cancellation is a different failure mode (demand or account issue,
+      not fulfillment speed) and blending the two would let fulfillment
+      problems hide behind a wave of cancellations, or vice versa.
+
+  delamination_claim_rate:
+    definition: >-
+      Warranty claims with defect_type "delamination" per 100 decks, counted
+      only among decks that have reached 90 days of field maturity (90 days
+      since ship_date as of the metric's as-of date). Decks younger than 90
+      days are excluded from both the numerator and the denominator.
+    grain: [batch, press_line, month]
+    allowed_filters: [series, press_line_id, batch_id]
+    owner: quality_engineering
+    rationale: >-
+      Delamination is a defect that surfaces with use, not at the moment of
+      sale — a deck typically has to be ridden, get wet, and take a few
+      impacts before a sub-par adhesive bond starts to show itself. A metric of raw claims over
+      decks shipped is biased toward whichever batches are oldest,
+      because they have had the most time to accumulate claims,
+      and it is biased against the newest batches, which look artificially
+      safe simply because they have not been skated long enough
+      to start to fail. That makes "raw claims over shipped" actively misleading
+      during exactly the window when catching a bad batch matters most: a
+      newly-discovered material problem would look clean under that
+      definition for months, by which time far more decks have shipped.
+      Matching on maturity — comparing batches only once each has had the
+      same amount of field time — is what makes the batches comparable at
+      all, and it is the difference between "we have a lot problem" and "we
+      have a plausible pattern that might just be an aging artifact."

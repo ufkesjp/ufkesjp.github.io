@@ -5,3 +5,7 @@ description: >- # A brief description of your site
 url: "https://ufkesjp.github.io" # The base hostname & protocol for your site
 
 theme: jekyll-theme-modernist
+
+exclude:
+  - agent/
+  - eval_boards/data/
