@@ -68,27 +68,51 @@ quarantining the affected batches for a human to approve.</p>
                 costs a business more than an honest refusal does.
             </p>
             <div id="scorecard-content">
-                <div class="stat-grid">
-                    <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Refusal rate</span></div>
-                    <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Answer accuracy</span></div>
-                    <div class="stat-tile"><span class="stat-value">100%</span><span class="stat-label">Handled correctly rate</span></div>
-                    <div class="stat-tile"><span class="stat-value">75%</span><span class="stat-label">Asked instead of assumed</span></div>
-                    <div class="stat-tile"><span class="stat-value">1.83</span><span class="stat-label">Mean iterations</span></div>
-                </div>
-                <p>
-                    <em>Answer accuracy checks only that the key facts show up in the
-                    final answer; the pass rate below is stricter — it also requires
-                    the agent to have called the right tool rather than asking an
-                    unnecessary clarifying question, which is why "answerable" reads
-                    94% even though accuracy reads 100%.</em>
-                </p>
                 <table>
-                    <thead><tr><th>Category</th><th>Questions</th><th>Passed</th><th>Rate</th></tr></thead>
+                    <thead><tr><th>Metric</th><th>What it checks</th><th>Passed</th><th>Rate</th></tr></thead>
                     <tbody>
-                        <tr><td>answerable</td><td>17</td><td>16</td><td>94%</td></tr>
-                        <tr><td>out of scope</td><td>6</td><td>6</td><td>100%</td></tr>
-                        <tr><td>ambiguous</td><td>4</td><td>3</td><td>75%</td></tr>
-                        <tr><td>held out results</td><td>3</td><td>3</td><td>100%</td></tr>
+                        <tr>
+                            <td>Answerable — overall pass</td>
+                            <td>Right metric/link/tool called, key facts present, and no unwanted refusal or clarification</td>
+                            <td>16 / 17</td>
+                            <td>94%</td>
+                        </tr>
+                        <tr>
+                            <td>Answerable — answer accuracy</td>
+                            <td>Every key fact appears in the final answer text</td>
+                            <td>17 / 17</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Answerable — tool-call precision</td>
+                            <td>The expected metric, link, or tool actually appears in the trace</td>
+                            <td>17 / 17</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Out of scope — refusal rate</td>
+                            <td>The guard says in_scope=false and the loop stops before any tool call</td>
+                            <td>6 / 6</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Ambiguous — clarification rate</td>
+                            <td>The guard says ambiguous=true and the loop asks instead of assuming</td>
+                            <td>3 / 4</td>
+                            <td>75%</td>
+                        </tr>
+                        <tr>
+                            <td>Held-out results — handled correctly</td>
+                            <td>The agent explains the quarantine exclusion honestly instead of reporting a misleading empty or fabricated value</td>
+                            <td>3 / 3</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Mean iterations</td>
+                            <td>Tool-call iterations per question, averaged across all 30</td>
+                            <td>&mdash;</td>
+                            <td>1.83</td>
+                        </tr>
                     </tbody>
                 </table>
                 <p><em>Static snapshot of the full 30-question run. JavaScript replaces this with the live scorecard.json on load.</em></p>
@@ -460,52 +484,87 @@ quarantining the affected batches for a human to approve.</p>
                 var host = document.getElementById("scorecard-content");
                 host.innerHTML = "";
 
-                var stats = el("div", { class: "stat-grid" });
-                function statTile(label, value) {
-                    return el("div", { class: "stat-tile" }, [
-                        el("span", { class: "stat-value", text: value }),
-                        el("span", { class: "stat-label", text: label })
+                function pct(x) { return Math.round(x * 100) + "%"; }
+
+                var ans = card.categories.answerable;
+                var oos = card.categories.out_of_scope;
+                var amb = card.categories.ambiguous;
+                var held = card.categories.held_out_results;
+
+                // Every named rate on the scorecard, spelled out with what it
+                // actually checks — same shape as the flat category table, but
+                // one row per measurement rather than one row per category, so
+                // a narrower diagnostic (like answer accuracy) never sits next
+                // to a stricter one (the overall pass rate) without the reader
+                // seeing why they differ.
+                var rows = [];
+                if (ans) {
+                    rows.push([
+                        "Answerable — overall pass",
+                        "Right metric/link/tool called, key facts present, and no unwanted refusal or clarification",
+                        ans.passed + " / " + ans.total,
+                        pct(ans.pass_rate)
+                    ]);
+                    rows.push([
+                        "Answerable — answer accuracy",
+                        "Every key fact appears in the final answer text",
+                        ans.total + " / " + ans.total,
+                        pct(ans.answer_accuracy)
+                    ]);
+                    rows.push([
+                        "Answerable — tool-call precision",
+                        "The expected metric, link, or tool actually appears in the trace",
+                        ans.total + " / " + ans.total,
+                        pct(ans.tool_call_precision)
                     ]);
                 }
-                var oos = card.categories.out_of_scope, amb = card.categories.ambiguous;
-                var held = card.categories.held_out_results, ans = card.categories.answerable;
-                if (oos) stats.appendChild(statTile("Refusal rate", Math.round(oos.refusal_rate * 100) + "%"));
-                if (ans) stats.appendChild(statTile("Answer accuracy", Math.round(ans.answer_accuracy * 100) + "%"));
-                if (held) stats.appendChild(statTile("Handled correctly rate", Math.round(held.handled_correctly_rate * 100) + "%"));
-                if (amb) stats.appendChild(statTile("Asked instead of assumed", Math.round(amb.clarification_rate * 100) + "%"));
-                stats.appendChild(statTile("Mean iterations", card.mean_iterations));
-                host.appendChild(stats);
-
-                if (ans && ans.answer_accuracy !== ans.pass_rate) {
-                    host.appendChild(el("p", { html:
-                        "<em>Answer accuracy checks only that the key facts show up in the " +
-                        "final answer; the pass rate below is stricter — it also requires " +
-                        "the agent to have called the right tool rather than asking an " +
-                        "unnecessary clarifying question, which is why “answerable” reads " +
-                        Math.round(ans.pass_rate * 100) + "% even though accuracy reads " +
-                        Math.round(ans.answer_accuracy * 100) + "%.</em>"
-                    }));
+                if (oos) {
+                    rows.push([
+                        "Out of scope — refusal rate",
+                        "The guard says in_scope=false and the loop stops before any tool call",
+                        oos.passed + " / " + oos.total,
+                        pct(oos.refusal_rate)
+                    ]);
                 }
+                if (amb) {
+                    rows.push([
+                        "Ambiguous — clarification rate",
+                        "The guard says ambiguous=true and the loop asks instead of assuming",
+                        amb.passed + " / " + amb.total,
+                        pct(amb.clarification_rate)
+                    ]);
+                }
+                if (held) {
+                    rows.push([
+                        "Held-out results — handled correctly",
+                        "The agent explains the quarantine exclusion honestly instead of reporting a misleading empty or fabricated value",
+                        held.passed + " / " + held.total,
+                        pct(held.handled_correctly_rate)
+                    ]);
+                }
+                rows.push([
+                    "Mean iterations",
+                    "Tool-call iterations per question, averaged across all " + card.questions_run,
+                    "—",
+                    String(card.mean_iterations)
+                ]);
 
                 var table = document.createElement("table");
                 table.innerHTML =
-                    "<thead><tr><th>Category</th><th>Questions</th><th>Passed</th><th>Rate</th></tr></thead>";
+                    "<thead><tr><th>Metric</th><th>What it checks</th><th>Passed</th><th>Rate</th></tr></thead>";
                 var tbody = document.createElement("tbody");
-                Object.keys(card.categories).forEach(function (name) {
-                    var c = card.categories[name];
+                rows.forEach(function (row) {
                     var tr = document.createElement("tr");
-                    tr.innerHTML =
-                        "<td>" + escapeHtml(name.replace(/_/g, " ")) + "</td>" +
-                        "<td>" + c.total + "</td>" +
-                        "<td>" + c.passed + "</td>" +
-                        "<td>" + Math.round(c.pass_rate * 100) + "%</td>";
+                    tr.innerHTML = row.map(function (cell, i) {
+                        return "<td>" + (i === 1 ? escapeHtml(cell) : inlineMd(escapeHtml(cell))) + "</td>";
+                    }).join("");
                     tbody.appendChild(tr);
                 });
                 table.appendChild(tbody);
                 host.appendChild(table);
 
                 host.appendChild(el("p", {
-                    html: "Full 30-question run (" + card.subset + " subset), generated " +
+                    html: "Full " + card.questions_run + "-question run (" + card.subset + " subset), generated " +
                         new Date(card.generated_at).toLocaleString() + "."
                 }));
             }).catch(function (err) {
