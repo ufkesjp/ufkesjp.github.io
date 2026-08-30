@@ -8,4 +8,3 @@ theme: jekyll-theme-modernist
 
 exclude:
   - agent/
-  - eval_boards/data/

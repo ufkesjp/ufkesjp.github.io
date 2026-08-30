@@ -267,6 +267,17 @@
             return node;
         }
 
+        // fetch() doesn't reject on a 404/500 — it resolves normally, and
+        // calling .json() on that body then fails with a confusing parse
+        // error instead of the actual HTTP status. Check response.ok first
+        // so a real failure (e.g. a hosting misconfiguration) says so.
+        function fetchJson(url) {
+            return fetch(url).then(function (r) {
+                if (!r.ok) throw new Error(url + " responded " + r.status + " " + r.statusText);
+                return r.json();
+            });
+        }
+
         function jsonBlock(obj) {
             var pre = document.createElement("pre");
             var code = document.createElement("code");
@@ -353,7 +364,7 @@
         }
 
         function loadFlagship() {
-            fetch("data/traces/flagship.json").then(function (r) { return r.json(); }).then(function (trace) {
+            fetchJson("data/traces/flagship.json").then(function (trace) {
                 var host = document.getElementById("flagship-content");
                 host.innerHTML = "";
                 host.appendChild(el("h3", { text: "“" + trace.question + "”" }));
@@ -379,8 +390,7 @@
             var host = document.getElementById("other-traces-content");
             host.innerHTML = "";
             var pending = OTHER_TRACES.map(function (entry) {
-                return fetch("data/traces/" + entry.file + ".json")
-                    .then(function (r) { return r.json(); })
+                return fetchJson("data/traces/" + entry.file + ".json")
                     .then(function (trace) { return { entry: entry, trace: trace }; })
                     .catch(function () { return { entry: entry, trace: null }; });
             });
@@ -401,7 +411,7 @@
         }
 
         function loadScorecard() {
-            fetch("data/scorecard.json").then(function (r) { return r.json(); }).then(function (card) {
+            fetchJson("data/scorecard.json").then(function (card) {
                 var host = document.getElementById("scorecard-content");
                 host.innerHTML = "";
 
