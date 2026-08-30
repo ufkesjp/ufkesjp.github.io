@@ -29,7 +29,7 @@ from runtime.env import load_dotenv_if_present, make_client
 _QUESTIONS_PATH = Path(__file__).parent / "questions.yml"
 _QUESTIONS = yaml.safe_load(_QUESTIONS_PATH.read_text())
 _SMOKE_IDS = set(_QUESTIONS["smoke"])
-_CATEGORIES = ("answerable", "out_of_scope", "ambiguous", "degraded_path")
+_CATEGORIES = ("answerable", "out_of_scope", "ambiguous", "held_out_results")
 
 
 def pytest_addoption(parser):

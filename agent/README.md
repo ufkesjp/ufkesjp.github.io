@@ -49,8 +49,8 @@ scorecard.
 - `tests/` — pytest suite covering ontology validation, the compiler, the
   tools, and the guard/loop (against a fake Anthropic client — the test
   suite makes no real API calls).
-- `evals/questions.yml` — 30 golden questions (15 answerable, 6 out of
-  scope, 4 ambiguous, 5 degraded-path), with a 5-question `smoke` subset.
+- `evals/questions.yml` — 30 golden questions (17 answerable, 6 out of
+  scope, 4 ambiguous, 3 held-out-results), with a 5-question `smoke` subset.
 - `evals/test_evals.py`, `evals/conftest.py` — the eval harness. Unlike
   `tests/`, this makes real Anthropic API calls and writes
   `eval_boards/data/scorecard.json`:

@@ -1,26 +1,33 @@
 # Golden questions for the Eval Boards agent — Run 3 eval harness.
 #
 # Four categories, 30 questions total:
-#   answerable    (15) — expected_metrics/expected_links name the tool(s)
-#                        the agent's trace must show it used; key_facts are
-#                        substrings the final answer must contain.
-#   out_of_scope  (6)  — the coverage guard must refuse (guard_decision.in_scope
-#                        == false) before any tool call runs.
-#   ambiguous     (4)  — the coverage guard must ask rather than assume
-#                        (guard_decision.ambiguous == true), because no
-#                        single default reading is clearly correct.
-#   degraded_path (5)  — the question explicitly asks for a filter/grain
-#                        combination the ontology does not allow for that
-#                        metric, so the agent's first natural tool call
-#                        raises a real UnknownFilterError/UnknownGrainError
-#                        (tool_calls[i].is_error == true) — not merely an
-#                        empty result. Scored on whether the agent revises
-#                        its approach and gives a real, unfabricated answer
-#                        (or plainly says what it couldn't determine) after
-#                        the error, rather than inventing a number.
+#   answerable       (17) — expected_metrics/expected_links name the tool(s)
+#                           the agent's trace must show it used; key_facts are
+#                           substrings the final answer must contain.
+#   out_of_scope     (6)  — the coverage guard must refuse (guard_decision.in_scope
+#                           == false) before any tool call runs.
+#   ambiguous        (4)  — the coverage guard must ask rather than assume
+#                           (guard_decision.ambiguous == true), because no
+#                           single default reading is clearly correct.
+#   held_out_results (3)  — the question asks about a batch that is held out
+#                           of metric results by an approved quarantine
+#                           action. The underlying tool call succeeds — this
+#                           is not an error path — and the pass condition is
+#                           that the agent explains the exclusion honestly
+#                           instead of reporting a misleading empty or zero
+#                           value.
+#
+# Correction (2026-08-30): this category was previously named `degraded_path`
+# and scored as if the quarantine exclusion were a genuine tool error
+# (`triggered_genuine_error`). It never was — d01-d03 below always returned a
+# successful, held-out result, and the two other original members of that set
+# (ordinary successful queries with no exclusion involved) have been moved
+# into `answerable` below, where they belong. See PHASE_4.md for the full
+# writeup. A category that tests actual tool-call error recovery does not
+# exist yet.
 #
 # `smoke` lists 5 question ids (one per category, plus one extra
-# degraded_path) to run first with `--subset smoke`. Only run the full 30
+# held_out_results) to run first with `--subset smoke`. Only run the full 30
 # once smoke is green — per EVAL_BOARDS_KICKOFF.md this flag is most of the
 # weekend's API budget.
 
@@ -130,6 +137,22 @@ answerable:
     expected_tools: [propose_action]
     key_facts: ["ORD00005", "pending_approval"]
 
+  # Moved from the old degraded_path category (see the correction note above)
+  # — this is an ordinary successful query with no exclusion involved.
+  - id: d04
+    question: "What's the on_time_ship_rate for account ACC0136?"
+    expected_metrics: [on_time_ship_rate]
+    expected_links: []
+    key_facts: ["on_time_ship_rate", "ACC0136"]
+
+  # Moved from the old degraded_path category (see the correction note above)
+  # — this is an ordinary successful query with no exclusion involved.
+  - id: d05
+    question: "What's the veneer_yield for lot LOT-MAP-011?"
+    expected_metrics: [veneer_yield]
+    expected_links: []
+    key_facts: ["veneer_yield", "LOT-MAP-011"]
+
 out_of_scope:
   - id: o01
     question: "What's our customer churn rate this quarter?"
@@ -169,21 +192,14 @@ ambiguous:
   - id: m04
     question: "Is our on_time_ship_rate or our delamination_claim_rate the bigger problem right now?"
 
-# Degraded-path questions ask about one real, specific entity by its id —
-# the same shape as the recorded recovery.json trace, where the agent's
-# own first tool call used the grain-dimension name ("batch") as a filter
-# key instead of the ontology's actual filter key ("batch_id") and got a
-# genuine UnknownFilterError back, then corrected itself. An earlier draft
-# asked explicitly for a filter/grain combination the ontology disallows
-# (e.g. "veneer_yield on press line PL02") — the coverage guard caught that
-# as unanswerable and refused before the loop ever ran a tool, which is
-# indistinguishable from an out_of_scope case, not a genuine tool failure.
-# These avoid naming the filter at all, so if a genuine error happens it's
-# because of how the agent itself named the argument, not because the
-# question described something the guard can already see is invalid. That
-# also means the trap isn't guaranteed on every run the way a guard
-# refusal is — recovery is scored on whatever the trace actually shows.
-degraded_path:
+# Held-out-results questions ask about a batch that carries an approved
+# quarantine action, so the ontology's own filtering excludes it from the
+# metric's normal result set. The tool call succeeds — this is a valid,
+# deliberately-empty-for-this-batch result, not an error. The pass condition
+# is that the agent explains the exclusion honestly (names the quarantine,
+# doesn't report a misleading zero or fabricate a number) rather than that
+# any tool call raised.
+held_out_results:
   - id: d01
     question: "What's the first_pass_yield for batch B0050?"
     metric: first_pass_yield
@@ -193,9 +209,3 @@ degraded_path:
   - id: d03
     question: "What's the scrap_cost_per_batch for batch B0233?"
     metric: scrap_cost_per_batch
-  - id: d04
-    question: "What's the on_time_ship_rate for account ACC0136?"
-    metric: on_time_ship_rate
-  - id: d05
-    question: "What's the veneer_yield for lot LOT-MAP-011?"
-    metric: veneer_yield

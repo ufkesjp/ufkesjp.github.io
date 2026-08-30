@@ -8,23 +8,24 @@ tests/test_loop.py.
 
 Five scores, one per category plus one cross-cutting:
 
-- answer accuracy       (answerable)    every key_fact string appears in the
-                                         final answer
-- tool-call precision    (answerable)    every expected_metric/expected_link/
-                                         expected_tool actually appears among
-                                         the trace's tool calls
-- refusal rate          (out_of_scope)  the guard says in_scope=false and the
-                                         loop stops before any tool call
-- ambiguous handling    (ambiguous)     the guard says ambiguous=true and the
-                                         loop asks instead of assuming
-- recovery rate         (degraded_path) the question's natural first tool
-                                         call genuinely errors (is_error on
-                                         the trace, not just an empty result)
-                                         and the agent still produces a real,
-                                         non-empty answer afterward rather
-                                         than stalling out or hitting the
-                                         iteration limit
-- mean iterations       (all)           averaged across every question run
+- answer accuracy       (answerable)       every key_fact string appears in
+                                            the final answer
+- tool-call precision    (answerable)       every expected_metric/expected_link/
+                                            expected_tool actually appears
+                                            among the trace's tool calls
+- refusal rate          (out_of_scope)     the guard says in_scope=false and
+                                            the loop stops before any tool call
+- ambiguous handling    (ambiguous)        the guard says ambiguous=true and
+                                            the loop asks instead of assuming
+- handled-correctly rate (held_out_results) the question asks about a batch
+                                            held out of results by an
+                                            approved quarantine action — the
+                                            underlying tool call succeeds, and
+                                            the agent is scored on whether it
+                                            explains the exclusion honestly
+                                            instead of reporting a misleading
+                                            empty or fabricated value
+- mean iterations       (all)              averaged across every question run
 """
 
 from __future__ import annotations
@@ -88,8 +89,8 @@ def write_scorecard(results: list[dict], *, subset: str) -> None:
         categories["out_of_scope"]["refusal_rate"] = categories["out_of_scope"]["pass_rate"]
     if "ambiguous" in categories:
         categories["ambiguous"]["clarification_rate"] = categories["ambiguous"]["pass_rate"]
-    if "degraded_path" in categories:
-        categories["degraded_path"]["recovery_rate"] = categories["degraded_path"]["pass_rate"]
+    if "held_out_results" in categories:
+        categories["held_out_results"]["handled_correctly_rate"] = categories["held_out_results"]["pass_rate"]
 
     mean_iterations = round(sum(r["iterations"] for r in results) / len(results), 2)
 
@@ -226,24 +227,26 @@ def test_ambiguous(ambiguous_case, ontology, con, client):
     )
 
 
-def test_degraded_path(degraded_path_case, ontology, con, client):
-    case = degraded_path_case
+def test_held_out_results(held_out_results_case, ontology, con, client):
+    case = held_out_results_case
     trace = run_agent(case["question"], ontology=ontology, con=con, client=client)
 
-    triggered_genuine_error = any(tc.is_error for tc in trace.tool_calls)
+    handled_exclusion_correctly = any(
+        term in (trace.final_answer or "").lower() for term in ("quarantine", "excluded", "held out")
+    )
     gave_real_answer = bool((trace.final_answer or "").strip())
     did_not_hit_iteration_limit = trace.iterations < MAX_ITERATIONS
 
     result = _record(
-        "degraded_path",
+        "held_out_results",
         case,
         trace,
-        triggered_genuine_error=triggered_genuine_error,
+        handled_exclusion_correctly=handled_exclusion_correctly,
         gave_real_answer=gave_real_answer,
         did_not_hit_iteration_limit=did_not_hit_iteration_limit,
     )
     assert result["passed"], (
-        f"{case['id']}: triggered_genuine_error={triggered_genuine_error} "
+        f"{case['id']}: handled_exclusion_correctly={handled_exclusion_correctly} "
         f"gave_real_answer={gave_real_answer} iterations={trace.iterations} "
         f"answer={trace.final_answer!r}"
     )

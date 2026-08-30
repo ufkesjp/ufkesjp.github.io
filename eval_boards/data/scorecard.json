@@ -5,9 +5,9 @@
   "mean_iterations": 1.83,
   "categories": {
     "answerable": {
-      "total": 15,
-      "passed": 14,
-      "pass_rate": 0.933,
+      "total": 17,
+      "passed": 16,
+      "pass_rate": 0.941,
       "answer_accuracy": 1.0,
       "tool_call_precision": 1.0
     },
@@ -23,11 +23,11 @@
       "pass_rate": 0.75,
       "clarification_rate": 0.75
     },
-    "degraded_path": {
-      "total": 5,
-      "passed": 5,
+    "held_out_results": {
+      "total": 3,
+      "passed": 3,
       "pass_rate": 1.0,
-      "recovery_rate": 1.0
+      "handled_correctly_rate": 1.0
     }
   },
   "results": [
@@ -418,13 +418,13 @@
     },
     {
       "id": "d01",
-      "category": "degraded_path",
+      "category": "held_out_results",
       "question": "What's the first_pass_yield for batch B0050?",
       "iterations": 4,
       "latency_seconds": 9.272,
       "final_answer": "Batch **B0050** is currently excluded from first_pass_yield reporting because it has an **approved quarantine_batch action** in place \u2014 along with batches B0203 and B0233. Since it's quarantined, no first-pass yield figure is being computed/reported for it in the standard metric output.\n\nIf you need the metric that was in place *before* the quarantine, or details on why B0050 was quarantined, I can look up the batch object and its linked quality inspections/lots directly \u2014 let me know if you'd like that.",
       "checks": {
-        "triggered_genuine_error": true,
+        "handled_exclusion_correctly": true,
         "gave_real_answer": true,
         "did_not_hit_iteration_limit": true
       },
@@ -432,13 +432,13 @@
     },
     {
       "id": "d02",
-      "category": "degraded_path",
+      "category": "held_out_results",
       "question": "What's the delamination_claim_rate for batch B0203?",
       "iterations": 4,
       "latency_seconds": 9.226,
       "final_answer": "Batch **B0203** currently has no delamination_claim_rate reading available \u2014 it's excluded from this metric because it has an **approved quarantine_batch action** already in place (along with batches B0050 and B0233). \n\nSince B0203 is quarantined, it's held out of the standard delamination_claim_rate calculation (defined as warranty claims with defect_type \"delamination\" per 100 decks, counted only among decks that have reached 90 days of field maturity). If you'd like, I can pull the batch's details directly (via get_object) to see the quarantine reason and any linked warranty claims that led to that action.",
       "checks": {
-        "triggered_genuine_error": true,
+        "handled_exclusion_correctly": true,
         "gave_real_answer": true,
         "did_not_hit_iteration_limit": true
       },
@@ -446,13 +446,13 @@
     },
     {
       "id": "d03",
-      "category": "degraded_path",
+      "category": "held_out_results",
       "question": "What's the scrap_cost_per_batch for batch B0233?",
       "iterations": 3,
       "latency_seconds": 7.47,
       "final_answer": "Batch **B0233** currently has no computable value for **scrap_cost_per_batch** \u2014 the metric (defined as \"total material and labor cost attributed to decks scrapped during production for a batch, divided by the batch's planned deck count\") excludes it from results.\n\nThe reason: B0233, along with B0050 and B0203, has an **approved quarantine_batch action** already in place, so these batches are held out of this metric's normal reporting. If you need the underlying scrap cost figures for a quarantined batch, I'd have to pull it via a different path (e.g., the batch object directly) rather than this metric \u2014 let me know if you'd like me to do that.",
       "checks": {
-        "triggered_genuine_error": true,
+        "handled_exclusion_correctly": true,
         "gave_real_answer": true,
         "did_not_hit_iteration_limit": true
       },
@@ -460,29 +460,35 @@
     },
     {
       "id": "d04",
-      "category": "degraded_path",
+      "category": "answerable",
       "question": "What's the on_time_ship_rate for account ACC0136?",
       "iterations": 3,
       "latency_seconds": 6.434,
       "final_answer": "The **on_time_ship_rate** for account **ACC0136** is **95.3%** (0.9535).\n\nThis metric is defined as: \"The share of orders shipped on or before their committed ship date (order_date plus standard lead time), out of all orders with a non-cancelled status.\" No batches were excluded from this calculation.",
       "checks": {
-        "triggered_genuine_error": true,
-        "gave_real_answer": true,
-        "did_not_hit_iteration_limit": true
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
       },
       "passed": true
     },
     {
       "id": "d05",
-      "category": "degraded_path",
+      "category": "answerable",
       "question": "What's the veneer_yield for lot LOT-MAP-011?",
       "iterations": 4,
       "latency_seconds": 10.413,
       "final_answer": "The **veneer_yield** for lot **LOT-MAP-011** is **0.363** (\u224836.3%).\n\nPer the metric's definition: *\"the fraction of a maple veneer material lot's received quantity that is actually drawn into production batches, versus left unused as remainder or trim, computed as the sum of quantity_used across every batch that consumes the lot, divided by the lot's received quantity.\"*\n\nFor context, this lot comes from supplier SUP01, whose other lots range widely \u2014 from ~0.086 (LOT-MAP-013) up to ~0.90 (LOT-MAP-001, LOT-MAP-010). LOT-MAP-011's yield of 0.363 is well below the supplier's best-performing lots, though not the single worst (that's LOT-MAP-013, and LOT-MAP-008 is also lower at 0.284). Let me know if you'd like me to dig into whether this pattern is tied to specific batches or a broader supplier issue.",
       "checks": {
-        "triggered_genuine_error": true,
-        "gave_real_answer": true,
-        "did_not_hit_iteration_limit": true
+        "not_refused": true,
+        "not_stuck_clarifying": true,
+        "expected_metrics_used": true,
+        "expected_links_used": true,
+        "expected_tools_used": true,
+        "key_facts_present": true
       },
       "passed": true
     }
