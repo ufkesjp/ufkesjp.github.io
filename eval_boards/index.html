@@ -67,6 +67,7 @@ quarantining the affected batches for a human to approve.</p>
                 it's just more willing to guess — and a confident wrong answer
                 costs a business more than an honest refusal does.
             </p>
+            <p><strong>28 of 30 golden questions passed.</strong></p>
             <div id="scorecard-content">
                 <table>
                     <thead><tr><th>Metric</th><th>What it checks</th><th>Passed</th><th>Rate</th></tr></thead>
@@ -117,6 +118,20 @@ quarantining the affected batches for a human to approve.</p>
                 </table>
                 <p><em>Static snapshot of the full 30-question run. JavaScript replaces this with the live scorecard.json on load.</em></p>
             </div>
+            <p>
+                The two failures: <strong>a02</strong>, an answerable question
+                (<code>scrap_cost_per_batch</code> for the Cruiser series), where
+                the agent asked which time period and grain were wanted instead
+                of answering — answer accuracy and tool-call precision were both
+                17/17, so it didn't get anything wrong, it declined to commit.
+                And <strong>m01</strong>, an ambiguous question ("Which yield are
+                we underperforming on?"), where the guard classified it as out
+                of scope rather than ambiguous, so the agent refused instead of
+                asking which yield was meant. Both are the same over-caution
+                tendency pulling in opposite directions from what each category
+                wanted — a more useful failure mode to find than a fabricated
+                answer.
+            </p>
         </section>
 
         <section id="architecture">
