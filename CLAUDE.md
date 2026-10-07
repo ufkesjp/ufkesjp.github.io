@@ -23,9 +23,8 @@ npm dependencies, or a static site generator without asking.
 | `index.html` | Landing page, section cards |
 | `projects/index.html` | Project index |
 | `minimize_freight_miles/index.html` | Freight optimization writeup (see warning below) |
-| `blog/index.html` | Post index |
-| `blog/take_it_personally/` | Published post |
-| `games/`, `utilities/` | Prototypes and small tools |
+| `games/grid_racing/` | Game project, linked from `projects/index.html` |
+| `utilities/` | Prototypes and small tools |
 | `css/style.css` | Single shared stylesheet for the whole site |
 | `images/` | Card thumbnails |
 | `404.html` | Root 404 page |
