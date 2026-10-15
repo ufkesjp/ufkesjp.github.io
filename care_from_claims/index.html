@@ -8,8 +8,32 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fira+Code:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <script type="module" crossorigin src="./assets/index-DnLhqfc8.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-BDuwc6SF.css">
+    <!-- Site escape hatch (not part of the app's own UI) -->
+    <style>
+      .site-back {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 1000;
+        font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 6px 12px;
+        color: #0a0a0a;
+        background: #ffd60a;
+        border: 2px solid #0a0a0a;
+        opacity: 0.9;
+        transition: opacity 0.12s;
+      }
+      .site-back:hover { opacity: 1; }
+      @media print { .site-back { display: none; } }
+    </style>
   </head>
   <body>
+    <a class="site-back" href="https://ufkesjp.github.io/projects/">&larr; Projects</a>
     <div id="root"></div>
   </body>
 </html>
